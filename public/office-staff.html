@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Staff - School Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <a href="dashboard.html" class="sidebar-item">SUPER ADMIN</a>
+            <div class="sidebar-item active">OFFICE STAFF</div>
+            <a href="schools.html" class="sidebar-item">SCHOOL List</a>
+            <div class="sidebar-item has-submenu" id="plansMenu" onclick="togglePlansMenu(event)">
+                PLANS
+                <div class="submenu" id="plansSubmenu">
+                    <a href="plans.html" class="submenu-item">Plans</a>
+                    <a href="subscription-list.html" class="submenu-item">Subscription List</a>
+                    <a href="overview.html" class="submenu-item">Overview</a>
+                </div>
+            </div>
+            <a href="send-message.html" class="sidebar-item">SEND MESSAGE</a>
+            <a href="support.html" class="sidebar-item">SUPPORT</a>
+            <a href="terms.html" class="sidebar-item">TERMS & CONDITION</a>
+        </div>
+        <div class="content">
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <h2>Office Staff</h2>
+                </div>
+                <button class="btn btn-dark" id="addStaffBtn">Add Staff</button>
+            </div>
+
+            <div class="section-card" style="min-height: auto; padding: 15px 20px;">
+                <div class="search-bar" style="margin-bottom: 15px;">
+                    <input type="text" class="search-input" id="searchName" placeholder="Search by name">
+                    <input type="text" class="search-input" id="searchPhone" placeholder="Search by phone">
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>S.No.</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Age</th>
+                            <th>Address</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffTableBody">
+                        <tr>
+                            <td colspan="8" class="loading">Loading staff...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Staff Modal -->
+    <div class="modal-overlay" id="staffModal">
+        <div class="confirm-modal" style="max-width: 550px; text-align: left;">
+            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span id="modalTitle">Add Staff</span>
+            </h2>
+            <form id="staffForm">
+                <input type="hidden" id="staffId">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" required placeholder="Enter first name">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" required placeholder="Enter last name">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" required placeholder="Enter phone number">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="Enter email">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" placeholder="Age" min="18" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" placeholder="Enter address">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="idCard">ID Card (Optional)</label>
+                    <input type="file" id="idCard" accept="image/*" style="padding: 8px;">
+                    <div id="idCardPreview" style="margin-top: 10px;"></div>
+                </div>
+                <div class="confirm-modal-actions" style="margin-top: 25px;">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-dark">Save Staff</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Staff Modal -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="confirm-modal" style="max-width: 500px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                    </svg>
+                    Staff Details
+                </h2>
+                <button class="view-modal-close" onclick="closeViewModal()"
+                    style="background: none; border: none; cursor: pointer;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="viewModalContent" style="background: #f9f9f9; border-radius: 8px; padding: 15px;">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePlansMenu(event) {
+            event.stopPropagation();
+            var submenu = document.getElementById('plansSubmenu');
+            var menu = document.getElementById('plansMenu');
+            submenu.classList.toggle('show');
+            menu.classList.toggle('active');
+        }
+    </script>
+    <script src="js/office-staff.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #c0c0c0;
+        }
+
+        .school-header {
+            background-color: #333;
+            border: 3px solid #000;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .school-header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .school-logo {
+            width: 50px;
+            height: 50px;
+            background-color: #87CEEB;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .school-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .school-logo svg {
+            width: 30px;
+            height: 30px;
+            stroke: #333;
+        }
+
+        .school-name {
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .school-header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: #fff;
+        }
+
+        .school-main {
+            display: flex;
+            gap: 0;
+            padding: 0 10px 10px 10px;
+        }
+
+        .school-sidebar {
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 15px;
+        }
+
+        .school-sidebar-item {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 12px 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .school-sidebar-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .school-sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .school-content {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .stats-circles {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+
+        .stat-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 3px solid #333;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-circle-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .stat-circle-value {
+            font-size: 42px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .content-section {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .quick-access-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-left: 5px;
+        }
+
+        .quick-access-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .quick-access-card {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 2px solid #333;
+            border-radius: 15px;
+            height: 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .quick-access-card:hover {
+            background: linear-gradient(145deg, #f5f5f5, #e8e8e8);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+        }
+
+        .quick-access-card svg {
+            width: 36px;
+            height: 36px;
+            stroke: #333;
+        }
+
+        .quick-access-card span {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .notification-bell {
+            position: relative;
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+        }
+
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            min-width: 150px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .profile-dropdown-item.logout {
+            color: #e74c3c;
+        }
+
+        .plan-section {
+            margin-bottom: 20px;
+        }
+
+        .plan-card {
+            background: linear-gradient(145deg, #ffffff, #f5f5f5);
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .plan-card.active {
+            border-color: #2e7d32;
+        }
+
+        .plan-card.expired {
+            border-color: #c62828;
+        }
+
+        .plan-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .plan-header svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .plan-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .plan-status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            margin-left: auto;
+        }
+
+        .plan-status-badge.active {
+            background-color: #2e7d32;
+        }
+
+        .plan-status-badge.expired {
+            background-color: #c62828;
+        }
+
+        .plan-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .plan-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .plan-detail-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .plan-detail-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .no-plan-content {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .no-plan-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            color: #c62828;
+        }
+
+        .no-plan-text {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .support-email {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #1565c0;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .support-email:hover {
+            background-color: #bbdefb;
+        }
+
+        .contact-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #000;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .contact-btn:hover {
+            background-color: #333;
+        }
+
+        .notification-wrapper {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            background: #f44336;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            top: 45px;
+            right: 0;
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .notification-dropdown.show {
+            display: block;
+        }
+
+        .notification-header {
+            padding: 12px 15px;
+            background: #333;
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .notification-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background: #f5f5f5;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .notification-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .no-notifications {
+            padding: 30px 15px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Logo Upload Styles */
+        .school-logo {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .school-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-edit-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .school-logo:hover .logo-edit-overlay {
+            opacity: 1;
+        }
+
+        .logo-edit-overlay svg {
+            width: 20px;
+            height: 20px;
+            stroke: #fff;
+        }
+
+        /* Logo Upload Modal */
+        .logo-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-modal-overlay.show {
+            display: flex;
+        }
+
+        .logo-modal {
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .logo-modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .logo-modal-close svg {
+            width: 24px;
+            height: 24px;
+            stroke: #666;
+        }
+
+        .logo-instructions {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo-instructions-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-instructions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .logo-instructions-list li {
+            padding: 5px 0;
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-instructions-list li::before {
+            content: '✓';
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .logo-preview-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo-preview-area:hover {
+            border-color: #333;
+            background: #f8f9fa;
+        }
+
+        .logo-preview-area.has-image {
+            border-style: solid;
+            border-color: #2e7d32;
+        }
+
+        .logo-preview-placeholder {
+            color: #999;
+        }
+
+        .logo-preview-placeholder svg {
+            width: 50px;
+            height: 50px;
+            stroke: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .logo-preview-img {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 10px;
+        }
+
+        .logo-modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .logo-modal-btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .logo-modal-btn.cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .logo-modal-btn.cancel:hover {
+            background: #d0d0d0;
+        }
+
+        .logo-modal-btn.upload {
+            background: #333;
+            color: #fff;
+        }
+
+        .logo-modal-btn.upload:hover {
+            background: #555;
+        }
+
+        .logo-modal-btn.upload:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .dont-show-again {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .dont-show-again input {
+            cursor: pointer;
+        }
+
+        .dont-show-again label {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Logo Upload Modal -->
+    <div class="logo-modal-overlay" id="logoModalOverlay">
+        <div class="logo-modal">
+            <div class="logo-modal-header">
+                <span class="logo-modal-title">📷 Change School Logo</span>
+                <button class="logo-modal-close" onclick="closeLogoModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="logo-instructions" id="logoInstructions">
+                <div class="logo-instructions-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    Image Requirements
+                </div>
+                <ul class="logo-instructions-list">
+                    <li>Recommended size: 200 x 200 pixels</li>
+                    <li>Maximum file size: 2 MB</li>
+                    <li>Supported formats: JPG, PNG</li>
+                    <li>Square images work best</li>
+                </ul>
+            </div>
+            <div class="logo-preview-area" id="logoPreviewArea"
+                onclick="document.getElementById('logoFileInput').click()">
+                <div class="logo-preview-placeholder" id="logoPreviewPlaceholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <p>Click to select an image</p>
+                </div>
+                <img id="logoPreviewImg" class="logo-preview-img" style="display: none;" alt="Preview">
+            </div>
+            <input type="file" id="logoFileInput" accept="image/jpeg,image/png" style="display: none;"
+                onchange="handleLogoFileSelect(event)">
+            <div class="dont-show-again">
+                <input type="checkbox" id="dontShowAgain">
+                <label for="dontShowAgain">Don't show instructions again</label>
+            </div>
+            <div class="logo-modal-actions">
+                <button class="logo-modal-btn cancel" onclick="closeLogoModal()">Cancel</button>
+                <button class="logo-modal-btn upload" id="uploadLogoBtn" onclick="uploadNewLogo()" disabled>Upload
+                    Logo</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="school-header">
+        <div class="school-header-left">
+            <div class="school-logo" id="schoolLogo" onclick="openLogoModal()" title="Click to change logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                </svg>
+                <div class="logo-edit-overlay">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="school-name" id="schoolName">Loading...</div>
+        <div class="school-header-right">
+            <div class="profile-wrapper">
+                <div class="header-icon" id="profileIcon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-dropdown-item" id="profileEmail">Loading...</div>
+                    <div class="profile-dropdown-item logout" onclick="logout()">Logout</div>
+                </div>
+            </div>
+            <div class="notification-wrapper">
+                <div class="header-icon" id="notificationIcon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge" id="notificationBadge"></span>
+                </div>
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notification-header">📢 Notifications</div>
+                    <div id="notificationList">
+                        <div class="no-notifications">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="school-main">
+        <div class="school-sidebar">
+            <a href="dashboard.html" class="school-sidebar-item active">HOME</a>
+            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="pending-students.html" class="school-sidebar-item" id="pendingLink">PENDING<span id="pendingDot"
+                    style="display:none;width:8px;height:8px;background:#e74c3c;border-radius:50%;margin-left:5px;"></span></a>
+            <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
+            <a href="plans.html" class="school-sidebar-item">PLANS</a>
+            <a href="support.html" class="school-sidebar-item">SUPPORT</a>
+            <a href="send-message.html" class="school-sidebar-item">SEND MESSAGE</a>
+            <a href="events.html" class="school-sidebar-item">EVENTS</a>
+            <a href="exams.html" class="school-sidebar-item">EXAMS</a>
+            <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
+
+        <div class="school-content">
+            <div class="content-section">
+                <div class="stats-circles">
+                    <div class="stat-circle">
+                        <span class="stat-circle-label">Students</span>
+                        <span class="stat-circle-value" id="studentsCount">0</span>
+                    </div>
+                    <div class="stat-circle">
+                        <span class="stat-circle-label">Teachers</span>
+                        <span class="stat-circle-value" id="teachersCount">0</span>
+                    </div>
+                    <div class="stat-circle">
+                        <span class="stat-circle-label">AAP</span>
+                        <span class="stat-circle-value" id="aapValue">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plan Status Section -->
+            <div class="plan-section">
+                <div id="planStatusCard" class="plan-card">
+                    <div class="plan-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span class="plan-title" id="planTitle">Loading Plan Status...</span>
+                    </div>
+                    <div id="planContent"></div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section-title">Quick Access</div>
+                <div class="quick-access-grid">
+                    <a href="teachers.html" class="quick-access-card">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span>Teachers</span>
+                    </a>
+                    <a href="students.html" class="quick-access-card">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span>Students</span>
+                    </a>
+                    <a href="events.html" class="quick-access-card">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span>Events</span>
+                    </a>
+                    <a href="exams.html" class="quick-access-card">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        <span>Exams</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showToast(message, type) {
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast ' + (type || 'info');
+
+            var iconSvg = '';
+            if (type === 'success') {
+                iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+            } else if (type === 'error') {
+                iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+            } else {
+                iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+            }
+
+            toast.innerHTML = iconSvg +
+                '<span class="toast-message">' + message + '</span>' +
+                '<button class="toast-close" onclick="this.parentElement.remove()">' +
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>' +
+                '</button>';
+
+            container.appendChild(toast);
+
+            setTimeout(function () {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(function () {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var token = localStorage.getItem('schoolToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            verifyTokenAndLoad();
+            loadNotifications();
+
+            document.getElementById('profileIcon').addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.getElementById('profileDropdown').classList.toggle('show');
+                document.getElementById('notificationDropdown').classList.remove('show');
+            });
+
+            document.getElementById('notificationIcon').addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.getElementById('notificationDropdown').classList.toggle('show');
+                document.getElementById('profileDropdown').classList.remove('show');
+            });
+
+            document.addEventListener('click', function () {
+                document.getElementById('profileDropdown').classList.remove('show');
+                document.getElementById('notificationDropdown').classList.remove('show');
+            });
+        });
+
+        async function loadNotifications() {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/messages/for-my-school', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    document.getElementById('notificationList').innerHTML = '<div class="no-notifications">Failed to load notifications</div>';
+                    return;
+                }
+
+                var messages = await response.json();
+
+                if (messages.length === 0) {
+                    document.getElementById('notificationList').innerHTML = '<div class="no-notifications">No notifications</div>';
+                    document.getElementById('notificationBadge').style.display = 'none';
+                    return;
+                }
+
+                // Count unread messages
+                var unreadCount = messages.filter(function (m) { return !m.isRead; }).length;
+                if (unreadCount > 0) {
+                    document.getElementById('notificationBadge').style.display = 'block';
+                } else {
+                    document.getElementById('notificationBadge').style.display = 'none';
+                }
+
+                var html = messages.map(function (msg) {
+                    var date = new Date(msg.createdAt);
+                    var timeAgo = getTimeAgo(date);
+                    var unreadClass = msg.isRead ? '' : 'style="background: #e3f2fd;"';
+                    var newBadge = msg.isRead ? '' : '<span style="background: #f44336; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 10px; margin-left: 5px;">NEW</span>';
+                    return '<div class="notification-item" ' + unreadClass + ' onclick="markMessageRead(\'' + msg._id + '\')">' +
+                        '<div class="notification-title">' + msg.heading + newBadge + '</div>' +
+                        '<div class="notification-message">' + msg.message + '</div>' +
+                        '<div class="notification-time">' + timeAgo + '</div>' +
+                        '</div>';
+                }).join('');
+
+                document.getElementById('notificationList').innerHTML = html;
+            } catch (error) {
+                console.error('Load notifications error:', error);
+                document.getElementById('notificationList').innerHTML = '<div class="no-notifications">Error loading notifications</div>';
+            }
+        }
+
+        async function markMessageRead(messageId) {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                await fetch('/api/messages/mark-read/' + messageId, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                loadNotifications(); // Reload to update UI
+            } catch (error) {
+                console.error('Mark message read error:', error);
+            }
+        }
+
+        function getTimeAgo(date) {
+            var seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'Just now';
+            var minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return minutes + ' min ago';
+            var hours = Math.floor(minutes / 60);
+            if (hours < 24) return hours + ' hour' + (hours > 1 ? 's' : '') + ' ago';
+            var days = Math.floor(hours / 24);
+            if (days < 7) return days + ' day' + (days > 1 ? 's' : '') + ' ago';
+            return date.toLocaleDateString();
+        }
+
+        async function verifyTokenAndLoad() {
+            var token = localStorage.getItem('schoolToken');
+
+            try {
+                var response = await fetch('/api/school-auth/me', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (!response.ok) {
+                    localStorage.removeItem('schoolToken');
+                    localStorage.removeItem('schoolData');
+                    showToast('Session expired. Please login again.', 'error');
+                    setTimeout(function () {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                    return;
+                }
+
+                loadSchoolData();
+            } catch (error) {
+                console.error('Token verification error:', error);
+                localStorage.removeItem('schoolToken');
+                window.location.href = 'index.html';
+            }
+        }
+
+        async function loadSchoolData() {
+            var token = localStorage.getItem('schoolToken');
+
+            try {
+                var response = await fetch('/api/school-auth/me', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('schoolToken');
+                    localStorage.removeItem('schoolData');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                var school = await response.json();
+
+                document.getElementById('schoolName').textContent = school.name.toUpperCase();
+                document.getElementById('studentsCount').textContent = school.students || 0;
+                document.getElementById('teachersCount').textContent = school.teachers || 0;
+
+                var aap = 0;
+                if (school.students > 0 && school.teachers > 0) {
+                    aap = Math.round((school.teachers / school.students) * 100);
+                }
+                document.getElementById('aapValue').textContent = aap + '%';
+
+                if (school.logo) {
+                    document.getElementById('schoolLogo').innerHTML = '<img src="' + school.logo + '" alt="Logo">' +
+                        '<div class="logo-edit-overlay">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke-width="2">' +
+                        '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
+                        '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
+                        '</svg>' +
+                        '</div>';
+                }
+
+                document.getElementById('profileEmail').textContent = school.email || 'Profile';
+
+                // Display plan status
+                displayPlanStatus(school);
+
+            } catch (error) {
+                console.error('Load school data error:', error);
+                showToast('Error loading school data', 'error');
+            }
+
+            // Check for pending students
+            checkPendingCount();
+        }
+
+        async function checkPendingCount() {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-auth/pending-students', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    var students = await response.json();
+                    var dot = document.getElementById('pendingDot');
+                    if (dot && students.length > 0) {
+                        dot.style.display = 'inline-block';
+                    }
+                }
+            } catch (e) {
+                console.log('Error checking pending count');
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            var date = new Date(dateString);
+            var day = String(date.getDate()).padStart(2, '0');
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var year = date.getFullYear();
+            return day + '-' + month + '-' + year;
+        }
+
+        function displayPlanStatus(school) {
+            var card = document.getElementById('planStatusCard');
+            var title = document.getElementById('planTitle');
+            var content = document.getElementById('planContent');
+
+            if (school.hasActivePlan && school.subscription) {
+                var sub = school.subscription;
+                card.classList.add('active');
+                card.classList.remove('expired');
+                title.innerHTML = 'Current Plan <span class="plan-status-badge active">Active</span>';
+                content.innerHTML =
+                    '<div class="plan-details-grid">' +
+                    '<div class="plan-detail-item"><span class="plan-detail-label">Valid Until</span><span class="plan-detail-value">' + formatDate(sub.endDate) + '</span></div>' +
+                    '<div class="plan-detail-item"><span class="plan-detail-label">Due Date</span><span class="plan-detail-value">' + formatDate(sub.dueDate) + '</span></div>' +
+                    '<div class="plan-detail-item"><span class="plan-detail-label">Teachers Allowed</span><span class="plan-detail-value">' + (sub.numberOfTeachers || 0) + '</span></div>' +
+                    '<div class="plan-detail-item"><span class="plan-detail-label">Students Allowed</span><span class="plan-detail-value">' + (sub.numberOfStudents || 0) + '</span></div>' +
+                    '<div class="plan-detail-item"><span class="plan-detail-label">Amount Paid</span><span class="plan-detail-value">₹' + (sub.amount || 0) + '</span></div>' +
+                    '</div>';
+            } else {
+                card.classList.add('expired');
+                card.classList.remove('active');
+                title.innerHTML = '<span style="color: #c62828;">⚠️ No Active Plan</span>';
+                content.innerHTML =
+                    '<div class="no-plan-content">' +
+                    '<p class="no-plan-text">Your subscription has expired or you don\'t have any active plan.<br>Please contact support to renew your subscription.</p>' +
+                    '<a href="mailto:support@schoolmanagement.com" class="support-email">' +
+                    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>' +
+                    'support@schoolmanagement.com</a>' +
+                    '<br><a href="support.html" class="contact-btn">Contact Support</a>' +
+                    '</div>';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('schoolToken');
+            localStorage.removeItem('schoolData');
+            localStorage.removeItem('schoolHasActivePlan');
+            localStorage.removeItem('schoolSubscription');
+            window.location.href = 'index.html';
+        }
+
+        // Logo Upload Functions
+        var selectedLogoFile = null;
+        var selectedLogoBase64 = null;
+
+        function openLogoModal() {
+            var dontShowAgain = localStorage.getItem('hideLogoInstructions') === 'true';
+
+            // Show/hide instructions based on preference
+            var instructionsDiv = document.getElementById('logoInstructions');
+            var dontShowCheckbox = document.getElementById('dontShowAgain');
+
+            if (dontShowAgain) {
+                instructionsDiv.style.display = 'none';
+                document.querySelector('.dont-show-again').style.display = 'none';
+            } else {
+                instructionsDiv.style.display = 'block';
+                document.querySelector('.dont-show-again').style.display = 'flex';
+                dontShowCheckbox.checked = false;
+            }
+
+            // Reset modal state
+            document.getElementById('logoPreviewImg').style.display = 'none';
+            document.getElementById('logoPreviewPlaceholder').style.display = 'block';
+            document.getElementById('logoPreviewArea').classList.remove('has-image');
+            document.getElementById('uploadLogoBtn').disabled = true;
+            document.getElementById('logoFileInput').value = '';
+            selectedLogoFile = null;
+            selectedLogoBase64 = null;
+
+            document.getElementById('logoModalOverlay').classList.add('show');
+        }
+
+        function closeLogoModal() {
+            // Save "don't show again" preference if checked
+            var dontShowCheckbox = document.getElementById('dontShowAgain');
+            if (dontShowCheckbox.checked) {
+                localStorage.setItem('hideLogoInstructions', 'true');
+            }
+
+            document.getElementById('logoModalOverlay').classList.remove('show');
+        }
+
+        function handleLogoFileSelect(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.match(/^image\/(jpeg|png)$/)) {
+                showToast('Please select a JPG or PNG image', 'error');
+                return;
+            }
+
+            // Validate file size (2MB max)
+            var maxSize = 2 * 1024 * 1024; // 2MB
+            if (file.size > maxSize) {
+                showToast('File size must be less than 2MB', 'error');
+                return;
+            }
+
+            selectedLogoFile = file;
+
+            // Convert to base64 and show preview
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                selectedLogoBase64 = e.target.result;
+
+                document.getElementById('logoPreviewImg').src = selectedLogoBase64;
+                document.getElementById('logoPreviewImg').style.display = 'block';
+                document.getElementById('logoPreviewPlaceholder').style.display = 'none';
+                document.getElementById('logoPreviewArea').classList.add('has-image');
+                document.getElementById('uploadLogoBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function uploadNewLogo() {
+            if (!selectedLogoBase64) {
+                showToast('Please select an image first', 'error');
+                return;
+            }
+
+            var token = localStorage.getItem('schoolToken');
+            var uploadBtn = document.getElementById('uploadLogoBtn');
+
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+
+            try {
+                var response = await fetch('/api/school-auth/update-logo', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ logo: selectedLogoBase64 })
+                });
+
+                var data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to update logo');
+                }
+
+                // Update the logo in the header
+                var schoolLogo = document.getElementById('schoolLogo');
+                schoolLogo.innerHTML = '<img src="' + selectedLogoBase64 + '" alt="Logo">' +
+                    '<div class="logo-edit-overlay">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke-width="2">' +
+                    '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>' +
+                    '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>' +
+                    '</svg>' +
+                    '</div>';
+
+                closeLogoModal();
+                showToast('Logo updated successfully!', 'success');
+
+            } catch (error) {
+                console.error('Upload logo error:', error);
+                showToast(error.message || 'Failed to update logo', 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Logo';
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('logoModalOverlay').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeLogoModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

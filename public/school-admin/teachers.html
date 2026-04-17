@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teachers - School Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="plan-check.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #c0c0c0;
+        }
+
+        .school-header {
+            background-color: #333;
+            border: 3px solid #000;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .school-header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .school-logo {
+            width: 50px;
+            height: 50px;
+            background-color: #87CEEB;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .school-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .school-logo svg {
+            width: 30px;
+            height: 30px;
+            stroke: #333;
+        }
+
+        .school-name {
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .school-header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: #fff;
+        }
+
+        .school-main {
+            display: flex;
+            gap: 0;
+            padding: 0 10px 10px 10px;
+        }
+
+        .school-sidebar {
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 15px;
+        }
+
+        .school-sidebar-item {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 12px 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .school-sidebar-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .school-sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .school-content {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .page-title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .page-title svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .quick-access-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .quick-access-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .quick-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            color: #333;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            height: 100px;
+        }
+
+        .quick-action-btn:hover {
+            background-color: #eee;
+            border-color: #bbb;
+            transform: translateY(-2px);
+        }
+
+        .quick-action-btn svg {
+            width: 32px;
+            height: 32px;
+            stroke: #333;
+            stroke-width: 2;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-filters input {
+            padding: 10px 15px;
+            border: 2px solid #666;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .teachers-table {
+            width: 100%;
+            background-color: #e8e8e8;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .teachers-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .teachers-table th {
+            background-color: #d0d0d0;
+            padding: 12px 10px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: bold;
+            border-bottom: 2px solid #999;
+        }
+
+        .teachers-table td {
+            padding: 12px 10px;
+            font-size: 14px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .teachers-table tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+        .teachers-table tr:hover {
+            background-color: #e0e0e0;
+        }
+
+        .action-btn {
+            padding: 5px 8px;
+            border: 1px solid #999;
+            background-color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 2px;
+        }
+
+        .action-btn:hover {
+            background-color: #f0f0f0;
+        }
+
+        .action-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: #333;
+        }
+
+        .btn-add {
+            padding: 10px 20px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-add:hover {
+            background-color: #333;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            background-color: #fff;
+            color: #333;
+            border: 2px solid #666;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f0f0f0;
+        }
+
+        .btn-save {
+            padding: 10px 20px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .view-details {
+            padding: 10px 0;
+        }
+
+        .view-detail-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .view-detail-label {
+            font-weight: bold;
+            width: 120px;
+            color: #666;
+        }
+
+        .view-detail-value {
+            flex: 1;
+            color: #333;
+        }
+
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            min-width: 150px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .profile-dropdown-item.logout {
+            color: #e74c3c;
+        }
+
+        /* Class Assignment Styles */
+        .class-assignments-container {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #fafafa;
+        }
+
+        .class-assignments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .class-assignments-header label {
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .btn-add-class {
+            padding: 6px 12px;
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-add-class:hover {
+            background: #45a049;
+        }
+
+        .btn-add-class:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .class-assignment-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .class-assignment-row select {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-remove-class {
+            width: 30px;
+            height: 30px;
+            background: #f44336;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-remove-class:hover {
+            background: #d32f2f;
+        }
+
+        .no-assignments-msg {
+            color: #999;
+            font-size: 13px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .class-badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .subject-tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 36px;
+            padding: 6px 8px;
+            border: 2px solid #ccc;
+            border-radius: 7px;
+            background: #fafafa;
+        }
+
+        .subject-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #000;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .subject-tag button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 15px;
+            line-height: 1;
+            padding: 0;
+            opacity: 0.7;
+        }
+
+        .subject-tag button:hover { opacity: 1; }
+    </style>
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="school-header">
+        <div class="school-header-left">
+            <div class="school-logo" id="schoolLogo">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="school-name" id="schoolName">Loading...</div>
+        <div class="school-header-right">
+            <div class="profile-wrapper">
+                <div class="header-icon" id="profileIcon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-dropdown-item" id="profileEmail">Loading...</div>
+                    <div class="profile-dropdown-item logout" onclick="logout()">Logout</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="school-main">
+        <div class="school-sidebar">
+            <a href="dashboard.html" class="school-sidebar-item">HOME</a>
+            <a href="teachers.html" class="school-sidebar-item active">TEACHER</a>
+            <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
+            <a href="plans.html" class="school-sidebar-item">PLANS</a>
+            <a href="support.html" class="school-sidebar-item">SUPPORT</a>
+            <a href="send-message.html" class="school-sidebar-item">SEND MESSAGE</a>
+            <a href="events.html" class="school-sidebar-item">EVENTS</a>
+            <a href="exams.html" class="school-sidebar-item">EXAMS</a>
+            <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
+
+        <div class="school-content">
+            <div class="page-title-bar">
+                <div class="page-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    Teachers
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-add" onclick="exportTeachers()"
+                        style="background-color: #28a745;">Export</button>
+                    <!-- Add Teacher moved to quick actions, but keeping here if user wants redundancy, or remove? User asked for 4 buttons. I will keep it consistent with request and remove the specific button here if it duplicates, BUT the design usually keeps a primary action top right. The user said "add a dive area above search related make full width i want atlest 4 button". I will place the quick actions below title bar. -->
+                </div>
+            </div>
+
+            <div class="quick-access-card">
+                <div class="quick-access-title">Quick Access</div>
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="openModal()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="8.5" cy="7" r="4"></circle>
+                            <line x1="20" y1="8" x2="20" y2="14"></line>
+                            <line x1="23" y1="11" x2="17" y2="11"></line>
+                        </svg>
+                        Add Teacher
+                    </button>
+                    <button class="quick-action-btn" onclick="window.location.href='students.html'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        All Students
+                    </button>
+                    <button class="quick-action-btn" onclick="window.location.href='pending-students.html'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="8.5" cy="7" r="4"></circle>
+                            <circle cx="20" cy="8" r="5"></circle>
+                            <polyline points="20 5 20 8 22 10"></polyline>
+                        </svg>
+                        Pending Students
+                    </button>
+                    <button class="quick-action-btn" onclick="window.location.href='overview.html'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        Overview
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-filters">
+                <input type="text" id="searchName" placeholder="Search by name">
+                <input type="text" id="searchId" placeholder="Search by id">
+                <input type="text" id="searchMobile" placeholder="Search by mo no">
+            </div>
+
+            <div class="teachers-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No.</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Class</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Device</th>
+                            <th>Joining Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teachersTableBody">
+                        <tr>
+                            <td colspan="10" style="text-align:center;padding:20px;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="teacherModal">
+        <div class="modal">
+            <h2 id="modalTitle">Add Teacher</h2>
+            <form id="teacherForm">
+                <input type="hidden" id="teacherId">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="teacherName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="teacherEmail">
+                </div>
+                <div class="form-group">
+                    <label>Password (for teacher login)</label>
+                    <input type="password" id="teacherPassword" placeholder="Leave empty to keep unchanged">
+                </div>
+                <div class="form-group">
+                    <label>Mobile No</label>
+                    <input type="text" id="teacherMobile" maxlength="10" pattern="\d{10}"
+                        title="Please enter exactly 10 digits" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                        placeholder="Enter 10 digit mobile number">
+                </div>
+                <div class="class-assignments-container">
+                    <div class="class-assignments-header">
+                        <label>Class Assignments</label>
+                        <button type="button" class="btn-add-class" id="btnAddClass" onclick="addClassAssignment()">
+                            + Add Class
+                        </button>
+                    </div>
+                    <div id="classAssignmentsList">
+                        <div class="no-assignments-msg">No classes assigned. Click "Add Class" to assign.</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Subjects</label>
+                    <div class="subject-tags-container" id="subjectTagsContainer"></div>
+                    <div style="display:flex;gap:8px;margin-top:6px;">
+                        <input type="text" id="subjectInput" placeholder="Type subject and press Add" style="flex:1;">
+                        <button type="button" onclick="addSubjectTag()" style="padding:8px 14px;background:#000;color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:bold;">Add</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Students</label>
+                    <input type="number" id="teacherStudents" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="teacherStatus">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                        <option value="On Leave">On Leave</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="viewTeacherModal">
+        <div class="modal">
+            <h2>Teacher Details</h2>
+            <div id="viewTeacherContent" class="view-details">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeViewModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Confirmation Modal -->
+    <div class="modal-overlay" id="leaveConfirmModal">
+        <div class="modal" style="width: 400px; text-align: center;">
+            <div style="margin-bottom: 20px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" style="width: 60px; height: 60px;">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </div>
+            <h3>Update Leave Status?</h3>
+            <p id="leaveConfirmMsg" style="color: #666; margin: 10px 0 20px;"></p>
+            <div class="modal-actions" style="justify-content: center;">
+                <button type="button" class="btn-cancel" onclick="closeLeaveModal()">Cancel</button>
+                <button type="button" id="confirmLeaveBtn" style="padding: 10px 20px; border: none; background: #d97706; color: white; border-radius: 6px; cursor: pointer; font-weight: 500;">Mark On Leave</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Reset Confirmation Modal -->
+    <div class="modal-overlay" id="resetConfirmModal">
+        <div class="modal" style="width: 400px; text-align: center;">
+            <div style="margin-bottom: 20px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"
+                    style="width: 60px; height: 60px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h3>Reset Device?</h3>
+            <p id="resetConfirmMsg" style="color: #666; margin: 10px 0 20px;">Are you sure you want to reset the device?
+            </p>
+            <div class="modal-actions" style="justify-content: center;">
+                <button type="button" class="btn-cancel" onclick="closeResetModal()">Cancel</button>
+                <button type="button" class="btn-save" id="confirmResetBtn"
+                    style="background-color: #dc2626;">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var viewIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+        var editIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+        var deleteIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+        var resetIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>';
+        var leaveIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
+        var activateIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+
+        function showToast(message, type) {
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast ' + (type || 'info');
+            toast.innerHTML = '<span class="toast-message">' + message + '</span>';
+            container.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var token = localStorage.getItem('schoolToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadSchoolData();
+            loadTeachers();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('profileIcon').addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.getElementById('profileDropdown').classList.toggle('show');
+            });
+
+            document.addEventListener('click', function () {
+                document.getElementById('profileDropdown').classList.remove('show');
+            });
+
+            document.getElementById('teacherForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                saveTeacher();
+            });
+
+            var searchTimeout;
+            function debounceSearch() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(loadTeachers, 300);
+            }
+
+            document.getElementById('searchName').addEventListener('input', debounceSearch);
+            document.getElementById('searchId').addEventListener('input', debounceSearch);
+            document.getElementById('searchMobile').addEventListener('input', debounceSearch);
+        }
+
+        async function loadSchoolData() {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-auth/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                var school = await response.json();
+                document.getElementById('schoolName').textContent = school.name.toUpperCase();
+                document.getElementById('profileEmail').textContent = school.email || 'Profile';
+                if (school.logo) {
+                    document.getElementById('schoolLogo').innerHTML = '<img src="' + school.logo + '" alt="Logo">';
+                }
+            } catch (error) {
+                console.error('Load school data error:', error);
+            }
+        }
+
+        async function loadTeachers() {
+            var token = localStorage.getItem('schoolToken');
+            var tableBody = document.getElementById('teachersTableBody');
+
+            var name = document.getElementById('searchName').value;
+            var id = document.getElementById('searchId').value;
+            var mobileNo = document.getElementById('searchMobile').value;
+
+            var queryParams = new URLSearchParams();
+            if (name) queryParams.append('name', name);
+            if (id) queryParams.append('id', id);
+            if (mobileNo) queryParams.append('mobileNo', mobileNo);
+
+            try {
+                var response = await fetch('/api/teachers?' + queryParams.toString(), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!response.ok) {
+                    tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;">Error loading teachers</td></tr>';
+                    return;
+                }
+
+                var teachers = await response.json();
+
+                if (teachers.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;">No teachers found</td></tr>';
+                    return;
+                }
+
+                tableBody.innerHTML = teachers.map(function (teacher, index) {
+                    var classDisplay = '-';
+                    if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+                        classDisplay = teacher.classAssignments.map(function (ca) {
+                            return '<span class="class-badge">' + ca.className + '-' + ca.section + '</span>';
+                        }).join('');
+                    } else if (teacher.className) {
+                        classDisplay = teacher.className;
+                    }
+
+                    // Status badge
+                    var statusColors = {
+                        'Active': 'background: #d1fae5; color: #059669;',
+                        'Inactive': 'background: #fee2e2; color: #dc2626;',
+                        'On Leave': 'background: #fef3c7; color: #d97706;'
+                    };
+                    var statusStyle = statusColors[teacher.status] || 'background: #e5e7eb; color: #374151;';
+                    var statusBadge = '<span style="' + statusStyle + ' padding: 4px 10px; border-radius: 4px; font-size: 12px;">' + teacher.status + '</span>';
+
+                    // Device info
+                    var deviceInfo = teacher.deviceId ?
+                        '<span style="color: #059669; font-size: 12px;">' + (teacher.deviceName || 'Locked') + '</span>' :
+                        '<span style="color: #9ca3af; font-size: 12px;">Not Set</span>';
+
+                    // Reset device button (only if device is set)
+                    var resetBtn = teacher.deviceId ?
+                        '<button class="action-btn" onclick="resetDevice(\'' + teacher._id + '\', \'' + teacher.name.replace(/'/g, "\\'") + '\')" title="Reset Device" style="background: #fee2e2;">' + resetIcon + '</button>' : '';
+
+                    // Leave toggle button
+                    var isOnLeave = teacher.status === 'On Leave';
+                    var leaveBtn = '<button class="action-btn" onclick="toggleLeave(\'' + teacher._id + '\', \'' + teacher.name.replace(/'/g, "\\'") + '\', ' + isOnLeave + ')" title="' + (isOnLeave ? 'Mark Active' : 'Mark On Leave') + '" style="background: ' + (isOnLeave ? '#d1fae5' : '#fef3c7') + ';">' + (isOnLeave ? activateIcon : leaveIcon) + '</button>';
+
+                    // Format joining date
+                    var joiningDate = 'N/A';
+                    if (teacher.joiningDate) {
+                        var d = new Date(teacher.joiningDate);
+                        var day = String(d.getDate()).padStart(2, '0');
+                        var month = String(d.getMonth() + 1).padStart(2, '0');
+                        var year = d.getFullYear();
+                        joiningDate = day + '-' + month + '-' + year;
+                    }
+
+                    return '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + teacher.name + '</td>' +
+                        '<td>' + (teacher.email || 'N/A') + '</td>' +
+                        '<td>' + (teacher.mobileNo || 'N/A') + '</td>' +
+                        '<td>' + classDisplay + '</td>' +
+                        '<td>' + (teacher.subject || '-') + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
+                        '<td>' + deviceInfo + '</td>' +
+                        '<td>' + joiningDate + '</td>' +
+                        '<td>' +
+                        '<button class="action-btn" onclick="viewTeacher(\'' + teacher._id + '\')" title="View">' + viewIcon + '</button>' +
+                        '<button class="action-btn" onclick="editTeacher(\'' + teacher._id + '\')" title="Edit">' + editIcon + '</button>' +
+                        '<button class="action-btn" onclick="deleteTeacher(\'' + teacher._id + '\')" title="Delete">' + deleteIcon + '</button>' +
+                        leaveBtn +
+                        resetBtn +
+                        '</td>' +
+                        '</tr>';
+                }).join('');
+
+            } catch (error) {
+                console.error('Load teachers error:', error);
+                tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;">Error loading teachers</td></tr>';
+            }
+        }
+
+        function openModal(teacher) {
+            var modal = document.getElementById('teacherModal');
+            var modalTitle = document.getElementById('modalTitle');
+
+            // Reset class assignments
+            document.getElementById('classAssignmentsList').innerHTML = '<div class="no-assignments-msg">No classes assigned. Click "Add Class" to assign.</div>';
+            updateAddClassButton();
+
+            if (teacher) {
+                modalTitle.textContent = 'Edit Teacher';
+                document.getElementById('teacherId').value = teacher._id;
+                document.getElementById('teacherName').value = teacher.name;
+                document.getElementById('teacherEmail').value = teacher.email || '';
+                document.getElementById('teacherMobile').value = teacher.mobileNo || '';
+                setSubjects(teacher.subject || '');
+                document.getElementById('teacherStudents').value = teacher.students || 0;
+                document.getElementById('teacherStatus').value = teacher.status;
+
+                // Load class assignments
+                if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+                    document.getElementById('classAssignmentsList').innerHTML = '';
+                    teacher.classAssignments.forEach(function (ca) {
+                        addClassAssignment(ca.className, ca.section);
+                    });
+                }
+            } else {
+                modalTitle.textContent = 'Add Teacher';
+                document.getElementById('teacherForm').reset();
+                document.getElementById('teacherId').value = '';
+                document.getElementById('subjectTagsContainer').innerHTML = '';
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('teacherModal').classList.remove('show');
+        }
+
+        async function saveTeacher() {
+            var token = localStorage.getItem('schoolToken');
+            var teacherId = document.getElementById('teacherId').value;
+
+            // Collect class assignments
+            var classAssignments = [];
+            var rows = document.querySelectorAll('.class-assignment-row');
+            rows.forEach(function (row) {
+                var classSelect = row.querySelector('.class-select');
+                var sectionSelect = row.querySelector('.section-select');
+                if (classSelect && sectionSelect && classSelect.value && sectionSelect.value) {
+                    classAssignments.push({
+                        className: classSelect.value,
+                        section: sectionSelect.value
+                    });
+                }
+            });
+
+            var teacherData = {
+                name: document.getElementById('teacherName').value,
+                email: document.getElementById('teacherEmail').value,
+                mobileNo: document.getElementById('teacherMobile').value,
+                classAssignments: classAssignments,
+                subject: getSubjects().join(', '),
+                students: parseInt(document.getElementById('teacherStudents').value) || 0,
+                status: document.getElementById('teacherStatus').value
+            };
+
+            // Add password only if provided
+            var password = document.getElementById('teacherPassword').value;
+            if (password) {
+                teacherData.password = password;
+            }
+
+            try {
+                var url = teacherId ? '/api/teachers/' + teacherId : '/api/teachers';
+                var method = teacherId ? 'PUT' : 'POST';
+
+                var response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(teacherData)
+                });
+
+                if (response.ok) {
+                    closeModal();
+                    loadTeachers();
+                    showToast('Teacher saved successfully!', 'success');
+                } else {
+                    var data = await response.json();
+                    showToast(data.message || 'Error saving teacher', 'error');
+                }
+            } catch (error) {
+                console.error('Save teacher error:', error);
+                showToast('Error saving teacher', 'error');
+            }
+        }
+
+        async function viewTeacher(id) {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/teachers/' + id, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var teacher = await response.json();
+
+                var classDisplay = 'N/A';
+                if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+                    classDisplay = teacher.classAssignments.map(function (ca) {
+                        return '<span class="class-badge">' + ca.className + '-' + ca.section + '</span>';
+                    }).join(' ');
+                } else if (teacher.className) {
+                    classDisplay = teacher.className;
+                }
+
+                var content =
+                    '<div class="view-detail-row">' +
+                    '<span class="view-detail-label">Name:</span>' +
+                    '<span class="view-detail-value">' + teacher.name + '</span>' +
+                    '</div>' +
+                    '<div class="view-detail-row">' +
+                    '<span class="view-detail-label">Email:</span>' +
+                    '<span class="view-detail-value">' + (teacher.email || 'N/A') + '</span>' +
+                    '</div>' +
+                    '<div class="view-detail-row">' +
+                    '<span class="view-detail-label">Mobile:</span>' +
+                    '<span class="view-detail-value">' + (teacher.mobileNo || 'N/A') + '</span>' +
+                    '</div>' +
+                    '<div class="view-detail-row">' +
+                    '<span class="view-detail-label">Classes:</span>' +
+                    '<span class="view-detail-value">' + classDisplay + '</span>' +
+                    '</div>' +
+                    '<div class="view-detail-row">' +
+                    '<span class="view-detail-label">Subject:</span>' +
+                    '<span class="view-detail-value">' + (teacher.subject || 'N/A') + '</span>' +
+                    '</div>' +
+                    '<div class="view-detail-row">' +
+                    '<span class="view-detail-label">Students:</span>' +
+                    '<span class="view-detail-value">' + (teacher.students || 0) + '</span>' +
+                    '</div>' +
+                    '<div class="view-detail-row">' +
+                    '<span class="view-detail-label">Status:</span>' +
+                    '<span class="view-detail-value">' + teacher.status + '</span>' +
+                    '</div>';
+
+                document.getElementById('viewTeacherContent').innerHTML = content;
+                document.getElementById('viewTeacherModal').classList.add('show');
+            } catch (error) {
+                showToast('Error loading teacher', 'error');
+            }
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewTeacherModal').classList.remove('show');
+        }
+
+        async function editTeacher(id) {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/teachers/' + id, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var teacher = await response.json();
+                openModal(teacher);
+            } catch (error) {
+                showToast('Error loading teacher', 'error');
+            }
+        }
+
+        async function deleteTeacher(id) {
+            if (!confirm('Are you sure you want to delete this teacher?')) return;
+
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/teachers/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    loadTeachers();
+                    showToast('Teacher deleted successfully!', 'success');
+                } else {
+                    showToast('Error deleting teacher', 'error');
+                }
+            } catch (error) {
+                showToast('Error deleting teacher', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('schoolToken');
+            localStorage.removeItem('schoolData');
+            window.location.href = 'index.html';
+        }
+
+        var resetTargetTeacherId = null;
+
+        function openResetModal(teacherId, teacherName) {
+            resetTargetTeacherId = teacherId;
+            document.getElementById('resetConfirmMsg').textContent = 'Are you sure you want to reset the device for "' + teacherName + '"?';
+            document.getElementById('resetConfirmModal').classList.add('show');
+        }
+
+        function closeResetModal() {
+            resetTargetTeacherId = null;
+            document.getElementById('resetConfirmModal').classList.remove('show');
+        }
+
+        document.getElementById('confirmResetBtn').addEventListener('click', function () {
+            if (resetTargetTeacherId) {
+                performDeviceReset(resetTargetTeacherId);
+            }
+        });
+
+        // Wrapper to call from button
+        function resetDevice(teacherId, teacherName) {
+            openResetModal(teacherId, teacherName);
+        }
+
+        async function performDeviceReset(teacherId) {
+            closeResetModal();
+            var token = localStorage.getItem('schoolToken');
+
+            try {
+                showToast('Resetting device...', 'info');
+
+                var response = await fetch('/api/teachers/' + teacherId + '/reset-device', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                var data = await response.json();
+
+                if (response.ok) {
+                    showToast('Device reset successfully!', 'success');
+                    loadTeachers();
+                } else {
+                    showToast(data.message || 'Error resetting device', 'error');
+                }
+            } catch (error) {
+                console.error('Reset device error:', error);
+                showToast('Error resetting device', 'error');
+            }
+        }
+
+        var leaveTargetTeacherId = null;
+        var leaveTargetIsOnLeave = false;
+
+        function toggleLeave(teacherId, teacherName, isOnLeave) {
+            leaveTargetTeacherId = teacherId;
+            leaveTargetIsOnLeave = isOnLeave;
+            var msg = isOnLeave
+                ? 'Mark "' + teacherName + '" as Active? They will be able to login again.'
+                : 'Mark "' + teacherName + '" as On Leave? They will not be able to login until restored.';
+            document.getElementById('leaveConfirmMsg').textContent = msg;
+            document.getElementById('confirmLeaveBtn').textContent = isOnLeave ? 'Mark Active' : 'Mark On Leave';
+            document.getElementById('confirmLeaveBtn').style.background = isOnLeave ? '#059669' : '#d97706';
+            document.getElementById('leaveConfirmModal').classList.add('show');
+        }
+
+        function closeLeaveModal() {
+            leaveTargetTeacherId = null;
+            document.getElementById('leaveConfirmModal').classList.remove('show');
+        }
+
+        document.getElementById('confirmLeaveBtn').addEventListener('click', function () {
+            if (leaveTargetTeacherId) {
+                performToggleLeave(leaveTargetTeacherId);
+            }
+        });
+
+        async function performToggleLeave(teacherId) {
+            closeLeaveModal();
+            var token = localStorage.getItem('schoolToken');
+
+            try {
+                var response = await fetch('/api/teachers/' + teacherId + '/mark-leave', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                var data = await response.json();
+
+                if (response.ok) {
+                    showToast(data.message, 'success');
+                    loadTeachers();
+                } else {
+                    showToast(data.message || 'Error updating status', 'error');
+                }
+            } catch (error) {
+                console.error('Toggle leave error:', error);
+                showToast('Error updating teacher status', 'error');
+            }
+        }
+
+        async function exportTeachers() {
+            var token = localStorage.getItem('schoolToken');
+
+            var name = document.getElementById('searchName').value;
+            var id = document.getElementById('searchId').value;
+            var mobileNo = document.getElementById('searchMobile').value;
+
+            var queryParams = new URLSearchParams();
+            if (name) queryParams.append('name', name);
+            if (id) queryParams.append('id', id);
+            if (mobileNo) queryParams.append('mobileNo', mobileNo);
+
+            try {
+                showToast('Exporting data...', 'info');
+                var response = await fetch('/api/teachers?' + queryParams.toString(), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!response.ok) {
+                    showToast('Error exporting data', 'error');
+                    return;
+                }
+
+                var teachers = await response.json();
+
+                if (teachers.length === 0) {
+                    showToast('No data to export', 'error');
+                    return;
+                }
+
+                // CSV Headers
+                var csvHeaders = ['S.No.', 'Name', 'Email', 'Mobile', 'Class', 'Subject', 'Status', 'Joining Date'];
+                var csvRows = [csvHeaders.join(',')];
+
+                teachers.forEach(function (teacher, index) {
+                    // Format joining date
+                    var joiningDate = 'N/A';
+                    if (teacher.joiningDate) {
+                        var d = new Date(teacher.joiningDate);
+                        var day = String(d.getDate()).padStart(2, '0');
+                        var month = String(d.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+                        var year = d.getFullYear();
+                        joiningDate = day + '-' + month + '-' + year;
+                    }
+
+                    // Format Class
+                    var classDisplay = 'N/A';
+                    if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+                        classDisplay = teacher.classAssignments.map(function (ca) {
+                            return ca.className + '-' + ca.section;
+                        }).join(', ');
+                    } else if (teacher.className) {
+                        classDisplay = teacher.className;
+                    }
+
+                    var row = [
+                        index + 1,
+                        '"' + (teacher.name || '').replace(/"/g, '""') + '"',
+                        '"' + (teacher.email || 'N/A').replace(/"/g, '""') + '"',
+                        '"' + (teacher.mobileNo || 'N/A').replace(/"/g, '""') + '"',
+                        '"' + classDisplay.replace(/"/g, '""') + '"',
+                        '"' + (teacher.subject || '-').replace(/"/g, '""') + '"',
+                        '"' + (teacher.status || 'Active').replace(/"/g, '""') + '"',
+                        '"' + joiningDate + '"'
+                    ];
+                    csvRows.push(row.join(','));
+                });
+
+                var csvContent = csvRows.join('\n');
+                var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                var url = URL.createObjectURL(blob);
+                var link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'teachers_export.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast('Export successful!', 'success');
+
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Error exporting data', 'error');
+            }
+        }
+
+        // Class Assignment Functions
+        var classAssignmentCounter = 0;
+
+        // --- Subject tag helpers ---
+        function addSubjectTag(value) {
+            var input = document.getElementById('subjectInput');
+            var subject = (value || input.value).trim().toUpperCase();
+            if (!subject) return;
+
+            // Prevent duplicates
+            var existing = getSubjects();
+            if (existing.includes(subject)) { input.value = ''; return; }
+
+            var container = document.getElementById('subjectTagsContainer');
+            var tag = document.createElement('span');
+            tag.className = 'subject-tag';
+            tag.dataset.value = subject;
+            tag.innerHTML = subject + '<button type="button" onclick="removeSubjectTag(this)" title="Remove">&times;</button>';
+            container.appendChild(tag);
+            input.value = '';
+        }
+
+        function removeSubjectTag(btn) {
+            btn.parentElement.remove();
+        }
+
+        function getSubjects() {
+            return Array.from(document.querySelectorAll('#subjectTagsContainer .subject-tag'))
+                .map(function(t) { return t.dataset.value; });
+        }
+
+        function setSubjects(subjectsStr) {
+            document.getElementById('subjectTagsContainer').innerHTML = '';
+            if (!subjectsStr) return;
+            // Support comma-separated string or single value
+            subjectsStr.split(',').forEach(function(s) {
+                var trimmed = s.trim();
+                if (trimmed) addSubjectTag(trimmed);
+            });
+        }
+
+        // Allow Enter key to add subject
+        document.addEventListener('DOMContentLoaded', function() {
+            var subjectInput = document.getElementById('subjectInput');
+            if (subjectInput) {
+                subjectInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') { e.preventDefault(); addSubjectTag(); }
+                });
+            }
+        });
+
+        function addClassAssignment(selectedClass, selectedSection) {
+            var container = document.getElementById('classAssignmentsList');
+            var noMsgEl = container.querySelector('.no-assignments-msg');
+            if (noMsgEl) noMsgEl.remove();
+
+            var rows = container.querySelectorAll('.class-assignment-row');
+            if (rows.length >= 7) {
+                showToast('Maximum 7 class assignments allowed', 'error');
+                return;
+            }
+
+            classAssignmentCounter++;
+            var rowId = 'classRow_' + classAssignmentCounter;
+
+            var classOptions = '';
+            for (var i = 1; i <= 12; i++) {
+                var selected = (selectedClass == i) ? ' selected' : '';
+                classOptions += '<option value="' + i + '"' + selected + '>Class ' + i + '</option>';
+            }
+
+            var sections = ['A', 'B', 'C', 'D'];
+            var sectionOptions = '';
+            sections.forEach(function (sec) {
+                var selected = (selectedSection == sec) ? ' selected' : '';
+                sectionOptions += '<option value="' + sec + '"' + selected + '>' + sec + '</option>';
+            });
+
+            var rowHtml = '<div class="class-assignment-row" id="' + rowId + '">' +
+                '<select class="class-select">' +
+                '<option value="">Select Class</option>' +
+                classOptions +
+                '</select>' +
+                '<select class="section-select">' +
+                '<option value="">Section</option>' +
+                sectionOptions +
+                '</select>' +
+                '<button type="button" class="btn-remove-class" onclick="removeClassAssignment(\'' + rowId + '\')">&times;</button>' +
+                '</div>';
+
+            container.insertAdjacentHTML('beforeend', rowHtml);
+            updateAddClassButton();
+        }
+
+        function removeClassAssignment(rowId) {
+            var row = document.getElementById(rowId);
+            if (row) row.remove();
+
+            var container = document.getElementById('classAssignmentsList');
+            var rows = container.querySelectorAll('.class-assignment-row');
+            if (rows.length === 0) {
+                container.innerHTML = '<div class="no-assignments-msg">No classes assigned. Click "Add Class" to assign.</div>';
+            }
+            updateAddClassButton();
+        }
+
+        function updateAddClassButton() {
+            var container = document.getElementById('classAssignmentsList');
+            var rows = container.querySelectorAll('.class-assignment-row');
+            var btn = document.getElementById('btnAddClass');
+            if (rows.length >= 7) {
+                btn.disabled = true;
+            } else {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

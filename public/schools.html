@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School List - School Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <a href="dashboard.html" class="sidebar-item">SUPER ADMIN</a>
+            <a href="office-staff.html" class="sidebar-item">OFFICE STAFF</a>
+            <div class="sidebar-item active has-submenu" id="schoolListMenu">
+                SCHOOL List
+                <div class="submenu show" id="schoolSubmenu">
+                    <a href="schools.html" class="submenu-item">School List</a>
+                    <a href="users.html" class="submenu-item">All Teachers</a>
+                    <a href="payments.html" class="submenu-item">Payment Details</a>
+                </div>
+            </div>
+            <div class="sidebar-item has-submenu" id="plansMenu" onclick="togglePlansMenu(event)">
+                PLANS
+                <div class="submenu" id="plansSubmenu">
+                    <a href="plans.html" class="submenu-item">Plans</a>
+                    <a href="subscription-list.html" class="submenu-item">Subscription List</a>
+                    <a href="overview.html" class="submenu-item">Overview</a>
+                </div>
+            </div>
+            <a href="send-message.html" class="sidebar-item">SEND MESSAGE</a>
+            <a href="support.html" class="sidebar-item">SUPPORT</a>
+            <a href="terms.html" class="sidebar-item">TERMS & CONDITION</a>
+        </div>
+        <div class="content">
+            <div class="page-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                </svg>
+                <h2>School List</h2>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-dark" id="exportBtn">Export</button>
+                <button class="btn btn-dark" id="addSchoolBtn">Add School</button>
+            </div>
+
+            <div class="section-card">
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="searchName" placeholder="Search by name">
+                    <input type="text" class="search-input" id="searchId" placeholder="Search by id">
+                    <input type="text" class="search-input" id="searchMobile" placeholder="Search by mo no">
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Teachers</th>
+                            <th>Students</th>
+                            <th>City</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th>Sub. End Date</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schoolsTableBody">
+                        <tr>
+                            <td colspan="10" class="loading">Loading schools...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="viewModal">
+        <div class="view-modal">
+            <div class="view-modal-header">
+                <h2>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                    </svg>
+                    School Details
+                </h2>
+                <button class="view-modal-close" onclick="closeViewModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="view-modal-content" id="viewModalContent">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="schoolModal">
+        <div class="modal">
+            <h2 id="modalTitle">Edit School</h2>
+            <form id="schoolForm">
+                <input type="hidden" id="schoolId">
+                <div class="form-group">
+                    <label for="schoolName">School Name</label>
+                    <input type="text" id="schoolName" required>
+                </div>
+                <div class="form-group">
+                    <label for="schoolOwner">Owner Name</label>
+                    <input type="text" id="schoolOwner">
+                </div>
+                <div class="form-group">
+                    <label for="schoolMobile">Mobile No</label>
+                    <input type="text" id="schoolMobile">
+                </div>
+                <div class="form-group">
+                    <label for="schoolEmail">Email</label>
+                    <input type="email" id="schoolEmail">
+                </div>
+                <div class="form-group">
+                    <label for="schoolAddress">Address</label>
+                    <input type="text" id="schoolAddress">
+                </div>
+                <div class="form-group">
+                    <label for="schoolState">State</label>
+                    <input type="text" id="schoolState">
+                </div>
+                <div class="form-group">
+                    <label for="schoolCity">City</label>
+                    <input type="text" id="schoolCity" required>
+                </div>
+                <div class="form-group">
+                    <label for="schoolZipCode">Zip Code</label>
+                    <input type="text" id="schoolZipCode">
+                </div>
+                <div class="form-group">
+                    <label for="schoolGstNo">GST No</label>
+                    <input type="text" id="schoolGstNo">
+                </div>
+                <div class="form-group">
+                    <label for="schoolPassword">Password</label>
+                    <input type="password" id="schoolPassword">
+                </div>
+                <div class="form-group">
+                    <label for="schoolLogoFile">Logo (Square image for circular display)</label>
+                    <input type="file" id="schoolLogoFile" accept=".jpg,.png,.svg">
+                    <div id="schoolLogoPreview" style="margin-top: 10px;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="schoolTeachers">Teachers</label>
+                    <input type="number" id="schoolTeachers" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="schoolStudents">Students</label>
+                    <input type="number" id="schoolStudents" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="schoolStatus">Status</label>
+                    <select id="schoolStatus">
+                        <option value="Pending">Pending</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Unpaid">Unpaid</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="schoolAmount">Amount (INR)</label>
+                    <input type="number" id="schoolAmount" value="0">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-dark">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Renew Confirmation Modal -->
+    <div class="modal-overlay" id="renewModal">
+        <div class="confirm-modal">
+            <div class="confirm-modal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <path d="M23 4v6h-6"></path>
+                    <path d="M1 20v-6h6"></path>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+            </div>
+            <h2>Renew Subscription</h2>
+            <p class="confirm-modal-text">Are you sure you want to renew the subscription for</p>
+            <p class="confirm-modal-name" id="renewSchoolName"></p>
+            <div class="confirm-modal-info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                Subscription will be extended by 1 month
+            </div>
+            <input type="hidden" id="renewSchoolId">
+            <div class="confirm-modal-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeRenewModal()">Cancel</button>
+                <button type="button" class="btn btn-confirm" onclick="confirmRenew()">Renew Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePlansMenu(event) {
+            event.stopPropagation();
+            var submenu = document.getElementById('plansSubmenu');
+            var menu = document.getElementById('plansMenu');
+            submenu.classList.toggle('show');
+            menu.classList.toggle('active');
+        }
+    </script>
+    <script src="js/schools.js"></script>
+</body>
+
+</html>

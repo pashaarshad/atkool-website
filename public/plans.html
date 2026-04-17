@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plans - School Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <a href="dashboard.html" class="sidebar-item">SUPER ADMIN</a>
+            <a href="office-staff.html" class="sidebar-item">OFFICE STAFF</a>
+            <a href="schools.html" class="sidebar-item">SCHOOL List</a>
+            <div class="sidebar-item active has-submenu" id="plansMenu" onclick="togglePlansMenu(event)">
+                PLANS
+                <div class="submenu show" id="plansSubmenu">
+                    <a href="plans.html" class="submenu-item">Plans</a>
+                    <a href="subscription-list.html" class="submenu-item">Subscription List</a>
+                    <a href="overview.html" class="submenu-item">Overview</a>
+                </div>
+            </div>
+            <a href="send-message.html" class="sidebar-item">SEND MESSAGE</a>
+            <a href="support.html" class="sidebar-item">SUPPORT</a>
+            <a href="terms.html" class="sidebar-item">TERMS & CONDITION</a>
+        </div>
+        <div class="content">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <h3>Active Plans</h3>
+                    <div class="value" id="totalSchools">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Plans</h3>
+                    <div class="value" id="activePlans">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>system use</h3>
+                    <div class="value" id="systemUse">0%</div>
+                </div>
+            </div>
+
+            <div class="section-card" style="min-height: auto;">
+                <div class="setting-row">
+                    <div class="setting-box">
+                        <div class="setting-label">Own branding<br>one time setup</div>
+                        <div class="setting-value">
+                            <input type="number" id="ownBrandingSetup" class="setting-input" value="4000">
+                            <div class="setting-arrows">
+                                <button class="arrow-btn" onclick="incrementValue('ownBrandingSetup')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg>
+                                </button>
+                                <button class="arrow-btn" onclick="decrementValue('ownBrandingSetup')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-box">
+                        <div class="setting-label">Per Year<br>Subscription</div>
+                        <div class="setting-value">
+                            <input type="number" id="perYearSubscription" class="setting-input" value="5000">
+                            <div class="setting-arrows">
+                                <button class="arrow-btn" onclick="incrementValue('perYearSubscription')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg>
+                                </button>
+                                <button class="arrow-btn" onclick="decrementValue('perYearSubscription')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-box">
+                        <div class="setting-label">Per Student<br>Subscription</div>
+                        <div class="setting-value">
+                            <input type="number" id="perStudentSubscription" class="setting-input" value="20">
+                            <div class="setting-arrows">
+                                <button class="arrow-btn" onclick="incrementValue('perStudentSubscription')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg>
+                                </button>
+                                <button class="arrow-btn" onclick="decrementValue('perStudentSubscription')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card" style="min-height: auto;">
+                <h3 style="text-align: center; font-size: 22px; margin-bottom: 20px;">PLAN LIMITS</h3>
+                <div class="setting-row">
+                    <div class="setting-box">
+                        <div class="setting-label">Teachers<br>Limit</div>
+                        <div class="setting-value">
+                            <input type="number" id="teachersLimit" class="setting-input" value="50">
+                            <div class="setting-arrows">
+                                <button class="arrow-btn" onclick="incrementValue('teachersLimit')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg>
+                                </button>
+                                <button class="arrow-btn" onclick="decrementValue('teachersLimit')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-box">
+                        <div class="setting-label">Class<br>Limit</div>
+                        <div class="setting-value">
+                            <input type="number" id="classLimit" class="setting-input" value="50">
+                            <div class="setting-arrows">
+                                <button class="arrow-btn" onclick="incrementValue('classLimit')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg>
+                                </button>
+                                <button class="arrow-btn" onclick="decrementValue('classLimit')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-box">
+                        <div class="setting-label">Students<br>Limit</div>
+                        <div class="setting-value">
+                            <input type="number" id="studentsLimit" class="setting-input" value="500">
+                            <div class="setting-arrows">
+                                <button class="arrow-btn" onclick="incrementValue('studentsLimit')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg>
+                                </button>
+                                <button class="arrow-btn" onclick="decrementValue('studentsLimit')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions" style="margin-top: 15px;">
+                    <button class="btn btn-dark" onclick="savePlan()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" id="planId">
+    <script>
+        function togglePlansMenu(event) {
+            event.stopPropagation();
+            var submenu = document.getElementById('plansSubmenu');
+            var menu = document.getElementById('plansMenu');
+            submenu.classList.toggle('show');
+            menu.classList.toggle('active');
+        }
+    </script>
+    <script src="js/plans.js"></script>
+</body>
+
+</html>

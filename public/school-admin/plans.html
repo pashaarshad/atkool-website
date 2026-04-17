@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plans - School Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="plan-check.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #c0c0c0;
+        }
+
+        .school-header {
+            background-color: #333;
+            border: 3px solid #000;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .school-header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .school-logo {
+            width: 50px;
+            height: 50px;
+            background-color: #87CEEB;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .school-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .school-logo svg {
+            width: 30px;
+            height: 30px;
+            stroke: #333;
+        }
+
+        .school-name {
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .school-header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: #fff;
+        }
+
+        .school-main {
+            display: flex;
+            gap: 0;
+            padding: 0 10px 10px 10px;
+        }
+
+        .school-sidebar {
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 15px;
+        }
+
+        .school-sidebar-item {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 12px 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .school-sidebar-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .school-sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .school-content {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .offer-card {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .offer-title {
+            font-size: 42px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+
+        .pricing-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .pricing-box {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .price-info {
+            text-align: left;
+            border: 2px solid #333;
+            padding: 15px 25px;
+            background-color: #fff;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .price-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .price-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .pay-btn {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 22px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .pay-btn:hover {
+            background-color: #333;
+        }
+
+        .students-input {
+            display: flex;
+            align-items: center;
+            border: 2px solid #333;
+            background-color: #fff;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .students-label {
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .students-input input {
+            width: 80px;
+            padding: 15px 10px;
+            border: none;
+            border-left: 2px solid #333;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .student-price {
+            background-color: #000;
+            color: #fff;
+            padding: 15px 25px;
+            text-align: center;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+        }
+
+        .student-price:hover {
+            background-color: #333;
+        }
+
+        .student-price-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .student-price-label {
+            font-size: 12px;
+        }
+
+        .deal-card {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .deal-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #000;
+            text-align: center;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        .deal-features {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        .deal-features li {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .deal-features li:last-child {
+            border-bottom: none;
+        }
+
+        .deal-features li::before {
+            content: "👉";
+            font-size: 22px;
+        }
+
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            min-width: 150px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .profile-dropdown-item.logout {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="school-header">
+        <div class="school-header-left">
+            <div class="school-logo" id="schoolLogo">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="school-name" id="schoolName">Loading...</div>
+        <div class="school-header-right">
+            <div class="profile-wrapper">
+                <div class="header-icon" id="profileIcon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-dropdown-item" id="profileEmail">Loading...</div>
+                    <div class="profile-dropdown-item logout" onclick="logout()">Logout</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="school-main">
+        <div class="school-sidebar">
+            <a href="dashboard.html" class="school-sidebar-item">HOME</a>
+            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
+            <a href="plans.html" class="school-sidebar-item active">PLANS</a>
+            <a href="support.html" class="school-sidebar-item">SUPPORT</a>
+            <a href="send-message.html" class="school-sidebar-item">SEND MESSAGE</a>
+            <a href="events.html" class="school-sidebar-item">EVENTS</a>
+            <a href="exams.html" class="school-sidebar-item">EXAMS</a>
+            <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
+
+        <div class="school-content">
+            <!-- One-Time Unlimited Offer -->
+            <div class="offer-card" style="background: #1a1a1a; color: #fff; border: 2px solid #333;">
+                <div class="offer-title" style="color: #fff;">🌟 ONE-TIME OFFER - UNLIMITED ACCESS 🌟</div>
+                <p style="text-align: center; margin-bottom: 20px; font-size: 16px;">Pay once and get
+                    <strong>UNLIMITED</strong> teachers, students & classes forever!
+                </p>
+                <div class="pricing-row" style="justify-content: center;">
+                    <div class="pricing-box"
+                        style="background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 15px; padding: 25px 40px;">
+                        <div class="price-info" style="border: none; background: transparent; padding: 0;">
+                            <div class="price-label" style="color: rgba(255,255,255,0.8);">One-Time Payment</div>
+                            <div class="price-value" id="brandingPrice" style="font-size: 36px; color: #fff;">Loading...
+                            </div>
+                        </div>
+                        <button class="pay-btn" onclick="payNow('branding')"
+                            style="background: #fff; color: #1a1a1a; margin-left: 20px;">GET<br>NOW</button>
+                    </div>
+                </div>
+                <ul
+                    style="list-style: none; display: flex; justify-content: center; gap: 30px; margin-top: 20px; flex-wrap: wrap;">
+                    <li style="display: flex; align-items: center; gap: 8px;">✅ Unlimited Teachers</li>
+                    <li style="display: flex; align-items: center; gap: 8px;">✅ Unlimited Students</li>
+                    <li style="display: flex; align-items: center; gap: 8px;">✅ Unlimited Classes</li>
+                    <li style="display: flex; align-items: center; gap: 8px;">✅ Own Branding</li>
+                </ul>
+            </div>
+
+            <!-- Yearly Subscription (Required) -->
+            <div class="deal-card" style="margin-top: 20px;">
+                <div class="deal-title">📅 YEARLY SUBSCRIPTION (Required)</div>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">Annual subscription required to access
+                    the system</p>
+                <div class="pricing-row" style="justify-content: center; margin-bottom: 20px;">
+                    <div class="pricing-box">
+                        <div class="price-info">
+                            <div class="price-label">Per Year</div>
+                            <div class="price-value" id="yearlyPrice">Loading...</div>
+                        </div>
+                        <button class="pay-btn" onclick="payNow('yearly')">PAY<br>NOW</button>
+                    </div>
+                </div>
+                <ul class="deal-features">
+                    <li>Full App Access</li>
+                    <li>24/7 Support System</li>
+                    <li>Attendance Management</li>
+                    <li>Report Card Sharing</li>
+                    <li>Teachers: <span id="teachersLimitDisplay">50</span> (or Unlimited with above offer)</li>
+                    <li>Students: <span id="studentsLimitDisplay">500</span> (or Unlimited with above offer)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var token = localStorage.getItem('schoolToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadSchoolData();
+            loadPlanPricing();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('profileIcon').addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.getElementById('profileDropdown').classList.toggle('show');
+            });
+
+            document.addEventListener('click', function () {
+                document.getElementById('profileDropdown').classList.remove('show');
+            });
+
+            document.getElementById('studentCount').addEventListener('input', function () {
+                updateStudentPrice();
+            });
+        }
+
+        async function loadSchoolData() {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-auth/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                var school = await response.json();
+                document.getElementById('schoolName').textContent = school.name.toUpperCase();
+                document.getElementById('profileEmail').textContent = school.email || 'Profile';
+                if (school.logo) {
+                    document.getElementById('schoolLogo').innerHTML = '<img src="' + school.logo + '" alt="Logo">';
+                }
+            } catch (error) {
+                console.error('Load school data error:', error);
+            }
+        }
+
+        var planData = {
+            perYearSubscription: 5000,
+            ownBrandingSetup: 4000,
+            teachersLimit: 50,
+            studentsLimit: 500
+        };
+
+        async function loadPlanPricing() {
+            try {
+                var response = await fetch('/api/plans/public');
+                if (response.ok) {
+                    planData = await response.json();
+                    document.getElementById('yearlyPrice').textContent = planData.perYearSubscription.toLocaleString() + '/-';
+                    document.getElementById('brandingPrice').textContent = '₹' + planData.ownBrandingSetup.toLocaleString() + '/-';
+                    document.getElementById('teachersLimitDisplay').textContent = planData.teachersLimit || 50;
+                    document.getElementById('studentsLimitDisplay').textContent = planData.studentsLimit || 500;
+                }
+            } catch (error) {
+                console.error('Load plan pricing error:', error);
+                document.getElementById('yearlyPrice').textContent = '5,000/-';
+                document.getElementById('brandingPrice').textContent = '₹4,000/-';
+            }
+        }
+
+        function payNow(type) {
+            if (type === 'branding') {
+                alert('One-time payment for Unlimited Access initiated. Amount: ₹' + planData.ownBrandingSetup.toLocaleString());
+            } else if (type === 'yearly') {
+                alert('Yearly subscription payment initiated. Amount: ₹' + planData.perYearSubscription.toLocaleString());
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('schoolToken');
+            localStorage.removeItem('schoolData');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

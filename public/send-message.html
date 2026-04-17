@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Message - School Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <a href="dashboard.html" class="sidebar-item">SUPER ADMIN</a>
+            <a href="office-staff.html" class="sidebar-item">OFFICE STAFF</a>
+            <a href="schools.html" class="sidebar-item">SCHOOL List</a>
+            <div class="sidebar-item has-submenu" id="plansMenu" onclick="togglePlansMenu(event)">
+                PLANS
+                <div class="submenu" id="plansSubmenu">
+                    <a href="plans.html" class="submenu-item">Plans</a>
+                    <a href="subscription-list.html" class="submenu-item">Subscription List</a>
+                    <a href="overview.html" class="submenu-item">Overview</a>
+                </div>
+            </div>
+            <div class="sidebar-item active">SEND MESSAGE</div>
+            <a href="support.html" class="sidebar-item">SUPPORT</a>
+            <a href="terms.html" class="sidebar-item">TERMS & CONDITION</a>
+        </div>
+        <div class="content">
+            <div class="message-header">
+                <button class="btn btn-dark" id="viewHistoryBtn">View History</button>
+            </div>
+
+            <div class="section-card" style="min-height: auto;">
+                <form id="messageForm">
+                    <div class="message-form-group">
+                        <label class="message-label">Send To</label>
+                        <select class="message-select" id="sendTo" onchange="toggleSchoolSelect()">
+                            <option value="Schools">All Schools</option>
+                            <option value="SpecificSchool">Specific School</option>
+                        </select>
+                    </div>
+
+                    <div class="message-form-group" id="schoolSelectGroup" style="display: none;">
+                        <label class="message-label">Select School</label>
+                        <select class="message-select" id="targetSchool">
+                            <option value="">Loading schools...</option>
+                        </select>
+                    </div>
+
+                    <div class="message-form-group">
+                        <label class="message-label">Heading Message (30 Character max)</label>
+                        <input type="text" class="message-input" id="heading" maxlength="30">
+                        <span class="char-count">Character Count :<span id="headingCount">0</span>/30</span>
+                    </div>
+
+                    <div class="message-form-group">
+                        <label class="message-label">Message (Max 180 Characters):</label>
+                        <textarea class="message-textarea" id="message" maxlength="180" rows="5"></textarea>
+                        <span class="char-count">Character Count :<span id="messageCount">0</span>/180</span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-dark">Send Message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="historyModal">
+        <div class="view-modal" style="max-width: 700px;">
+            <div class="view-modal-header">
+                <h2>Message History</h2>
+                <button class="view-modal-close" onclick="closeHistoryModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="view-modal-content" id="historyContent">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePlansMenu(event) {
+            event.stopPropagation();
+            var submenu = document.getElementById('plansSubmenu');
+            var menu = document.getElementById('plansMenu');
+            submenu.classList.toggle('show');
+            menu.classList.toggle('active');
+        }
+    </script>
+    <script src="js/send-message.js"></script>
+</body>
+
+</html>

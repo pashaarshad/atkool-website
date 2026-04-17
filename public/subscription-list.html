@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription List - School Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <a href="dashboard.html" class="sidebar-item">SUPER ADMIN</a>
+            <a href="office-staff.html" class="sidebar-item">OFFICE STAFF</a>
+            <a href="schools.html" class="sidebar-item">SCHOOL List</a>
+            <div class="sidebar-item active has-submenu" id="plansMenu" onclick="togglePlansMenu(event)">
+                PLANS
+                <div class="submenu show" id="plansSubmenu">
+                    <a href="plans.html" class="submenu-item">Plans</a>
+                    <a href="subscription-list.html" class="submenu-item">Subscription List</a>
+                    <a href="overview.html" class="submenu-item">Overview</a>
+                </div>
+            </div>
+            <a href="send-message.html" class="sidebar-item">SEND MESSAGE</a>
+            <a href="support.html" class="sidebar-item">SUPPORT</a>
+            <a href="terms.html" class="sidebar-item">TERMS & CONDITION</a>
+        </div>
+        <div class="content">
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                    </svg>
+                    <h2>School Subscription List</h2>
+                </div>
+                <button class="btn btn-dark" id="addSubscriptionBtn">Add New Subscription</button>
+            </div>
+
+            <div class="section-card" style="min-height: auto; padding: 15px 20px;">
+                <div class="filter-row" style="margin-bottom: 15px;">
+                    <div class="filter-group">
+                        <label>School:</label>
+                        <select class="filter-input" id="filterSchool" style="min-width: 200px;">
+                            <option value="">All Schools</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select class="filter-input" id="filterStatus">
+                            <option value="all">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Expired">Expired</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>S.No.</th>
+                            <th>School Name</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Due Date</th>
+                            <th>Amount</th>
+                            <th>Teachers</th>
+                            <th>Students</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subscriptionsTableBody">
+                        <tr>
+                            <td colspan="10" class="loading">Loading subscriptions...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Subscription Modal -->
+    <div class="modal-overlay" id="subscriptionModal">
+        <div class="view-modal" style="max-width: 600px;">
+            <div class="view-modal-header">
+                <h2>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                    </svg>
+                    <span id="modalTitle">Add Agency Subscription</span>
+                </h2>
+                <button class="view-modal-close" onclick="closeModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="view-modal-content">
+                <form id="subscriptionForm">
+                    <input type="hidden" id="subscriptionId">
+                    <div class="subscription-form-row">
+                        <label class="subscription-form-label">School Name:</label>
+                        <select class="subscription-form-input" id="schoolId" required>
+                            <option value="">--Select School--</option>
+                        </select>
+                    </div>
+                    <div class="subscription-form-row">
+                        <label class="subscription-form-label">Start Date:</label>
+                        <input type="date" class="subscription-form-input" id="startDate" required>
+                    </div>
+                    <div class="subscription-form-row">
+                        <label class="subscription-form-label">End Date:</label>
+                        <input type="date" class="subscription-form-input" id="endDate" required>
+                    </div>
+                    <div class="subscription-form-row">
+                        <label class="subscription-form-label">Due Date:</label>
+                        <input type="date" class="subscription-form-input" id="dueDate" required>
+                    </div>
+                    <div class="subscription-form-row">
+                        <label class="subscription-form-label">Amount:</label>
+                        <input type="number" class="subscription-form-input" id="amount" placeholder="Enter amount">
+                    </div>
+                    <div class="subscription-form-row">
+                        <label class="subscription-form-label">Number of Teachers:</label>
+                        <input type="number" class="subscription-form-input" id="numberOfTeachers"
+                            placeholder="Enter number of teachers">
+                    </div>
+                    <div class="subscription-form-row">
+                        <label class="subscription-form-label">Number of Students:</label>
+                        <input type="number" class="subscription-form-input" id="numberOfStudents"
+                            placeholder="Enter number of students">
+                    </div>
+                    <div class="subscription-form-row">
+                        <label class="subscription-form-label">Status:</label>
+                        <select class="subscription-form-input" id="status" required>
+                            <option value="">--Select Status--</option>
+                            <option value="Active">Active</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Expired">Expired</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions" style="justify-content: flex-end; margin-top: 20px;">
+                        <button type="button" class="btn btn-dark" onclick="closeModal()">Close</button>
+                        <button type="submit" class="btn btn-dark" style="margin-left: 10px;">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Subscription Modal -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="view-modal">
+            <div class="view-modal-header">
+                <h2>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                    </svg>
+                    Subscription Details
+                </h2>
+                <button class="view-modal-close" onclick="closeViewModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="view-modal-content" id="viewModalContent">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePlansMenu(event) {
+            event.stopPropagation();
+            var submenu = document.getElementById('plansSubmenu');
+            var menu = document.getElementById('plansMenu');
+            submenu.classList.toggle('show');
+            menu.classList.toggle('active');
+        }
+    </script>
+    <script src="js/subscription-list.js"></script>
+</body>
+
+</html>

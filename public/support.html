@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Tickets - School Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .tickets-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .tickets-table th,
+        .tickets-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tickets-table th {
+            background-color: #333;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .tickets-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-progress {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .status-resolved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .ticket-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ticket-modal.show {
+            display: flex;
+        }
+
+        .ticket-modal-content {
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .ticket-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .ticket-modal-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .ticket-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .ticket-detail-row {
+            margin-bottom: 15px;
+        }
+
+        .ticket-detail-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .ticket-detail-value {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .ticket-message-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .status-select {
+            padding: 8px 15px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-update-status {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .btn-update-status:hover {
+            background: #555;
+        }
+
+        .search-filter-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .reply-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            resize: vertical;
+            margin-top: 10px;
+        }
+
+        .existing-reply {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .reply-date {
+            font-size: 11px;
+            color: #666;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <a href="dashboard.html" class="sidebar-item">SUPER ADMIN</a>
+            <a href="office-staff.html" class="sidebar-item">OFFICE STAFF</a>
+            <a href="schools.html" class="sidebar-item">SCHOOL List</a>
+            <div class="sidebar-item has-submenu" id="plansMenu" onclick="togglePlansMenu(event)">
+                PLANS
+                <div class="submenu" id="plansSubmenu">
+                    <a href="plans.html" class="submenu-item">Plans</a>
+                    <a href="subscription-list.html" class="submenu-item">Subscription List</a>
+                    <a href="overview.html" class="submenu-item">Overview</a>
+                </div>
+            </div>
+            <a href="send-message.html" class="sidebar-item">SEND MESSAGE</a>
+            <a href="support.html" class="sidebar-item active">SUPPORT</a>
+            <a href="terms.html" class="sidebar-item">TERMS & CONDITION</a>
+        </div>
+        <div class="content">
+            <div class="stats-row">
+                <div class="stat-card">
+                    <h3>Total Tickets</h3>
+                    <div class="value" id="totalTickets">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Pending</h3>
+                    <div class="value" id="pendingTickets">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>In Progress</h3>
+                    <div class="value" id="progressTickets">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Resolved</h3>
+                    <div class="value" id="resolvedTickets">0</div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="search-filter-row">
+                    <input type="text" class="search-input" id="searchInput"
+                        placeholder="Search by school or subject...">
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                </div>
+
+                <table class="tickets-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>School</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketsTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket Detail Modal -->
+    <div class="ticket-modal" id="ticketModal">
+        <div class="ticket-modal-content">
+            <div class="ticket-modal-header">
+                <div class="ticket-modal-title">Ticket Details</div>
+                <button class="ticket-modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="ticket-detail-row">
+                <div class="ticket-detail-label">TICKET ID</div>
+                <div class="ticket-detail-value" id="modalTicketId">-</div>
+            </div>
+            <div class="ticket-detail-row">
+                <div class="ticket-detail-label">SCHOOL</div>
+                <div class="ticket-detail-value" id="modalSchoolName">-</div>
+            </div>
+            <div class="ticket-detail-row">
+                <div class="ticket-detail-label">EMAIL</div>
+                <div class="ticket-detail-value" id="modalSchoolEmail">-</div>
+            </div>
+            <div class="ticket-detail-row">
+                <div class="ticket-detail-label">SUBJECT</div>
+                <div class="ticket-detail-value" id="modalSubject">-</div>
+            </div>
+            <div class="ticket-detail-row">
+                <div class="ticket-detail-label">MESSAGE</div>
+                <div class="ticket-message-box" id="modalMessage">-</div>
+            </div>
+            <div class="ticket-detail-row">
+                <div class="ticket-detail-label">DATE</div>
+                <div class="ticket-detail-value" id="modalDate">-</div>
+            </div>
+            <div class="ticket-detail-row" style="margin-top: 20px;">
+                <div class="ticket-detail-label">REPLY TO SCHOOL</div>
+                <div id="existingReplyContainer"></div>
+                <textarea class="reply-textarea" id="modalReply" placeholder="Write your reply here..."></textarea>
+            </div>
+            <div class="ticket-detail-row" style="margin-top: 20px;">
+                <div class="ticket-detail-label">UPDATE STATUS</div>
+                <div style="display: flex; align-items: center; margin-top: 10px;">
+                    <select class="status-select" id="modalStatus">
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                    <button class="btn-update-status" onclick="updateTicketStatus()">Update & Send Reply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePlansMenu(event) {
+            event.stopPropagation();
+            var submenu = document.getElementById('plansSubmenu');
+            var menu = document.getElementById('plansMenu');
+            submenu.classList.toggle('show');
+            menu.classList.toggle('active');
+        }
+    </script>
+    <script>
+        var allTickets = [];
+        var currentTicketId = null;
+
+        function showToast(message, type) {
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast ' + (type || 'info');
+            toast.innerHTML = '<span class="toast-message">' + message + '</span>';
+            container.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+
+            loadStats();
+            loadTickets();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', filterTickets);
+            document.getElementById('statusFilter').addEventListener('change', filterTickets);
+        }
+
+        async function loadStats() {
+            var token = localStorage.getItem('adminToken');
+            try {
+                var response = await fetch('/api/support/admin/stats', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    var stats = await response.json();
+                    document.getElementById('totalTickets').textContent = stats.total || 0;
+                    document.getElementById('pendingTickets').textContent = stats.pending || 0;
+                    document.getElementById('progressTickets').textContent = stats.inProgress || 0;
+                    document.getElementById('resolvedTickets').textContent = stats.resolved || 0;
+                }
+            } catch (error) {
+                console.error('Load stats error:', error);
+            }
+        }
+
+        async function loadTickets() {
+            var token = localStorage.getItem('adminToken');
+            try {
+                var response = await fetch('/api/support/admin/tickets', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('adminToken');
+                    window.location.href = '/';
+                    return;
+                }
+
+                allTickets = await response.json();
+                renderTickets(allTickets);
+            } catch (error) {
+                console.error('Load tickets error:', error);
+            }
+        }
+
+        function filterTickets() {
+            var search = document.getElementById('searchInput').value.toLowerCase();
+            var status = document.getElementById('statusFilter').value;
+
+            var filtered = allTickets.filter(function (ticket) {
+                var matchSearch = !search ||
+                    (ticket.schoolId && ticket.schoolId.name && ticket.schoolId.name.toLowerCase().includes(search)) ||
+                    ticket.subject.toLowerCase().includes(search);
+                var matchStatus = !status || ticket.status === status;
+                return matchSearch && matchStatus;
+            });
+
+            renderTickets(filtered);
+        }
+
+        function renderTickets(tickets) {
+            var tbody = document.getElementById('ticketsTableBody');
+
+            if (tickets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No tickets found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = tickets.map(function (ticket) {
+                var statusClass = ticket.status === 'Pending' ? 'status-pending' :
+                    ticket.status === 'In Progress' ? 'status-progress' : 'status-resolved';
+
+                var schoolName = ticket.schoolId && ticket.schoolId.name ? ticket.schoolId.name : 'Unknown';
+                var date = new Date(ticket.createdAt).toLocaleDateString();
+                var shortId = ticket._id.slice(-6).toUpperCase();
+
+                return '<tr>' +
+                    '<td>#' + shortId + '</td>' +
+                    '<td>' + schoolName + '</td>' +
+                    '<td>' + ticket.subject + '</td>' +
+                    '<td><span class="status-badge ' + statusClass + '">' + ticket.status + '</span></td>' +
+                    '<td>' + date + '</td>' +
+                    '<td><button class="btn btn-dark" style="padding: 5px 15px;" onclick="viewTicket(\'' + ticket._id + '\')">View</button></td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function viewTicket(id) {
+            var ticket = allTickets.find(function (t) { return t._id === id; });
+            if (!ticket) return;
+
+            currentTicketId = id;
+            document.getElementById('modalTicketId').textContent = '#' + id.slice(-6).toUpperCase();
+            document.getElementById('modalSchoolName').textContent = ticket.schoolId && ticket.schoolId.name ? ticket.schoolId.name : 'Unknown';
+            document.getElementById('modalSchoolEmail').textContent = ticket.schoolId && ticket.schoolId.email ? ticket.schoolId.email : 'N/A';
+            document.getElementById('modalSubject').textContent = ticket.subject;
+            document.getElementById('modalMessage').textContent = ticket.message;
+            document.getElementById('modalDate').textContent = new Date(ticket.createdAt).toLocaleString();
+            document.getElementById('modalStatus').value = ticket.status;
+            document.getElementById('modalReply').value = '';
+
+            // Show existing reply if any
+            var replyContainer = document.getElementById('existingReplyContainer');
+            if (ticket.reply) {
+                var replyDate = ticket.repliedAt ? new Date(ticket.repliedAt).toLocaleString() : '';
+                replyContainer.innerHTML = '<div class="existing-reply"><strong>Previous Reply:</strong><br>' + ticket.reply + '<div class="reply-date">Sent: ' + replyDate + '</div></div>';
+            } else {
+                replyContainer.innerHTML = '';
+            }
+
+            document.getElementById('ticketModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('ticketModal').classList.remove('show');
+            currentTicketId = null;
+        }
+
+        async function updateTicketStatus() {
+            if (!currentTicketId) return;
+
+            var token = localStorage.getItem('adminToken');
+            var status = document.getElementById('modalStatus').value;
+            var reply = document.getElementById('modalReply').value.trim();
+
+            var updateData = { status: status };
+            if (reply) {
+                updateData.reply = reply;
+            }
+
+            try {
+                var response = await fetch('/api/support/admin/tickets/' + currentTicketId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (response.ok) {
+                    showToast('Status updated successfully!', 'success');
+                    closeModal();
+                    loadStats();
+                    loadTickets();
+                } else {
+                    showToast('Failed to update status', 'error');
+                }
+            } catch (error) {
+                showToast('Error updating status', 'error');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('ticketModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

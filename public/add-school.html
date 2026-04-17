@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add School - School Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <a href="dashboard.html" class="sidebar-item">SUPER ADMIN</a>
+            <a href="office-staff.html" class="sidebar-item">OFFICE STAFF</a>
+            <div class="sidebar-item active has-submenu" id="schoolListMenu">
+                SCHOOL List
+                <div class="submenu show" id="schoolSubmenu">
+                    <a href="schools.html" class="submenu-item">School List</a>
+                    <a href="users.html" class="submenu-item">All Teachers</a>
+                    <a href="payments.html" class="submenu-item">Payment Details</a>
+                </div>
+            </div>
+            <a href="plans.html" class="sidebar-item">PLANS</a>
+            <a href="subscription-list.html" class="sidebar-item sidebar-item-tall">SUBSCRIPTION LIST</a>
+            <a href="overview.html" class="sidebar-item">OVERVIEW</a>
+            <a href="send-message.html" class="sidebar-item">SEND MESSAGE</a>
+            <a href="support.html" class="sidebar-item">SUPPORT</a>
+            <a href="terms.html" class="sidebar-item">TERMS & CONDITION</a>
+        </div>
+        <div class="content">
+            <div class="page-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                </svg>
+                <h2>Add School</h2>
+            </div>
+
+            <div class="form-card">
+                <form id="addSchoolForm">
+                    <div class="form-row">
+                        <label class="form-label">School Name:</label>
+                        <input type="text" class="form-input" id="schoolName" required>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Owner Name:</label>
+                        <input type="text" class="form-input" id="ownerName">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Mobile:</label>
+                        <input type="text" class="form-input" id="mobile">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Email Id:</label>
+                        <input type="email" class="form-input" id="email">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Address:</label>
+                        <input type="text" class="form-input" id="address">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">State:</label>
+                        <input type="text" class="form-input" id="state">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">City:</label>
+                        <input type="text" class="form-input" id="city" required>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Zip Code:</label>
+                        <input type="text" class="form-input" id="zipCode">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">GST No:</label>
+                        <div class="input-with-button">
+                            <input type="text" class="form-input" id="gstNo">
+                            <label class="btn btn-upload">
+                                Upload File
+                                <input type="file" id="gstFile" accept=".pdf,.jpg,.png" hidden>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Password:</label>
+                        <input type="password" class="form-input" id="password">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Logo:</label>
+                        <div class="input-with-button">
+                            <label class="btn btn-upload">
+                                Upload File
+                                <input type="file" id="logoFile" accept=".jpg,.png,.svg" hidden>
+                            </label>
+                            <span class="file-name" id="logoFileName"></span>
+                        </div>
+                    </div>
+
+                    <!-- PAN Card Section -->
+                    <div class="form-row">
+                        <label class="form-label">PAN Card No:</label>
+                        <input type="text" class="form-input" id="panCardNo" placeholder="ABCDE1234F">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">PAN Card Front:</label>
+                        <div class="input-with-button">
+                            <label class="btn btn-upload">
+                                Upload Image
+                                <input type="file" id="panCardFront" accept=".jpg,.png,.jpeg" hidden>
+                            </label>
+                            <span class="file-name" id="panCardFrontName"></span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">PAN Card Back:</label>
+                        <div class="input-with-button">
+                            <label class="btn btn-upload">
+                                Upload Image
+                                <input type="file" id="panCardBack" accept=".jpg,.png,.jpeg" hidden>
+                            </label>
+                            <span class="file-name" id="panCardBackName"></span>
+                        </div>
+                    </div>
+
+                    <!-- Aadhar Card Section -->
+                    <div class="form-row">
+                        <label class="form-label">Aadhar Card No:</label>
+                        <input type="text" class="form-input" id="aadharCardNo" placeholder="1234 5678 9012">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Aadhar Front:</label>
+                        <div class="input-with-button">
+                            <label class="btn btn-upload">
+                                Upload Image
+                                <input type="file" id="aadharCardFront" accept=".jpg,.png,.jpeg" hidden>
+                            </label>
+                            <span class="file-name" id="aadharCardFrontName"></span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Aadhar Back:</label>
+                        <div class="input-with-button">
+                            <label class="btn btn-upload">
+                                Upload Image
+                                <input type="file" id="aadharCardBack" accept=".jpg,.png,.jpeg" hidden>
+                            </label>
+                            <span class="file-name" id="aadharCardBackName"></span>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-dark">Create Now</button>
+                        <button type="button" class="btn btn-cancel"
+                            onclick="window.location.href='schools.html'">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/add-school.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Students - School Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="plan-check.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #c0c0c0;
+        }
+
+        .school-header {
+            background-color: #333;
+            border: 3px solid #000;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .school-header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .school-logo {
+            width: 50px;
+            height: 50px;
+            background-color: #87CEEB;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .school-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .school-name {
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .school-header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: #fff;
+        }
+
+        .school-main {
+            display: flex;
+            gap: 0;
+            padding: 0 10px 10px 10px;
+        }
+
+        .school-sidebar {
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 15px;
+        }
+
+        .school-sidebar-item {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 12px 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .school-sidebar-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .school-sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .school-content {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .page-title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .page-title svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .pending-count {
+            background-color: #e74c3c;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .students-table {
+            width: 100%;
+            background-color: #e8e8e8;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .students-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .students-table th {
+            background-color: #d0d0d0;
+            padding: 12px 10px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: bold;
+            border-bottom: 2px solid #999;
+        }
+
+        .students-table td {
+            padding: 12px 10px;
+            font-size: 14px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .students-table tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+        .students-table tr:hover {
+            background-color: #e0e0e0;
+        }
+
+        .btn-approve {
+            padding: 6px 12px;
+            background-color: #27ae60;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .btn-approve:hover {
+            background-color: #219a52;
+        }
+
+        .btn-reject {
+            padding: 6px 12px;
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-reject:hover {
+            background-color: #c0392b;
+        }
+
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            min-width: 150px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .profile-dropdown-item.logout {
+            color: #e74c3c;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            color: #fff;
+            font-weight: bold;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background-color: #27ae60;
+        }
+
+        .toast.error {
+            background-color: #e74c3c;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="school-header">
+        <div class="school-header-left">
+            <div class="school-logo" id="schoolLogo">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="school-name" id="schoolName">Loading...</div>
+        <div class="school-header-right">
+            <div class="profile-wrapper">
+                <div class="header-icon" id="profileIcon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-dropdown-item" id="profileEmail">Loading...</div>
+                    <div class="profile-dropdown-item logout" onclick="logout()">Logout</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="school-main">
+        <div class="school-sidebar">
+            <a href="dashboard.html" class="school-sidebar-item">HOME</a>
+            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="pending-students.html" class="school-sidebar-item active">PENDING</a>
+            <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
+            <a href="plans.html" class="school-sidebar-item">PLANS</a>
+            <a href="support.html" class="school-sidebar-item">SUPPORT</a>
+            <a href="send-message.html" class="school-sidebar-item">SEND MESSAGE</a>
+            <a href="events.html" class="school-sidebar-item">EVENTS</a>
+            <a href="exams.html" class="school-sidebar-item">EXAMS</a>
+            <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
+
+        <div class="school-content">
+            <div class="page-title-bar">
+                <div class="page-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Pending Student Requests
+                    <span class="pending-count" id="pendingCount">0</span>
+                </div>
+            </div>
+
+            <div class="students-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student Name</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Roll No</th>
+                            <th>Added By</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align:center;padding:20px;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var schoolId = '';
+
+        function showToast(message, type) {
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast ' + (type || 'info');
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var token = localStorage.getItem('schoolToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadSchoolData();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('profileIcon').addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.getElementById('profileDropdown').classList.toggle('show');
+            });
+
+            document.addEventListener('click', function () {
+                document.getElementById('profileDropdown').classList.remove('show');
+            });
+        }
+
+        async function loadSchoolData() {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-auth/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                var school = await response.json();
+                schoolId = school._id;
+                document.getElementById('schoolName').textContent = school.name.toUpperCase();
+                document.getElementById('profileEmail').textContent = school.email || 'Profile';
+                if (school.logo) {
+                    document.getElementById('schoolLogo').innerHTML = '<img src="' + school.logo + '" alt="Logo">';
+                }
+                loadPendingStudents();
+            } catch (error) {
+                console.error('Load school data error:', error);
+            }
+        }
+
+        async function loadPendingStudents() {
+            var token = localStorage.getItem('schoolToken');
+            var tableBody = document.getElementById('pendingTableBody');
+
+            try {
+                var response = await fetch('/api/school-auth/pending-students', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!response.ok) {
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;">Error loading pending students</td></tr>';
+                    return;
+                }
+
+                var students = await response.json();
+                document.getElementById('pendingCount').textContent = students.length;
+
+                if (students.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="8" class="no-data">No pending student requests</td></tr>';
+                    return;
+                }
+
+                tableBody.innerHTML = students.map(function (s, index) {
+                    var addedDate = new Date(s.createdAt).toLocaleDateString();
+                    var teacherName = s.teacherId ? s.teacherId.name : 'Unknown';
+                    return '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + s.name + '</td>' +
+                        '<td>' + s.className + '</td>' +
+                        '<td>' + (s.section || 'A') + '</td>' +
+                        '<td>' + (s.rollNo || '-') + '</td>' +
+                        '<td>' + teacherName + '</td>' +
+                        '<td>' + addedDate + '</td>' +
+                        '<td>' +
+                        '<button class="btn-approve" onclick="approveStudent(\'' + s._id + '\')">Approve</button>' +
+                        '<button class="btn-reject" onclick="rejectStudent(\'' + s._id + '\')">Reject</button>' +
+                        '</td>' +
+                        '</tr>';
+                }).join('');
+
+            } catch (error) {
+                console.error('Load pending students error:', error);
+                tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;">Error loading pending students</td></tr>';
+            }
+        }
+
+        async function approveStudent(studentId) {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-auth/approve-student/' + studentId, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                var data = await response.json();
+                if (response.ok) {
+                    showToast('Student approved successfully!', 'success');
+                    loadPendingStudents();
+                } else {
+                    showToast(data.message || 'Error approving student', 'error');
+                }
+            } catch (error) {
+                showToast('Error approving student', 'error');
+            }
+        }
+
+        async function rejectStudent(studentId) {
+            if (!confirm('Are you sure you want to reject this student?')) return;
+
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-auth/reject-student/' + studentId, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                var data = await response.json();
+                if (response.ok) {
+                    showToast('Student rejected', 'success');
+                    loadPendingStudents();
+                } else {
+                    showToast(data.message || 'Error rejecting student', 'error');
+                }
+            } catch (error) {
+                showToast('Error rejecting student', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('schoolToken');
+            localStorage.removeItem('schoolData');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

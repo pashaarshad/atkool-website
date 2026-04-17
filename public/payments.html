@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Details - School Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <a href="dashboard.html" class="sidebar-item">SUPER ADMIN</a>
+            <a href="office-staff.html" class="sidebar-item">OFFICE STAFF</a>
+            <div class="sidebar-item active has-submenu" id="schoolListMenu">
+                SCHOOL List
+                <div class="submenu show" id="schoolSubmenu">
+                    <a href="schools.html" class="submenu-item">School List</a>
+                    <a href="users.html" class="submenu-item">All Teachers</a>
+                    <a href="payments.html" class="submenu-item">Payment Details</a>
+                </div>
+            </div>
+            <div class="sidebar-item has-submenu" id="plansMenu" onclick="togglePlansMenu(event)">
+                PLANS
+                <div class="submenu" id="plansSubmenu">
+                    <a href="plans.html" class="submenu-item">Plans</a>
+                    <a href="subscription-list.html" class="submenu-item">Subscription List</a>
+                    <a href="overview.html" class="submenu-item">Overview</a>
+                </div>
+            </div>
+            <a href="send-message.html" class="sidebar-item">SEND MESSAGE</a>
+            <a href="support.html" class="sidebar-item">SUPPORT</a>
+            <a href="terms.html" class="sidebar-item">TERMS & CONDITION</a>
+        </div>
+        <div class="content">
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <h2>School Payment Info</h2>
+                </div>
+                <button class="btn btn-dark" id="exportBtn">Export</button>
+            </div>
+
+            <div class="section-card" style="min-height: auto; padding: 15px 20px;">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>From:</label>
+                        <input type="date" class="filter-input" id="fromDate">
+                    </div>
+                    <div class="filter-group">
+                        <label>To:</label>
+                        <input type="date" class="filter-input" id="toDate">
+                    </div>
+                    <div class="filter-group">
+                        <label>Name/Txn ID:</label>
+                        <input type="text" class="filter-input" id="searchQuery" placeholder="Name/Txn ID">
+                    </div>
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select class="filter-input" id="statusFilter">
+                            <option value="all">Select Status</option>
+                            <option value="Initialize">Initialize</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Failed">Failed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>s.no.</th>
+                            <th>School Name</th>
+                            <th>User Name</th>
+                            <th>Mobile Number</th>
+                            <th>Created On</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>End Date</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsTableBody">
+                        <tr>
+                            <td colspan="9" class="loading">Loading payments...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePlansMenu(event) {
+            event.stopPropagation();
+            var submenu = document.getElementById('plansSubmenu');
+            var menu = document.getElementById('plansMenu');
+            submenu.classList.toggle('show');
+            menu.classList.toggle('active');
+        }
+    </script>
+    <script src="js/payments.js?v=3"></script>
+</body>
+
+</html>

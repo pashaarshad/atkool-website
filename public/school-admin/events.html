@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - School Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="plan-check.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #c0c0c0;
+        }
+
+        .school-header {
+            background-color: #333;
+            border: 3px solid #000;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .school-header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .school-logo {
+            width: 50px;
+            height: 50px;
+            background-color: #87CEEB;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .school-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .school-logo svg {
+            width: 30px;
+            height: 30px;
+            stroke: #333;
+        }
+
+        .school-name {
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .school-header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: #fff;
+        }
+
+        .school-main {
+            display: flex;
+            gap: 0;
+            padding: 0 10px 10px 10px;
+        }
+
+        .school-sidebar {
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 15px;
+        }
+
+        .school-sidebar-item {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 12px 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .school-sidebar-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .school-sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .school-content {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .event-form-card {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #999;
+            border-radius: 8px;
+            background-color: #e8e8e8;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background-color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .upload-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: #333;
+        }
+
+        .form-select {
+            flex: 1;
+            padding: 12px 15px;
+            font-size: 14px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        .form-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            font-size: 14px;
+            border: 2px solid #999;
+            border-radius: 8px;
+            background-color: #e8e8e8;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+            margin-bottom: 15px;
+        }
+
+        .btn-create {
+            width: 100%;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .btn-create:hover {
+            background-color: #333;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-manage {
+            padding: 8px 20px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-manage:hover {
+            background-color: #333;
+        }
+
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .event-card {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .event-image {
+            width: 60px;
+            height: 60px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .event-image svg {
+            width: 30px;
+            height: 30px;
+            stroke: #999;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .event-description {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .event-meta {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .event-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .event-status.active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .event-status.completed {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .event-status.cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+        }
+
+        .manage-event-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .manage-event-name {
+            font-weight: bold;
+        }
+
+        .manage-event-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .action-btn.complete {
+            background-color: #28a745;
+            color: #fff;
+            border-color: #28a745;
+        }
+
+        .action-btn.cancel {
+            background-color: #ffc107;
+            color: #000;
+            border-color: #ffc107;
+        }
+
+        .action-btn.delete {
+            background-color: #dc3545;
+            color: #fff;
+            border-color: #dc3545;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            background-color: #fff;
+            color: #333;
+            border: 2px solid #666;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f0f0f0;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            min-width: 150px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .profile-dropdown-item.logout {
+            color: #e74c3c;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .upload-hint {
+            font-size: 11px;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .image-preview-container {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 2px dashed #999;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            max-width: 300px;
+        }
+
+        .image-preview-container.show {
+            display: block;
+        }
+
+        .image-preview-container img {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 6px;
+            display: block;
+        }
+
+        .image-preview-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .remove-image {
+            color: #dc3545;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .remove-image:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="school-header">
+        <div class="school-header-left">
+            <div class="school-logo" id="schoolLogo">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="school-name" id="schoolName">Loading...</div>
+        <div class="school-header-right">
+            <div class="profile-wrapper">
+                <div class="header-icon" id="profileIcon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-dropdown-item" id="profileEmail">Loading...</div>
+                    <div class="profile-dropdown-item logout" onclick="logout()">Logout</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="school-main">
+        <div class="school-sidebar">
+            <a href="dashboard.html" class="school-sidebar-item">HOME</a>
+            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
+            <a href="plans.html" class="school-sidebar-item">PLANS</a>
+            <a href="support.html" class="school-sidebar-item">SUPPORT</a>
+            <a href="send-message.html" class="school-sidebar-item">SEND MESSAGE</a>
+            <a href="events.html" class="school-sidebar-item active">EVENTS</a>
+            <a href="exams.html" class="school-sidebar-item">EXAMS</a>
+            <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
+
+        <div class="school-content">
+            <div class="event-form-card">
+                <form id="eventForm">
+                    <input type="text" class="form-input" id="eventName" placeholder="Enter event name here" required>
+                    <div class="form-row">
+                        <div class="upload-section">
+                            <div style="display: flex; align-items: center;">
+                                <label class="upload-btn">
+                                    <input type="file" id="eventImage" accept="image/*" style="display:none;"
+                                        onchange="previewImage(this)">
+                                    Upload img
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                </label>
+                                <span class="upload-hint">Recommended: 16:9 ratio (e.g. 1920x1080)</span>
+                            </div>
+                            <div class="image-preview-container" id="imagePreviewContainer">
+                                <img id="imagePreview" src="" alt="Preview">
+                                <div class="image-preview-info">
+                                    <span id="imageFileName"></span>
+                                    <span class="remove-image" onclick="removeImage()">Remove</span>
+                                </div>
+                            </div>
+                        </div>
+                        <select class="form-select" id="eventFor">
+                            <option value="">Event For</option>
+                            <option value="All">All</option>
+                            <option value="Teachers">Teachers</option>
+                            <option value="Students">Students</option>
+                        </select>
+                    </div>
+                    <textarea class="form-textarea" id="eventDescription" placeholder="Enter event description here..."
+                        required></textarea>
+                    <button type="submit" class="btn-create">CREATE NOW</button>
+                </form>
+            </div>
+
+            <div class="section-title">
+                <span>Events</span>
+                <button class="btn-manage" onclick="openManageModal()">Manage</button>
+            </div>
+
+            <div class="events-list" id="eventsList">
+                <div class="no-data">Loading events...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="manageModal">
+        <div class="modal">
+            <h2>Manage Events</h2>
+            <div id="manageEventsList"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showToast(message, type) {
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast ' + (type || 'info');
+            toast.innerHTML = '<span class="toast-message">' + message + '</span>';
+            container.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 3000);
+        }
+
+        var allEvents = [];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var token = localStorage.getItem('schoolToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadSchoolData();
+            loadEvents();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('profileIcon').addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.getElementById('profileDropdown').classList.toggle('show');
+            });
+
+            document.addEventListener('click', function () {
+                document.getElementById('profileDropdown').classList.remove('show');
+            });
+
+            document.getElementById('eventForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                createEvent();
+            });
+        }
+
+        function previewImage(input) {
+            var previewContainer = document.getElementById('imagePreviewContainer');
+            var previewImg = document.getElementById('imagePreview');
+            var fileName = document.getElementById('imageFileName');
+
+            if (input.files && input.files[0]) {
+                var file = input.files[0];
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    previewImg.src = e.target.result;
+                    fileName.textContent = file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name;
+                    previewContainer.classList.add('show');
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage() {
+            document.getElementById('eventImage').value = '';
+            document.getElementById('imagePreviewContainer').classList.remove('show');
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('imageFileName').textContent = '';
+        }
+
+        async function loadSchoolData() {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-auth/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                var school = await response.json();
+                document.getElementById('schoolName').textContent = school.name.toUpperCase();
+                document.getElementById('profileEmail').textContent = school.email || 'Profile';
+                if (school.logo) {
+                    document.getElementById('schoolLogo').innerHTML = '<img src="' + school.logo + '" alt="Logo">';
+                }
+            } catch (error) {
+                console.error('Load school data error:', error);
+            }
+        }
+
+        async function loadEvents() {
+            var token = localStorage.getItem('schoolToken');
+            var eventsList = document.getElementById('eventsList');
+
+            try {
+                var response = await fetch('/api/events', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                allEvents = await response.json();
+
+                if (allEvents.length === 0) {
+                    eventsList.innerHTML = '<div class="no-data">No events yet. Create your first event!</div>';
+                    return;
+                }
+
+                eventsList.innerHTML = allEvents.map(function (event) {
+                    var statusClass = event.status.toLowerCase();
+                    var date = new Date(event.createdAt).toLocaleDateString('en-IN', {
+                        day: '2-digit', month: 'short', year: 'numeric'
+                    });
+                    return '<div class="event-card">' +
+                        '<div class="event-image">' +
+                        (event.image ? '<img src="' + event.image + '" alt="Event">' :
+                            '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>') +
+                        '</div>' +
+                        '<div class="event-info">' +
+                        '<div class="event-name">' + event.name + '</div>' +
+                        '<div class="event-description">' + event.description.substring(0, 80) + (event.description.length > 80 ? '...' : '') + '</div>' +
+                        '<div class="event-meta">For: ' + event.eventFor + ' | ' + date + '</div>' +
+                        '</div>' +
+                        '<span class="event-status ' + statusClass + '">' + event.status + '</span>' +
+                        '</div>';
+                }).join('');
+            } catch (error) {
+                console.error('Load events error:', error);
+                eventsList.innerHTML = '<div class="no-data">Error loading events</div>';
+            }
+        }
+
+        async function createEvent() {
+            var token = localStorage.getItem('schoolToken');
+            var name = document.getElementById('eventName').value;
+            var description = document.getElementById('eventDescription').value;
+            var eventFor = document.getElementById('eventFor').value || 'All';
+            var imageFile = document.getElementById('eventImage').files[0];
+
+            if (!name || !description) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+
+            var image = null;
+
+            // Convert image to Base64 if selected
+            if (imageFile) {
+                try {
+                    image = await new Promise(function (resolve, reject) {
+                        var reader = new FileReader();
+                        reader.onload = function () { resolve(reader.result); };
+                        reader.onerror = function () { reject(reader.error); };
+                        reader.readAsDataURL(imageFile);
+                    });
+                } catch (err) {
+                    console.error('Image read error:', err);
+                    showToast('Error reading image', 'error');
+                    return;
+                }
+            }
+
+            try {
+                var response = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ name, description, eventFor, image })
+                });
+
+                if (response.ok) {
+                    showToast('Event created successfully!', 'success');
+                    document.getElementById('eventForm').reset();
+                    loadEvents();
+                } else {
+                    var data = await response.json();
+                    showToast(data.message || 'Failed to create event', 'error');
+                }
+            } catch (error) {
+                showToast('Error creating event', 'error');
+            }
+        }
+
+        function openManageModal() {
+            var manageList = document.getElementById('manageEventsList');
+
+            if (allEvents.length === 0) {
+                manageList.innerHTML = '<div class="no-data">No events to manage</div>';
+            } else {
+                manageList.innerHTML = allEvents.map(function (event) {
+                    return '<div class="manage-event-item">' +
+                        '<div>' +
+                        '<div class="manage-event-name">' + event.name + '</div>' +
+                        '<small style="color:#666;">Status: ' + event.status + '</small>' +
+                        '</div>' +
+                        '<div class="manage-event-actions">' +
+                        '<button class="action-btn complete" onclick="updateEventStatus(\'' + event._id + '\', \'Completed\')">Complete</button>' +
+                        '<button class="action-btn cancel" onclick="updateEventStatus(\'' + event._id + '\', \'Cancelled\')">Cancel</button>' +
+                        '<button class="action-btn delete" onclick="deleteEvent(\'' + event._id + '\')">Delete</button>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
+            }
+
+            document.getElementById('manageModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('manageModal').classList.remove('show');
+        }
+
+        async function updateEventStatus(eventId, status) {
+            var token = localStorage.getItem('schoolToken');
+
+            try {
+                var response = await fetch('/api/events/' + eventId + '/status', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (response.ok) {
+                    showToast('Event marked as ' + status, 'success');
+                    loadEvents();
+                    closeModal();
+                } else {
+                    showToast('Failed to update event', 'error');
+                }
+            } catch (error) {
+                showToast('Error updating event', 'error');
+            }
+        }
+
+        async function deleteEvent(eventId) {
+            if (!confirm('Are you sure you want to delete this event?')) return;
+
+            var token = localStorage.getItem('schoolToken');
+
+            try {
+                var response = await fetch('/api/events/' + eventId, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    showToast('Event deleted successfully', 'success');
+                    loadEvents();
+                    closeModal();
+                } else {
+                    showToast('Failed to delete event', 'error');
+                }
+            } catch (error) {
+                showToast('Error deleting event', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('schoolToken');
+            localStorage.removeItem('schoolData');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

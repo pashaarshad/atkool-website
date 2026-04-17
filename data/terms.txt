@@ -1,0 +1,33 @@
+Terms and Conditions
+
+Welcome to School Management System. By using our services, you agree to the following terms and conditions, which govern all aspects of our relationship with you as a client, partner, or user of the School Management System platform.
+
+About School Management System
+School Management System is a comprehensive platform designed for schools, educational institutions, and their authorized administrative agencies to simplify, optimize, and streamline the school management process. Our platform is built to provide end-to-end solutions that cover everything from tracking and communication to compliance management and data analytics. The aim is to offer a seamless and secure experience for all parties involved while ensuring transparency, efficiency, and data protection.
+
+The School Management System platform is uniquely engineered to address the complex challenges that schools and educational institutions face when managing student data, staff, and administrative operations. By automating and digitizing critical processes, School Management System reduces manual errors, improves compliance, and enhances communication between all stakeholders. Whether you are handling student enrollment or managing educational operations, School Management System is designed to support your needs efficiently.
+
+Ownership and Head Office
+School Management System is a trademark and service of Education Solutions Private Limited, a company incorporated under the laws of India. As the owner of School Management System, Education Solutions Private Limited is responsible for the development, management, and operation of the platform.
+
+User Responsibilities
+Users of the School Management System platform agree to:
+- Provide accurate and complete information during registration
+- Maintain the confidentiality of their account credentials
+- Use the platform only for lawful purposes
+- Not attempt to gain unauthorized access to any part of the platform
+- Report any security breaches or vulnerabilities immediately
+
+Data Protection
+We are committed to protecting your personal data and privacy. All data collected through the platform is processed in accordance with applicable data protection laws and our Privacy Policy.
+
+Limitation of Liability
+School Management System shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or relating to your use of the platform.
+
+Modifications to Terms
+We reserve the right to modify these terms and conditions at any time. Users will be notified of significant changes through the platform.
+
+Contact Information
+For any questions or concerns regarding these terms and conditions, please contact our support team through the platform.
+
+Last Updated: January 2026

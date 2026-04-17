@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exams - School Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="plan-check.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #c0c0c0;
+        }
+
+        .school-header {
+            background-color: #333;
+            border: 3px solid #000;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .school-header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .school-logo {
+            width: 50px;
+            height: 50px;
+            background-color: #87CEEB;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .school-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .school-logo svg {
+            width: 30px;
+            height: 30px;
+            stroke: #333;
+        }
+
+        .school-name {
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .school-header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: #fff;
+        }
+
+        .school-main {
+            display: flex;
+            gap: 0;
+            padding: 0 10px 10px 10px;
+        }
+
+        .school-sidebar {
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 15px;
+        }
+
+        .school-sidebar-item {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 12px 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+
+        .school-sidebar-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .school-sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .school-content {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-title svg {
+            width: 28px;
+            height: 28px;
+            stroke: #333;
+        }
+
+        .exam-form-card {
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .form-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 14px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 14px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        .btn-schedule {
+            width: 100%;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-schedule:hover {
+            background-color: #333;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            padding: 8px 20px;
+            border: 2px solid #333;
+            border-radius: 20px;
+            background-color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .tab-btn.active {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .tab-btn:hover {
+            background-color: #f0f0f0;
+        }
+
+        .tab-btn.active:hover {
+            background-color: #333;
+        }
+
+        .exams-table {
+            width: 100%;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .exams-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .exams-table th {
+            background-color: #333;
+            color: #fff;
+            padding: 15px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .exams-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .exams-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .exams-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .exam-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .exam-status.scheduled {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .exam-status.ongoing {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .exam-status.completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .exam-status.cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .action-btn.complete {
+            background-color: #28a745;
+            color: #fff;
+            border-color: #28a745;
+        }
+
+        .action-btn.cancel {
+            background-color: #ffc107;
+            color: #000;
+            border-color: #ffc107;
+        }
+
+        .action-btn.delete {
+            background-color: #dc3545;
+            color: #fff;
+            border-color: #dc3545;
+        }
+
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            min-width: 150px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .profile-dropdown-item.logout {
+            color: #e74c3c;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="school-header">
+        <div class="school-header-left">
+            <div class="school-logo" id="schoolLogo">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="school-name" id="schoolName">Loading...</div>
+        <div class="school-header-right">
+            <div class="profile-wrapper">
+                <div class="header-icon" id="profileIcon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-dropdown-item" id="profileEmail">Loading...</div>
+                    <div class="profile-dropdown-item logout" onclick="logout()">Logout</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="school-main">
+        <div class="school-sidebar">
+            <a href="dashboard.html" class="school-sidebar-item">HOME</a>
+            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
+            <a href="plans.html" class="school-sidebar-item">PLANS</a>
+            <a href="support.html" class="school-sidebar-item">SUPPORT</a>
+            <a href="send-message.html" class="school-sidebar-item">SEND MESSAGE</a>
+            <a href="events.html" class="school-sidebar-item">EVENTS</a>
+            <a href="exams.html" class="school-sidebar-item active">EXAMS</a>
+            <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
+
+        <div class="school-content">
+            <div class="page-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Exam Management
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalExams">0</div>
+                    <div class="stat-label">Total Exams</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="upcomingExams">0</div>
+                    <div class="stat-label">Upcoming</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="completedExams">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+
+            <div class="exam-form-card">
+                <div class="form-title">📝 Schedule New Exam</div>
+                <form id="examForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Exam Name</label>
+                            <input type="text" class="form-input" id="examName" placeholder="e.g., Mid-Term Examination"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subject</label>
+                            <select class="form-select" id="examSubject" required>
+                                <option value="">Select Subject</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Science">Science</option>
+                                <option value="English">English</option>
+                                <option value="Hindi">Hindi</option>
+                                <option value="Social Studies">Social Studies</option>
+                                <option value="Computer">Computer</option>
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Biology">Biology</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Class</label>
+                            <select class="form-select" id="examClass" required>
+                                <option value="">Select Class</option>
+                                <option value="1">Class 1</option>
+                                <option value="2">Class 2</option>
+                                <option value="3">Class 3</option>
+                                <option value="4">Class 4</option>
+                                <option value="5">Class 5</option>
+                                <option value="6">Class 6</option>
+                                <option value="7">Class 7</option>
+                                <option value="8">Class 8</option>
+                                <option value="9">Class 9</option>
+                                <option value="10">Class 10</option>
+                                <option value="11">Class 11</option>
+                                <option value="12">Class 12</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Exam Date</label>
+                            <input type="date" class="form-input" id="examDate" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Start Time</label>
+                            <input type="time" class="form-input" id="examTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-input" id="examDuration" value="60" min="15" max="300"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Total Marks</label>
+                            <input type="number" class="form-input" id="examMarks" value="100" min="10" max="500"
+                                required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-schedule">SCHEDULE EXAM</button>
+                </form>
+            </div>
+
+            <div class="section-header">
+                <div class="section-title">Scheduled Exams</div>
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="filterExams('all')">All</button>
+                    <button class="tab-btn" onclick="filterExams('upcoming')">Upcoming</button>
+                    <button class="tab-btn" onclick="filterExams('completed')">Completed</button>
+                </div>
+            </div>
+
+            <div class="exams-table" id="examsTable">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Exam Name</th>
+                            <th>Class</th>
+                            <th>Subject</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Duration</th>
+                            <th>Marks</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="examsBody">
+                        <tr>
+                            <td colspan="9" class="no-data">Loading exams...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showToast(message, type) {
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast ' + (type || 'info');
+            toast.innerHTML = '<span class="toast-message">' + message + '</span>';
+            container.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 3000);
+        }
+
+        var allExams = [];
+        var currentFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var token = localStorage.getItem('schoolToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadSchoolData();
+            loadExams();
+            setupEventListeners();
+
+            // Set min date to today
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementById('examDate').setAttribute('min', today);
+        });
+
+        function setupEventListeners() {
+            document.getElementById('profileIcon').addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.getElementById('profileDropdown').classList.toggle('show');
+            });
+
+            document.addEventListener('click', function () {
+                document.getElementById('profileDropdown').classList.remove('show');
+            });
+
+            document.getElementById('examForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                scheduleExam();
+            });
+        }
+
+        async function loadSchoolData() {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-auth/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                var school = await response.json();
+                document.getElementById('schoolName').textContent = school.name.toUpperCase();
+                document.getElementById('profileEmail').textContent = school.email || 'Profile';
+                if (school.logo) {
+                    document.getElementById('schoolLogo').innerHTML = '<img src="' + school.logo + '" alt="Logo">';
+                }
+            } catch (error) {
+                console.error('Load school data error:', error);
+            }
+        }
+
+        async function loadExams() {
+            var token = localStorage.getItem('schoolToken');
+            var examsBody = document.getElementById('examsBody');
+
+            try {
+                var response = await fetch('/api/exams', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                allExams = await response.json();
+                updateStats();
+                renderExams();
+            } catch (error) {
+                console.error('Load exams error:', error);
+                examsBody.innerHTML = '<tr><td colspan="9" class="no-data">Error loading exams</td></tr>';
+            }
+        }
+
+        function updateStats() {
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            var total = allExams.length;
+            var upcoming = allExams.filter(function (e) {
+                return new Date(e.examDate) >= today && e.status === 'Scheduled';
+            }).length;
+            var completed = allExams.filter(function (e) {
+                return e.status === 'Completed';
+            }).length;
+
+            document.getElementById('totalExams').textContent = total;
+            document.getElementById('upcomingExams').textContent = upcoming;
+            document.getElementById('completedExams').textContent = completed;
+        }
+
+        function filterExams(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.tab-btn').forEach(function (btn) {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            renderExams();
+        }
+
+        function renderExams() {
+            var examsBody = document.getElementById('examsBody');
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            var filteredExams = allExams;
+
+            if (currentFilter === 'upcoming') {
+                filteredExams = allExams.filter(function (e) {
+                    return new Date(e.examDate) >= today && e.status === 'Scheduled';
+                });
+            } else if (currentFilter === 'completed') {
+                filteredExams = allExams.filter(function (e) {
+                    return e.status === 'Completed';
+                });
+            }
+
+            if (filteredExams.length === 0) {
+                examsBody.innerHTML = '<tr><td colspan="9" class="no-data">No exams found</td></tr>';
+                return;
+            }
+
+            examsBody.innerHTML = filteredExams.map(function (exam) {
+                var examDate = new Date(exam.examDate).toLocaleDateString('en-IN', {
+                    day: '2-digit', month: 'short', year: 'numeric'
+                });
+                var statusClass = exam.status.toLowerCase();
+
+                return '<tr>' +
+                    '<td><strong>' + exam.name + '</strong></td>' +
+                    '<td>Class ' + exam.className + '</td>' +
+                    '<td>' + exam.subject + '</td>' +
+                    '<td>' + examDate + '</td>' +
+                    '<td>' + exam.startTime + '</td>' +
+                    '<td>' + exam.duration + ' min</td>' +
+                    '<td>' + exam.totalMarks + '</td>' +
+                    '<td><span class="exam-status ' + statusClass + '">' + exam.status + '</span></td>' +
+                    '<td>' +
+                    '<button class="action-btn complete" onclick="updateStatus(\'' + exam._id + '\', \'Completed\')">✓</button>' +
+                    '<button class="action-btn cancel" onclick="updateStatus(\'' + exam._id + '\', \'Cancelled\')">✕</button>' +
+                    '<button class="action-btn delete" onclick="deleteExam(\'' + exam._id + '\')">🗑</button>' +
+                    '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        async function scheduleExam() {
+            var token = localStorage.getItem('schoolToken');
+
+            var data = {
+                name: document.getElementById('examName').value,
+                subject: document.getElementById('examSubject').value,
+                className: document.getElementById('examClass').value,
+                examDate: document.getElementById('examDate').value,
+                startTime: document.getElementById('examTime').value,
+                duration: parseInt(document.getElementById('examDuration').value),
+                totalMarks: parseInt(document.getElementById('examMarks').value)
+            };
+
+            if (!data.name || !data.subject || !data.className || !data.examDate || !data.startTime) {
+                showToast('Please fill all required fields', 'error');
+                return;
+            }
+
+            try {
+                var response = await fetch('/api/exams', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showToast('Exam scheduled successfully!', 'success');
+                    document.getElementById('examForm').reset();
+                    document.getElementById('examDuration').value = '60';
+                    document.getElementById('examMarks').value = '100';
+                    loadExams();
+                } else {
+                    var result = await response.json();
+                    showToast(result.message || 'Failed to schedule exam', 'error');
+                }
+            } catch (error) {
+                showToast('Error scheduling exam', 'error');
+            }
+        }
+
+        async function updateStatus(examId, status) {
+            var token = localStorage.getItem('schoolToken');
+
+            try {
+                var response = await fetch('/api/exams/' + examId + '/status', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (response.ok) {
+                    showToast('Exam marked as ' + status, 'success');
+                    loadExams();
+                } else {
+                    showToast('Failed to update exam', 'error');
+                }
+            } catch (error) {
+                showToast('Error updating exam', 'error');
+            }
+        }
+
+        async function deleteExam(examId) {
+            if (!confirm('Are you sure you want to delete this exam?')) return;
+
+            var token = localStorage.getItem('schoolToken');
+
+            try {
+                var response = await fetch('/api/exams/' + examId, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    showToast('Exam deleted successfully', 'success');
+                    loadExams();
+                } else {
+                    showToast('Failed to delete exam', 'error');
+                }
+            } catch (error) {
+                showToast('Error deleting exam', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('schoolToken');
+            localStorage.removeItem('schoolData');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

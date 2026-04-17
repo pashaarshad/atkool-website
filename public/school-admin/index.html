@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Admin Login</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .school-login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #c0c0c0;
+        }
+
+        .school-login-box {
+            background-color: #fff;
+            border: 3px solid #333;
+            border-radius: 15px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .school-login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .school-login-header h1 {
+            font-size: 24px;
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        .school-login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .school-login-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .school-login-form label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .school-login-form input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #999;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .school-login-form input:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        .school-login-form .btn-login {
+            width: 100%;
+            padding: 14px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .school-login-form .btn-login:hover {
+            background-color: #333;
+        }
+
+        .school-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="school-login-container">
+        <div class="school-login-box">
+            <div class="school-login-header">
+                <div class="school-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
+                        <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                    </svg>
+                </div>
+                <h1>School Admin Login</h1>
+                <p>Enter your school credentials to continue</p>
+            </div>
+
+            <form class="school-login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter school email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showToast(message, type) {
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast ' + (type || 'info');
+
+            var iconSvg = '';
+            if (type === 'success') {
+                iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+            } else if (type === 'error') {
+                iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+            } else {
+                iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+            }
+
+            toast.innerHTML = iconSvg +
+                '<span class="toast-message">' + message + '</span>' +
+                '<button class="toast-close" onclick="this.parentElement.remove()">' +
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>' +
+                '</button>';
+
+            container.appendChild(toast);
+
+            setTimeout(function () {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(function () {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+
+            try {
+                var response = await fetch('/api/school-auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                var data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('schoolToken', data.token);
+                    localStorage.setItem('schoolData', JSON.stringify(data.school));
+                    showToast('Login successful!', 'success');
+                    setTimeout(function () {
+                        window.location.href = 'dashboard.html';
+                    }, 500);
+                } else {
+                    showToast(data.message || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('Error connecting to server', 'error');
+            }
+        });
+
+        if (localStorage.getItem('schoolToken')) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+
+</html>
