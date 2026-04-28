@@ -28,19 +28,7 @@ app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/users', require('./routes/users'));
 
 app.get('/', (req, res) => {
-    const host = req.headers.host || '';
-    if (host.startsWith('superadmin.')) {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    } else if (host.startsWith('admin.')) {
-        res.sendFile(path.join(__dirname, 'public', 'school-admin', 'index.html'));
-    } else if (host.startsWith('teachers.')) {
-        res.sendFile(path.join(__dirname, 'public', 'teacher-login.html'));
-    } else if (host.startsWith('student.')) {
-        res.sendFile(path.join(__dirname, 'public', 'parent-login.html'));
-    } else {
-        // Main domain atkool.com
-        res.sendFile(path.join(__dirname, 'public', 'landing.html'));
-    }
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 
