@@ -406,6 +406,11 @@ async function viewSchool(id) {
             '<span class="view-detail-label">Status:</span>' +
             '<span class="view-detail-value">' + school.status + '</span>' +
             '</div>' +
+            '<div class="view-detail-row">' +
+            '<span class="view-detail-label">Amount:</span>' +
+            '<span class="view-detail-value">INR ' + school.amount + '</span>' +
+            '</div>' +
+
             '<div class="view-documents-section">' +
             '<h4 style="margin: 15px 0 10px; color: #333;">School Images</h4>' +
             '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">' +
