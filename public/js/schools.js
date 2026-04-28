@@ -45,6 +45,8 @@ function getDateBadge(dateString, type) {
 }
 
 var schoolLogoBase64 = '';
+var schoolImagesBase64 = [];
+
 
 function showToast(message, type) {
     var container = document.getElementById('toastContainer');
@@ -140,7 +142,34 @@ function setupEventListeners() {
             reader.readAsDataURL(file);
         });
     }
+
+    var schoolImagesInput = document.getElementById('schoolImagesInput');
+    if (schoolImagesInput) {
+        schoolImagesInput.addEventListener('change', function () {
+            var files = Array.from(this.files);
+            if (files.length > 6) {
+                showToast('Maximum 6 images allowed', 'error');
+                this.value = '';
+                return;
+            }
+
+            schoolImagesBase64 = [];
+            var preview = document.getElementById('schoolImagesPreview');
+            preview.innerHTML = '';
+
+            files.forEach(function (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var base64 = e.target.result;
+                    schoolImagesBase64.push(base64);
+                    preview.innerHTML += '<img src="' + base64 + '" style="width:50px;height:50px;border-radius:4px;object-fit:cover;border:1px solid #ddd;">';
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    }
 }
+
 
 async function loadSchools() {
     var token = localStorage.getItem('adminToken');
@@ -231,13 +260,21 @@ function openModal(school) {
         schoolLogoBase64 = school.logo || '';
         document.getElementById('schoolLogoPreview').innerHTML = school.logo ? '<img src="' + school.logo + '" style="width:50px;height:50px;border-radius:50%;object-fit:cover;">' : '';
         document.getElementById('schoolLogoFile').value = '';
+        
+        schoolImagesBase64 = school.schoolImages || [];
+        var preview = document.getElementById('schoolImagesPreview');
+        preview.innerHTML = schoolImagesBase64.map(img => '<img src="' + img + '" style="width:50px;height:50px;border-radius:4px;object-fit:cover;border:1px solid #ddd;">').join('');
+        document.getElementById('schoolImagesInput').value = '';
     } else {
         modalTitle.textContent = 'Add School';
         document.getElementById('schoolForm').reset();
         document.getElementById('schoolId').value = '';
         schoolLogoBase64 = '';
         document.getElementById('schoolLogoPreview').innerHTML = '';
+        schoolImagesBase64 = [];
+        document.getElementById('schoolImagesPreview').innerHTML = '';
     }
+
 
     modal.classList.add('show');
 }
@@ -271,8 +308,10 @@ async function saveSchool() {
         students: parseInt(document.getElementById('schoolStudents').value) || 0,
         status: document.getElementById('schoolStatus').value,
         amount: parseInt(document.getElementById('schoolAmount').value) || 0,
-        logo: schoolLogoBase64
+        logo: schoolLogoBase64,
+        schoolImages: schoolImagesBase64
     };
+
 
     try {
         var url = schoolId ? '/api/schools/' + schoolId : '/api/schools';
@@ -367,27 +406,15 @@ async function viewSchool(id) {
             '<span class="view-detail-label">Status:</span>' +
             '<span class="view-detail-value">' + school.status + '</span>' +
             '</div>' +
-            '<div class="view-detail-row">' +
-            '<span class="view-detail-label">Amount:</span>' +
-            '<span class="view-detail-value">INR ' + school.amount + '</span>' +
-            '</div>' +
-            '<div class="view-detail-row">' +
-            '<span class="view-detail-label">PAN Card No:</span>' +
-            '<span class="view-detail-value">' + (school.panCardNo || 'N/A') + '</span>' +
-            '</div>' +
-            '<div class="view-detail-row">' +
-            '<span class="view-detail-label">Aadhar Card No:</span>' +
-            '<span class="view-detail-value">' + (school.aadharCardNo || 'N/A') + '</span>' +
-            '</div>' +
             '<div class="view-documents-section">' +
-            '<h4 style="margin: 15px 0 10px; color: #333;">Documents</h4>' +
-            '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">' +
-            (school.panCardFront ? '<div class="doc-item"><p style="font-size: 12px; margin-bottom: 5px;">PAN Front</p><img src="' + school.panCardFront + '" style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer;" onclick="window.open(this.src)"></div>' : '') +
-            (school.panCardBack ? '<div class="doc-item"><p style="font-size: 12px; margin-bottom: 5px;">PAN Back</p><img src="' + school.panCardBack + '" style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer;" onclick="window.open(this.src)"></div>' : '') +
-            (school.aadharCardFront ? '<div class="doc-item"><p style="font-size: 12px; margin-bottom: 5px;">Aadhar Front</p><img src="' + school.aadharCardFront + '" style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer;" onclick="window.open(this.src)"></div>' : '') +
-            (school.aadharCardBack ? '<div class="doc-item"><p style="font-size: 12px; margin-bottom: 5px;">Aadhar Back</p><img src="' + school.aadharCardBack + '" style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer;" onclick="window.open(this.src)"></div>' : '') +
+            '<h4 style="margin: 15px 0 10px; color: #333;">School Images</h4>' +
+            '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">' +
+            (school.schoolImages && school.schoolImages.length > 0 ? 
+                school.schoolImages.map(img => '<div class="doc-item"><img src="' + img + '" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 1px solid #eee;" onclick="window.open(this.src)"></div>').join('') : 
+                '<p style="grid-column: span 3; color: #999; font-size: 14px;">No school images uploaded</p>') +
             '</div>' +
             '</div>';
+
 
         var modal = document.getElementById('viewModal');
         modal.classList.add('show');

@@ -56,26 +56,9 @@ const schoolSchema = new mongoose.Schema({
     logo: {
         type: String
     },
-    // PAN Card fields
-    panCardNo: {
-        type: String
-    },
-    panCardFront: {
-        type: String
-    },
-    panCardBack: {
-        type: String
-    },
-    // Aadhar Card fields
-    aadharCardNo: {
-        type: String
-    },
-    aadharCardFront: {
-        type: String
-    },
-    aadharCardBack: {
-        type: String
-    },
+    // School Images (maximum 6)
+    schoolImages: [String],
+
     createdAt: {
         type: Date,
         default: Date.now

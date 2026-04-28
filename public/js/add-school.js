@@ -37,10 +37,8 @@ function showToast(message, type) {
 
 var logoBase64 = '';
 var gstFileBase64 = '';
-var panCardFrontBase64 = '';
-var panCardBackBase64 = '';
-var aadharCardFrontBase64 = '';
-var aadharCardBackBase64 = '';
+var schoolImagesBase64 = [];
+
 
 document.addEventListener('DOMContentLoaded', function () {
     var token = localStorage.getItem('adminToken');
@@ -115,25 +113,43 @@ document.addEventListener('DOMContentLoaded', function () {
         reader.readAsDataURL(file);
     });
 
-    // PAN Card Front
-    setupFileUpload('panCardFront', 'panCardFrontName', function (base64) {
-        panCardFrontBase64 = base64;
+    // School Images (Multiple Upload)
+    var schoolImagesInput = document.getElementById('schoolImages');
+    schoolImagesInput.addEventListener('change', function () {
+        var files = Array.from(this.files);
+        if (files.length > 6) {
+            showToast('You can only upload a maximum of 6 images', 'error');
+            this.value = '';
+            return;
+        }
+
+        schoolImagesBase64 = [];
+        var previewContainer = document.getElementById('imagePreviewContainer');
+        previewContainer.innerHTML = '';
+
+        files.forEach(function(file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var base64 = e.target.result;
+                schoolImagesBase64.push(base64);
+                
+                // Add preview
+                var previewDiv = document.createElement('div');
+                previewDiv.style.position = 'relative';
+                previewDiv.innerHTML = `
+                    <img src="${base64}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
+                    <div style="font-size: 10px; color: #666; text-align: center; margin-top: 5px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</div>
+                `;
+                previewContainer.appendChild(previewDiv);
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        if (files.length > 0) {
+            showToast(files.length + ' images selected', 'success');
+        }
     });
 
-    // PAN Card Back
-    setupFileUpload('panCardBack', 'panCardBackName', function (base64) {
-        panCardBackBase64 = base64;
-    });
-
-    // Aadhar Card Front
-    setupFileUpload('aadharCardFront', 'aadharCardFrontName', function (base64) {
-        aadharCardFrontBase64 = base64;
-    });
-
-    // Aadhar Card Back
-    setupFileUpload('aadharCardBack', 'aadharCardBackName', function (base64) {
-        aadharCardBackBase64 = base64;
-    });
 });
 
 function setupFileUpload(inputId, nameSpanId, callback) {
@@ -169,12 +185,8 @@ async function saveSchool() {
         password: document.getElementById('password').value,
         logo: logoBase64,
         gstFile: gstFileBase64,
-        panCardNo: document.getElementById('panCardNo').value,
-        panCardFront: panCardFrontBase64,
-        panCardBack: panCardBackBase64,
-        aadharCardNo: document.getElementById('aadharCardNo').value,
-        aadharCardFront: aadharCardFrontBase64,
-        aadharCardBack: aadharCardBackBase64,
+        schoolImages: schoolImagesBase64,
+
         teachers: 0,
         students: 0,
         status: 'Pending',

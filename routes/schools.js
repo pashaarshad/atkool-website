@@ -58,7 +58,8 @@ router.get('/:id', auth, async (req, res) => {
 
 router.post('/', auth, async (req, res) => {
     try {
-        const { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo } = req.body;
+        const { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo, schoolImages } = req.body;
+
 
         if (!name || !city) {
             return res.status(400).json({ message: 'Name and city are required' });
@@ -80,7 +81,9 @@ router.post('/', auth, async (req, res) => {
             gstNo,
             gstFile,
             password,
-            logo
+            logo,
+            schoolImages
+
         });
 
         res.status(201).json(school);
@@ -92,11 +95,13 @@ router.post('/', auth, async (req, res) => {
 
 router.put('/:id', auth, async (req, res) => {
     try {
-        const { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo } = req.body;
+        const { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo, schoolImages } = req.body;
+
 
         const school = await School.findByIdAndUpdate(
             req.params.id,
-            { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo },
+            { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo, schoolImages },
+
             { new: true, runValidators: true }
         );
 

@@ -97,57 +97,20 @@
                         </div>
                     </div>
 
-                    <!-- PAN Card Section -->
+                    <!-- School Images Section -->
                     <div class="form-row">
-                        <label class="form-label">PAN Card No:</label>
-                        <input type="text" class="form-input" id="panCardNo" placeholder="ABCDE1234F">
-                    </div>
-                    <div class="form-row">
-                        <label class="form-label">PAN Card Front:</label>
+                        <label class="form-label">Upload School Images (Max 6):</label>
                         <div class="input-with-button">
                             <label class="btn btn-upload">
-                                Upload Image
-                                <input type="file" id="panCardFront" accept=".jpg,.png,.jpeg" hidden>
+                                Select Images
+                                <input type="file" id="schoolImages" accept=".jpg,.png,.jpeg" multiple hidden>
                             </label>
-                            <span class="file-name" id="panCardFrontName"></span>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <label class="form-label">PAN Card Back:</label>
-                        <div class="input-with-button">
-                            <label class="btn btn-upload">
-                                Upload Image
-                                <input type="file" id="panCardBack" accept=".jpg,.png,.jpeg" hidden>
-                            </label>
-                            <span class="file-name" id="panCardBackName"></span>
-                        </div>
+                    <div class="form-row" id="imagePreviewContainer" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                        <!-- Image previews will appear here -->
                     </div>
 
-                    <!-- Aadhar Card Section -->
-                    <div class="form-row">
-                        <label class="form-label">Aadhar Card No:</label>
-                        <input type="text" class="form-input" id="aadharCardNo" placeholder="1234 5678 9012">
-                    </div>
-                    <div class="form-row">
-                        <label class="form-label">Aadhar Front:</label>
-                        <div class="input-with-button">
-                            <label class="btn btn-upload">
-                                Upload Image
-                                <input type="file" id="aadharCardFront" accept=".jpg,.png,.jpeg" hidden>
-                            </label>
-                            <span class="file-name" id="aadharCardFrontName"></span>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <label class="form-label">Aadhar Back:</label>
-                        <div class="input-with-button">
-                            <label class="btn btn-upload">
-                                Upload Image
-                                <input type="file" id="aadharCardBack" accept=".jpg,.png,.jpeg" hidden>
-                            </label>
-                            <span class="file-name" id="aadharCardBackName"></span>
-                        </div>
-                    </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-dark">Create Now</button>
                         <button type="button" class="btn btn-cancel"
