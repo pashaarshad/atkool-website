@@ -22,6 +22,7 @@ app.get('/api', (req, res) => {
     res.json({ message: 'API is working', status: 'success' });
 });
 
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/schools', require('./routes/schools'));
 app.use('/api/dashboard', require('./routes/dashboard'));
