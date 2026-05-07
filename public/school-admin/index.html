@@ -7,93 +7,29 @@
     <title>School Admin Login</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { margin:0; font-family:'Inter',sans-serif; }
         .school-login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #c0c0c0;
+            min-height:100vh; display:flex; align-items:center; justify-content:center;
+            background:linear-gradient(135deg,#0F172A 0%,#1e293b 50%,#4338CA 100%);
         }
-
         .school-login-box {
-            background-color: #fff;
-            border: 3px solid #333;
-            border-radius: 15px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
+            background:#fff; border:none; border-radius:20px; padding:44px; width:100%; max-width:420px;
+            box-shadow:0 20px 60px rgba(0,0,0,.25);
         }
-
-        .school-login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .school-login-header h1 {
-            font-size: 24px;
-            color: #000;
-            margin-bottom: 10px;
-        }
-
-        .school-login-header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .school-login-form .form-group {
-            margin-bottom: 20px;
-        }
-
-        .school-login-form label {
-            display: block;
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .school-login-form input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #999;
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-
-        .school-login-form input:focus {
-            outline: none;
-            border-color: #333;
-        }
-
+        .school-login-header { text-align:center; margin-bottom:30px; }
+        .school-login-header h1 { font-size:24px; color:#0F172A; margin-bottom:8px; font-weight:800; }
+        .school-login-header p { color:#64748b; font-size:14px; }
+        .school-login-form .form-group { margin-bottom:20px; }
+        .school-login-form label { display:block; font-size:13px; font-weight:700; color:#475569; margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+        .school-login-form input { width:100%; padding:13px 16px; border:2px solid #e2e8f0; border-radius:12px; font-size:15px; box-sizing:border-box; background:#f8fafc; transition:all .3s; }
+        .school-login-form input:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.1); background:#fff; }
         .school-login-form .btn-login {
-            width: 100%;
-            padding: 14px;
-            background-color: #000;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
+            width:100%; padding:14px; background:linear-gradient(135deg,#4338CA,#7C3AED); color:#fff;
+            border:none; border-radius:12px; font-size:16px; font-weight:700; cursor:pointer; margin-top:10px;
+            box-shadow:0 4px 15px rgba(67,56,202,.3); transition:all .3s;
         }
-
-        .school-login-form .btn-login:hover {
-            background-color: #333;
-        }
-
-        .school-icon {
-            width: 60px;
-            height: 60px;
-            background-color: #e0e0e0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            border: 2px solid #333;
-        }
+        .school-login-form .btn-login:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(67,56,202,.4); }
     </style>
 </head>
 
@@ -103,11 +39,7 @@
     <div class="school-login-container">
         <div class="school-login-box">
             <div class="school-login-header">
-                <div class="school-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2">
-                        <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
-                    </svg>
-                </div>
+                <img src="/logo.jpeg" alt="ATKool" style="width:90px;height:90px;border-radius:16px;margin:0 auto 15px;display:block;box-shadow:0 4px 15px rgba(67,56,202,.15)">
                 <h1>School Admin Login</h1>
                 <p>Enter your school credentials to continue</p>
             </div>
