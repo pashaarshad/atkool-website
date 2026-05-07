@@ -7,129 +7,26 @@
     <title>Parent Portal - ATKool</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f7f6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .login-container {
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .icon-circle {
-            width: 80px;
-            height: 80px;
-            background-color: #059669; /* Distinct Green for Parents */
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
-        }
-
-        .login-header h1 {
-            font-size: 24px;
-            color: #1a1a1a;
-            margin: 0 0 8px 0;
-        }
-
-        .login-header p {
-            color: #666;
-            font-size: 14px;
-            margin: 0;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-            background-color: #f9f9f9;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #059669;
-            background-color: #fff;
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 14px;
-            background-color: #059669;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-top: 10px;
-        }
-
-        .btn-login:hover {
-            background-color: #047857;
-        }
+        body { margin:0; font-family:'Inter',sans-serif; background:linear-gradient(135deg,#0F172A 0%,#1e293b 50%,#4338CA 100%); display:flex; align-items:center; justify-content:center; min-height:100vh; }
+        .login-container { background:#fff; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.25); padding:44px; width:100%; max-width:420px; box-sizing:border-box; }
+        .login-header { text-align:center; margin-bottom:30px; }
+        .icon-circle { width:80px; height:80px; background:linear-gradient(135deg,#4338CA,#7C3AED); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; box-shadow:0 4px 15px rgba(67,56,202,.3); }
+        .icon-circle svg { width:40px; height:40px; color:#fff; }
+        .login-header h1 { font-size:26px; font-weight:800; color:#0F172A; margin:0 0 8px 0; }
+        .login-header p { color:#64748b; font-size:14px; margin:0; }
+        .form-group { margin-bottom:20px; }
+        .form-group label { display:block; margin-bottom:8px; color:#475569; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.5px; }
+        .form-group input { width:100%; padding:13px 16px; border:2px solid #e2e8f0; border-radius:12px; font-size:15px; transition:all .3s; background:#f8fafc; box-sizing:border-box; }
+        .form-group input:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.1); background:#fff; }
+        .btn-login { width:100%; padding:14px; background:linear-gradient(135deg,#4338CA,#7C3AED); color:#fff; border:none; border-radius:12px; font-size:16px; font-weight:700; cursor:pointer; transition:all .3s; box-shadow:0 4px 15px rgba(67,56,202,.3); margin-top:10px; }
+        .btn-login:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(67,56,202,.4); }
 
         /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .toast {
-            min-width: 250px;
-            margin-bottom: 10px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: white;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            animation: slideIn 0.3s ease forwards;
-        }
-
-        .toast.success { background-color: #10B981; }
-        .toast.error { background-color: #EF4444; }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+        .toast-container { position:fixed; top:20px; right:20px; z-index:1000; }
+        .toast { min-width:250px; margin-bottom:10px; padding:15px 20px; border-radius:12px; color:#fff; display:flex; align-items:center; box-shadow:0 4px 15px rgba(0,0,0,.15); animation:slideIn .3s ease forwards; font-weight:600; }
+        .toast.success { background:linear-gradient(135deg,#10B981,#059669); }
+        .toast.error { background:linear-gradient(135deg,#EF4444,#DC2626); }
+        @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
     </style>
 </head>
 
@@ -138,7 +35,7 @@
 
     <div class="login-container">
         <div class="login-header">
-            <img src="/logo.jpeg" alt="ATKool Logo" style="width:90px;height:90px;border-radius:16px;margin:0 auto 15px;display:block;box-shadow:0 4px 15px rgba(5,150,105,0.2)">
+            <img src="/logo.jpeg" alt="ATKool Logo" style="width:90px;height:90px;border-radius:16px;margin:0 auto 15px;display:block;box-shadow:0 4px 15px rgba(67,56,202,0.2)">
             <h1>Parent Portal</h1>
             <p>Login to view your child's progress</p>
         </div>

@@ -7,725 +7,118 @@
     <title>School Admin Dashboard</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#F1F5F9; }
+        .school-header { background:linear-gradient(135deg,#0F172A,#1e293b); border:none; border-radius:16px; margin:12px; padding:16px 28px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 20px rgba(0,0,0,.15); }
+        .school-header-left { display:flex; align-items:center; gap:20px; }
+        .school-logo { width:48px; height:48px; border-radius:12px; border:none; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; cursor:pointer; transition:all .3s; }
+        .school-logo:hover { transform:scale(1.05); }
+        .school-logo img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+        .school-logo svg { width:30px; height:30px; stroke:#c7d2fe; }
+        .school-name { color:#fff; font-size:24px; font-weight:800; letter-spacing:1px; flex:1; text-align:center; }
+        .school-header-right { display:flex; align-items:center; gap:16px; }
+        .header-icon { width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:rgba(255,255,255,.08); border-radius:10px; transition:all .2s; }
+        .header-icon:hover { background:rgba(67,56,202,.3); }
+        .header-icon svg { width:24px; height:24px; stroke:#c7d2fe; }
+        .school-main { display:flex; gap:0; padding:0 12px 12px; }
+        .school-sidebar { width:160px; display:flex; flex-direction:column; gap:6px; padding-right:15px; }
+        .school-sidebar-item { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 15px; text-align:center; font-size:13px; font-weight:700; color:#334155; cursor:pointer; text-decoration:none; display:block; transition:all .25s; }
+        .school-sidebar-item:hover { background:#eef2ff; color:#4338CA; border-color:#c7d2fe; }
+        .school-sidebar-item.active { background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border-color:transparent; box-shadow:0 4px 12px rgba(67,56,202,.3); }
+        .school-content { flex:1; padding:10px; }
+        .stats-circles { display:flex; justify-content:center; gap:40px; margin-bottom:28px; padding:20px 0; }
+        .stat-circle { width:130px; height:130px; border-radius:50%; border:3px solid #e0e7ff; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(67,56,202,.1); transition:all .3s; }
+        .stat-circle:hover { border-color:#4338CA; transform:translateY(-3px); box-shadow:0 8px 25px rgba(67,56,202,.2); }
+        .stat-circle-label { font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+        .stat-circle-value { font-size:36px; font-weight:800; background:linear-gradient(135deg,#4338CA,#7C3AED); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .content-section { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .section-title { font-size:17px; font-weight:700; color:#0F172A; margin-bottom:18px; }
+        .quick-access-title { font-size:15px; font-weight:700; color:#0F172A; margin-bottom:15px; padding-left:5px; }
+        .quick-access-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; }
+        .quick-access-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; height:110px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; color:#334155; gap:8px; transition:all .3s; box-shadow:0 2px 8px rgba(0,0,0,.03); }
+        .quick-access-card:hover { background:linear-gradient(135deg,#eef2ff,#f5f3ff); border-color:#c7d2fe; transform:translateY(-3px); box-shadow:0 8px 20px rgba(67,56,202,.1); }
+        .quick-access-card svg { width:34px; height:34px; stroke:#4338CA; }
+        .quick-access-card span { font-weight:700; font-size:13px; color:#334155; }
+        .notification-bell { position:relative; }
+        .notification-dot { position:absolute; top:-2px; right:-2px; width:10px; height:10px; background:#ef4444; border-radius:50%; border:2px solid #0F172A; }
+        .profile-wrapper { position:relative; }
+        .profile-dropdown { display:none; position:absolute; top:50px; right:0; background:#fff; border:1px solid #e2e8f0; border-radius:14px; min-width:160px; box-shadow:0 10px 40px rgba(0,0,0,.15); z-index:1000; overflow:hidden; }
+        .profile-dropdown.show { display:block; }
+        .profile-dropdown-item { padding:12px 20px; cursor:pointer; font-size:13px; font-weight:600; color:#334155; border-bottom:1px solid #f1f5f9; transition:all .2s; }
+        .profile-dropdown-item:last-child { border-bottom:none; }
+        .profile-dropdown-item:hover { background:#eef2ff; color:#4338CA; }
+        .profile-dropdown-item.logout { color:#dc2626; }
+        .profile-dropdown-item.logout:hover { background:#fef2f2; }
+        .plan-section { margin-bottom:20px; }
+        .plan-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .plan-card.active { border-left:4px solid #059669; }
+        .plan-card.expired { border-left:4px solid #dc2626; }
+        .plan-header { display:flex; align-items:center; gap:10px; margin-bottom:15px; }
+        .plan-header svg { width:24px; height:24px; stroke:#4338CA; }
+        .plan-title { font-size:18px; font-weight:700; color:#0F172A; }
+        .plan-status-badge { padding:5px 14px; border-radius:20px; font-size:12px; font-weight:700; color:#fff; margin-left:auto; }
+        .plan-status-badge.active { background:linear-gradient(135deg,#059669,#10b981); }
+        .plan-status-badge.expired { background:linear-gradient(135deg,#dc2626,#ef4444); }
+        .plan-details-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:15px; margin-top:15px; }
+        .plan-detail-item { display:flex; flex-direction:column; gap:4px; }
+        .plan-detail-label { font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
+        .plan-detail-value { font-size:16px; font-weight:700; color:#0F172A; }
+        .no-plan-content { text-align:center; padding:20px; }
+        .no-plan-icon { width:60px; height:60px; margin:0 auto 15px; color:#dc2626; }
+        .no-plan-text { font-size:15px; color:#475569; margin-bottom:15px; line-height:1.7; }
+        .support-email { display:inline-flex; align-items:center; gap:8px; font-size:15px; font-weight:700; color:#4338CA; text-decoration:none; padding:10px 20px; background:#eef2ff; border-radius:10px; margin-top:10px; transition:all .2s; }
+        .support-email:hover { background:#e0e7ff; }
+        .contact-btn { display:inline-block; padding:12px 30px; background:linear-gradient(135deg,#4338CA,#7C3AED); color:#fff; text-decoration:none; border-radius:12px; font-weight:700; margin-top:15px; box-shadow:0 4px 15px rgba(67,56,202,.3); transition:all .3s; }
+        .contact-btn:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(67,56,202,.4); }
+        .notification-wrapper { position:relative; }
+        .notification-badge { position:absolute; top:0; right:0; width:10px; height:10px; background:#ef4444; border-radius:50%; display:none; }
+        .notification-dropdown { display:none; position:absolute; top:45px; right:0; width:320px; max-height:400px; overflow-y:auto; background:#fff; border:1px solid #e2e8f0; border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,.15); z-index:1000; }
+        .notification-dropdown.show { display:block; }
+        .notification-header { padding:14px 18px; background:linear-gradient(135deg,#0F172A,#1e293b); color:#fff; font-weight:700; font-size:14px; border-radius:14px 14px 0 0; }
+        .notification-item { padding:12px 18px; border-bottom:1px solid #f1f5f9; cursor:pointer; transition:all .2s; }
+        .notification-item:hover { background:#eef2ff; }
+        .notification-item:last-child { border-bottom:none; }
+        .notification-title { font-weight:700; font-size:13px; color:#0F172A; margin-bottom:5px; }
+        .notification-message { font-size:12px; color:#64748b; line-height:1.5; }
+        .notification-time { font-size:10px; color:#94a3b8; margin-top:5px; }
+        .no-notifications { padding:30px 15px; text-align:center; color:#64748b; font-size:14px; }
+        .logo-edit-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(67,56,202,.7); border-radius:12px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .3s; }
+        .school-logo:hover .logo-edit-overlay { opacity:1; }
+        .logo-edit-overlay svg { width:20px; height:20px; stroke:#fff; }
+        .logo-modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center; }
+        .logo-modal-overlay.show { display:flex; }
+        .logo-modal { background:#fff; border-radius:18px; padding:32px; max-width:460px; width:90%; box-shadow:0 25px 60px rgba(0,0,0,.2); animation:modalSlideIn .3s ease; }
+        @keyframes modalSlideIn { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+        .logo-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        .logo-modal-title { font-size:20px; font-weight:700; color:#0F172A; }
+        .logo-modal-close { background:none; border:none; cursor:pointer; padding:6px; border-radius:8px; transition:all .2s; }
+        .logo-modal-close:hover { background:#f1f5f9; }
+        .logo-modal-close svg { width:24px; height:24px; stroke:#64748b; }
+        .logo-instructions { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:20px; }
+        .logo-instructions-title { font-weight:700; color:#0F172A; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+        .logo-instructions-list { list-style:none; padding:0; margin:0; }
+        .logo-instructions-list li { padding:5px 0; color:#64748b; font-size:13px; display:flex; align-items:center; gap:8px; }
+        .logo-instructions-list li::before { content:'✓'; color:#059669; font-weight:bold; }
+        .logo-preview-area { border:2px dashed #c7d2fe; border-radius:14px; padding:30px; text-align:center; margin-bottom:20px; transition:all .3s; cursor:pointer; }
+        .logo-preview-area:hover { border-color:#4338CA; background:#faf5ff; }
+        .logo-preview-area.has-image { border-style:solid; border-color:#059669; }
+        .logo-preview-placeholder { color:#94a3b8; }
+        .logo-preview-placeholder svg { width:50px; height:50px; stroke:#c7d2fe; margin-bottom:10px; }
+        .logo-preview-img { max-width:150px; max-height:150px; border-radius:12px; }
+        .logo-modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+        .logo-modal-btn { padding:12px 25px; border-radius:12px; font-weight:700; cursor:pointer; border:none; font-size:14px; transition:all .2s; }
+        .logo-modal-btn.cancel { background:#f1f5f9; color:#475569; }
+        .logo-modal-btn.cancel:hover { background:#e2e8f0; }
+        .logo-modal-btn.upload { background:linear-gradient(135deg,#4338CA,#7C3AED); color:#fff; box-shadow:0 4px 12px rgba(67,56,202,.25); }
+        .logo-modal-btn.upload:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(67,56,202,.35); }
+        .logo-modal-btn.upload:disabled { background:#e2e8f0; color:#94a3b8; cursor:not-allowed; box-shadow:none; transform:none; }
+        .dont-show-again { display:flex; align-items:center; gap:8px; margin-bottom:20px; font-size:13px; color:#64748b; }
+        .dont-show-again input { cursor:pointer; accent-color:#4338CA; }
+        .dont-show-again label { cursor:pointer; }
+    </style>
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #c0c0c0;
-        }
 
-        .school-header {
-            background-color: #333;
-            border: 3px solid #000;
-            border-radius: 10px;
-            margin: 10px;
-            padding: 15px 25px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .school-header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .school-logo {
-            width: 50px;
-            height: 50px;
-            background-color: #87CEEB;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .school-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .school-logo svg {
-            width: 30px;
-            height: 30px;
-            stroke: #333;
-        }
-
-        .school-name {
-            color: #fff;
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            flex: 1;
-            text-align: center;
-        }
-
-        .school-header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .header-icon {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .header-icon svg {
-            width: 28px;
-            height: 28px;
-            stroke: #fff;
-        }
-
-        .school-main {
-            display: flex;
-            gap: 0;
-            padding: 0 10px 10px 10px;
-        }
-
-        .school-sidebar {
-            width: 160px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding-right: 15px;
-        }
-
-        .school-sidebar-item {
-            background-color: #fff;
-            border: 2px solid #333;
-            border-radius: 10px;
-            padding: 12px 15px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: bold;
-            color: #000;
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-        }
-
-        .school-sidebar-item:hover {
-            background-color: #f0f0f0;
-        }
-
-        .school-sidebar-item.active {
-            background-color: #000;
-            color: #fff;
-        }
-
-        .school-content {
-            flex: 1;
-            padding: 10px;
-        }
-
-        .stats-circles {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-bottom: 30px;
-            padding: 20px 0;
-        }
-
-        .stat-circle {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            border: 3px solid #333;
-            background-color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-circle-label {
-            font-size: 14px;
-            font-weight: bold;
-            color: #666;
-        }
-
-        .stat-circle-value {
-            font-size: 42px;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .content-section {
-            background-color: #fff;
-            border: 2px solid #333;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .quick-access-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-            padding-left: 5px;
-        }
-
-        .quick-access-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-        }
-
-        .quick-access-card {
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 2px solid #333;
-            border-radius: 15px;
-            height: 110px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            text-decoration: none;
-            color: #333;
-            gap: 8px;
-            transition: all 0.2s ease;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-        }
-
-        .quick-access-card:hover {
-            background: linear-gradient(145deg, #f5f5f5, #e8e8e8);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
-        }
-
-        .quick-access-card svg {
-            width: 36px;
-            height: 36px;
-            stroke: #333;
-        }
-
-        .quick-access-card span {
-            font-weight: bold;
-            font-size: 13px;
-        }
-
-        .notification-bell {
-            position: relative;
-        }
-
-        .notification-dot {
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            width: 10px;
-            height: 10px;
-            background-color: red;
-            border-radius: 50%;
-        }
-
-        .profile-wrapper {
-            position: relative;
-        }
-
-        .profile-dropdown {
-            display: none;
-            position: absolute;
-            top: 50px;
-            right: 0;
-            background-color: #fff;
-            border: 2px solid #333;
-            border-radius: 10px;
-            min-width: 150px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-
-        .profile-dropdown.show {
-            display: block;
-        }
-
-        .profile-dropdown-item {
-            padding: 12px 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            border-bottom: 1px solid #eee;
-        }
-
-        .profile-dropdown-item:last-child {
-            border-bottom: none;
-        }
-
-        .profile-dropdown-item:hover {
-            background-color: #f5f5f5;
-        }
-
-        .profile-dropdown-item.logout {
-            color: #e74c3c;
-        }
-
-        .plan-section {
-            margin-bottom: 20px;
-        }
-
-        .plan-card {
-            background: linear-gradient(145deg, #ffffff, #f5f5f5);
-            border: 2px solid #333;
-            border-radius: 15px;
-            padding: 25px;
-        }
-
-        .plan-card.active {
-            border-color: #2e7d32;
-        }
-
-        .plan-card.expired {
-            border-color: #c62828;
-        }
-
-        .plan-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .plan-header svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .plan-title {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .plan-status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            color: #fff;
-            margin-left: auto;
-        }
-
-        .plan-status-badge.active {
-            background-color: #2e7d32;
-        }
-
-        .plan-status-badge.expired {
-            background-color: #c62828;
-        }
-
-        .plan-details-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .plan-detail-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .plan-detail-label {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .plan-detail-value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .no-plan-content {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .no-plan-icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 15px;
-            color: #c62828;
-        }
-
-        .no-plan-text {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-
-        .support-email {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #1565c0;
-            text-decoration: none;
-            padding: 10px 20px;
-            background-color: #e3f2fd;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-
-        .support-email:hover {
-            background-color: #bbdefb;
-        }
-
-        .contact-btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: #000;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            margin-top: 15px;
-        }
-
-        .contact-btn:hover {
-            background-color: #333;
-        }
-
-        .notification-wrapper {
-            position: relative;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 10px;
-            height: 10px;
-            background: #f44336;
-            border-radius: 50%;
-            display: none;
-        }
-
-        .notification-dropdown {
-            display: none;
-            position: absolute;
-            top: 45px;
-            right: 0;
-            width: 320px;
-            max-height: 400px;
-            overflow-y: auto;
-            background: #fff;
-            border: 2px solid #333;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-
-        .notification-dropdown.show {
-            display: block;
-        }
-
-        .notification-header {
-            padding: 12px 15px;
-            background: #333;
-            color: #fff;
-            font-weight: bold;
-            font-size: 14px;
-            border-radius: 8px 8px 0 0;
-        }
-
-        .notification-item {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-
-        .notification-item:hover {
-            background: #f5f5f5;
-        }
-
-        .notification-item:last-child {
-            border-bottom: none;
-        }
-
-        .notification-title {
-            font-weight: bold;
-            font-size: 13px;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .notification-message {
-            font-size: 12px;
-            color: #666;
-            line-height: 1.4;
-        }
-
-        .notification-time {
-            font-size: 10px;
-            color: #999;
-            margin-top: 5px;
-        }
-
-        .no-notifications {
-            padding: 30px 15px;
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-        }
-
-        /* Logo Upload Styles */
-        .school-logo {
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .school-logo:hover {
-            transform: scale(1.05);
-        }
-
-        .logo-edit-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .school-logo:hover .logo-edit-overlay {
-            opacity: 1;
-        }
-
-        .logo-edit-overlay svg {
-            width: 20px;
-            height: 20px;
-            stroke: #fff;
-        }
-
-        /* Logo Upload Modal */
-        .logo-modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-modal-overlay.show {
-            display: flex;
-        }
-
-        .logo-modal {
-            background: #fff;
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 450px;
-            width: 90%;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .logo-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .logo-modal-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .logo-modal-close {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .logo-modal-close svg {
-            width: 24px;
-            height: 24px;
-            stroke: #666;
-        }
-
-        .logo-instructions {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .logo-instructions-title {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logo-instructions-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .logo-instructions-list li {
-            padding: 5px 0;
-            color: #666;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logo-instructions-list li::before {
-            content: '✓';
-            color: #2e7d32;
-            font-weight: bold;
-        }
-
-        .logo-preview-area {
-            border: 2px dashed #ccc;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .logo-preview-area:hover {
-            border-color: #333;
-            background: #f8f9fa;
-        }
-
-        .logo-preview-area.has-image {
-            border-style: solid;
-            border-color: #2e7d32;
-        }
-
-        .logo-preview-placeholder {
-            color: #999;
-        }
-
-        .logo-preview-placeholder svg {
-            width: 50px;
-            height: 50px;
-            stroke: #ccc;
-            margin-bottom: 10px;
-        }
-
-        .logo-preview-img {
-            max-width: 150px;
-            max-height: 150px;
-            border-radius: 10px;
-        }
-
-        .logo-modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        .logo-modal-btn {
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        .logo-modal-btn.cancel {
-            background: #e0e0e0;
-            color: #333;
-        }
-
-        .logo-modal-btn.cancel:hover {
-            background: #d0d0d0;
-        }
-
-        .logo-modal-btn.upload {
-            background: #333;
-            color: #fff;
-        }
-
-        .logo-modal-btn.upload:hover {
-            background: #555;
-        }
-
-        .logo-modal-btn.upload:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .dont-show-again {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .dont-show-again input {
-            cursor: pointer;
-        }
-
-        .dont-show-again label {
-            cursor: pointer;
-        }
     </style>
 </head>
 
