@@ -99,10 +99,31 @@ async function loadStudents() {
         <div class="card">
             <div class="card-header">My Students <span class="badge">${students.length} total</span></div>
             ${students.length === 0 ? '<div class="empty-state"><p>No students assigned yet.</p><button class="btn btn-primary" onclick="loadView(\'add-student\')">+ Add Student</button></div>' :
-            `<table><thead><tr><th>Roll</th><th>Name</th><th>Class</th><th>Parent</th><th>Contact</th><th>Status</th></tr></thead><tbody>
-            ${students.map(s => `<tr><td>${s.rollNo || '-'}</td><td><strong>${s.name}</strong></td><td>${s.className} ${s.section || ''}</td><td>${s.parentName || 'N/A'}</td><td>${s.parentMobile || 'N/A'}</td><td><span class="badge ${s.approvalStatus === 'Approved' ? 'badge-green' : 'badge-orange'}">${s.approvalStatus || 'Pending'}</span></td></tr>`).join('')}
+            `<table><thead><tr><th>Roll</th><th>Name</th><th>Class</th><th>Parent</th><th>Contact</th><th>Status</th><th>Parent Login</th></tr></thead><tbody>
+            ${students.map(s => `<tr><td>${s.rollNo || '-'}</td><td><strong>${s.name}</strong></td><td>${s.className} ${s.section || ''}</td><td>${s.parentName || 'N/A'}</td><td>${s.parentMobile || 'N/A'}</td><td><span class="badge ${s.approvalStatus === 'Approved' ? 'badge-green' : 'badge-orange'}">${s.approvalStatus || 'Pending'}</span></td><td><button class="btn btn-primary" style="padding:6px 14px;font-size:12px" onclick="generateParentLogin('${s._id}','${s.name}')">🔑 Generate</button></td></tr>`).join('')}
             </tbody></table>`}
         </div>`;
+}
+
+async function generateParentLogin(studentId, studentName) {
+    const result = await fetchAPI('/api/teacher/generate-parent-login', {
+        method: 'POST',
+        body: JSON.stringify({ studentId })
+    });
+    if (!result) return;
+    const isExisting = result.existing ? ' (already existed)' : ' (newly created)';
+    const c = document.getElementById('mainContent');
+    c.innerHTML += `
+        <div class="card" style="border:2px solid #6B4EFF;margin-top:20px" id="parentLoginCard">
+            <div class="card-header">🔑 Parent Login Credentials for ${studentName}${isExisting}</div>
+            <div style="background:#f0f0ff;padding:20px;border-radius:12px;margin-bottom:15px">
+                <div style="margin-bottom:12px"><strong style="color:#666;font-size:13px">Username:</strong><div style="font-size:20px;font-weight:700;color:#6B4EFF;letter-spacing:1px">${result.parentUsername}</div></div>
+                <div><strong style="color:#666;font-size:13px">Password:</strong><div style="font-size:20px;font-weight:700;color:#DC3545;letter-spacing:1px">${result.parentPassword}</div></div>
+            </div>
+            <p style="color:#666;font-size:13px">📋 Share these credentials with the parent. They can log in at the <strong>Parent Portal</strong>.</p>
+            <button class="btn btn-outline" style="margin-top:10px" onclick="document.getElementById('parentLoginCard').remove()">✕ Close</button>
+        </div>`;
+    showToast(`Parent login ${result.existing ? 'retrieved' : 'generated'} for ${studentName}!`);
 }
 
 // ============ TAKE ATTENDANCE ============
