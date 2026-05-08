@@ -55,7 +55,7 @@
         .no-data {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color:#64748b;
         }
 
         .upload-section {
@@ -66,7 +66,7 @@
 
         .upload-hint {
             font-size: 11px;
-            color: #666;
+            color:#94a3b8;
             margin-left: 5px;
         }
 
@@ -74,9 +74,9 @@
             display: none;
             margin-top: 10px;
             padding: 10px;
-            border: 2px dashed #999;
+            border:2px dashed #c7d2fe;
             border-radius: 8px;
-            background-color: #f9f9f9;
+            background:#f8fafc;
             max-width: 300px;
         }
 
@@ -157,15 +157,61 @@
         @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
     
         /* ===== EVENT CARDS ===== */
-        .event-card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; margin-bottom:14px; transition:all .3s; box-shadow:0 2px 8px rgba(0,0,0,.03); }
+        .event-card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:14px; transition:all .3s; box-shadow:0 2px 8px rgba(0,0,0,.03); display:flex; align-items:center; gap:16px; }
         .event-card:hover { border-color:#c7d2fe; box-shadow:0 6px 20px rgba(67,56,202,.1); }
-        .event-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-        .event-title { font-size:16px; font-weight:700; color:#0F172A; }
-        .event-date { font-size:12px; color:#64748b; font-weight:500; }
-        .event-description { font-size:14px; color:#475569; line-height:1.6; }
-        .event-actions { display:flex; gap:8px; margin-top:12px; }
+        .event-image { width:80px; height:60px; border-radius:10px; overflow:hidden; background:#f1f5f9; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .event-image img { width:100%; height:100%; object-fit:cover; }
+        .event-image svg { width:30px; height:30px; stroke:#94a3b8; }
+        .event-info { flex:1; }
+        .event-name { font-size:15px; font-weight:700; color:#0F172A; margin-bottom:4px; }
+        .event-description { font-size:13px; color:#475569; line-height:1.5; margin-bottom:4px; }
+        .event-meta { font-size:11px; color:#94a3b8; font-weight:500; }
+        .event-status { padding:5px 12px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; flex-shrink:0; }
+        .event-status.active, .event-status.upcoming { background:#d1fae5; color:#059669; }
+        .event-status.completed { background:#dbeafe; color:#2563eb; }
+        .event-status.cancelled { background:#fee2e2; color:#dc2626; }
         .events-grid { display:grid; gap:14px; }
         .no-events { text-align:center; padding:40px; color:#64748b; font-size:14px; }
+
+        /* ===== EVENT FORM ===== */
+        .event-form-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .event-form-card .form-row { display:flex; gap:12px; margin:14px 0; align-items:flex-start; }
+        .event-form-card .form-input { width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#f8fafc; transition:all .3s; font-family:'Inter',sans-serif; box-sizing:border-box; }
+        .event-form-card .form-input:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); background:#fff; }
+        .form-select { padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#fff; cursor:pointer; transition:all .3s; font-family:'Inter',sans-serif; min-width:150px; }
+        .form-select:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); }
+        .form-textarea { width:100%; min-height:100px; padding:14px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#f8fafc; resize:vertical; font-family:'Inter',sans-serif; transition:all .3s; box-sizing:border-box; }
+        .form-textarea:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); background:#fff; }
+        .btn-create { width:100%; padding:14px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; transition:all .3s; box-shadow:0 4px 15px rgba(67,56,202,.25); margin-top:10px; }
+        .btn-create:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(67,56,202,.35); }
+        .btn-manage { padding:8px 18px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; transition:all .3s; margin-left:auto; float:right; }
+        .btn-manage:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(67,56,202,.3); }
+        .upload-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 18px; background:linear-gradient(135deg,#eef2ff,#e0e7ff); color:#4338CA; border:2px solid #c7d2fe; border-radius:10px; cursor:pointer; font-size:13px; font-weight:700; transition:all .3s; }
+        .upload-btn:hover { background:#e0e7ff; border-color:#4338CA; }
+        .upload-btn svg { width:18px; height:18px; stroke:#4338CA; }
+
+        /* ===== MANAGE EVENTS ===== */
+        .manage-event-item { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid #f1f5f9; }
+        .manage-event-item:last-child { border-bottom:none; }
+        .manage-event-name { font-weight:700; font-size:14px; color:#0F172A; margin-bottom:4px; }
+        .manage-event-actions { display:flex; gap:6px; }
+        .manage-event-actions .action-btn { padding:6px 14px; border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; transition:all .2s; color:#fff; }
+        .manage-event-actions .action-btn.complete { background:linear-gradient(135deg,#10b981,#059669); }
+        .manage-event-actions .action-btn.cancel { background:linear-gradient(135deg,#f59e0b,#d97706); }
+        .manage-event-actions .action-btn.delete { background:linear-gradient(135deg,#ef4444,#dc2626); }
+        .manage-event-actions .action-btn:hover { transform:translateY(-1px); box-shadow:0 3px 10px rgba(0,0,0,.2); }
+
+    
+        /* ===== MODALS ===== */
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center; }
+        .modal-overlay.show { display:flex; }
+        .modal { background:#fff; border-radius:18px; width:90%; max-width:600px; max-height:80vh; overflow-y:auto; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+        .modal h2 { font-size:20px; font-weight:800; color:#0F172A; margin-bottom:20px; }
+        .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid #f1f5f9; }
+        .btn-cancel { padding:10px 24px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+        .btn-cancel:hover { background:#e2e8f0; }
+        .btn-save { padding:10px 24px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 4px 12px rgba(67,56,202,.25); }
+        .btn-save:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(67,56,202,.35); }
 
     </style>
 </head>
@@ -464,7 +510,7 @@
                     return '<div class="manage-event-item">' +
                         '<div>' +
                         '<div class="manage-event-name">' + event.name + '</div>' +
-                        '<small style="color:#666;">Status: ' + event.status + '</small>' +
+                        '<small style="color:#64748b;">Status: ' + event.status + '</small>' +
                         '</div>' +
                         '<div class="manage-event-actions">' +
                         '<button class="action-btn complete" onclick="updateEventStatus(\'' + event._id + '\', \'Completed\')">Complete</button>' +

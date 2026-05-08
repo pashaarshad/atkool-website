@@ -128,6 +128,18 @@
         .message-body { font-size:14px; color:#475569; line-height:1.6; margin-bottom:6px; }
         .message-sendto { font-size:12px; color:#64748b; font-weight:600; }
 
+    
+        /* ===== MODALS ===== */
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center; }
+        .modal-overlay.show { display:flex; }
+        .modal { background:#fff; border-radius:18px; width:90%; max-width:600px; max-height:80vh; overflow-y:auto; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+        .modal h2 { font-size:20px; font-weight:800; color:#0F172A; margin-bottom:20px; }
+        .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid #f1f5f9; }
+        .btn-cancel { padding:10px 24px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+        .btn-cancel:hover { background:#e2e8f0; }
+        .btn-save { padding:10px 24px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 4px 12px rgba(67,56,202,.25); }
+        .btn-save:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(67,56,202,.35); }
+
     </style>
 </head>
 

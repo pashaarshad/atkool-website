@@ -52,38 +52,12 @@
         .profile-dropdown-item.logout { color:#dc2626; }
         .profile-dropdown-item.logout:hover { background:#fef2f2; }
 
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .stats-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            flex: 1;
-            background-color: #fff;
-            border: 2px solid #333;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: #666;
-            margin-top: 5px;
-        }
+        .no-data { text-align:center; padding:40px; color:#64748b; }
+        .stats-row { display:flex; gap:15px; margin-bottom:20px; }
+        .stat-card { flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:22px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.03); transition:all .3s; }
+        .stat-card:hover { border-color:#c7d2fe; transform:translateY(-2px); box-shadow:0 6px 20px rgba(67,56,202,.1); }
+        .stat-value { font-size:32px; font-weight:800; background:linear-gradient(135deg,#4338CA,#7C3AED); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .stat-label { font-size:13px; color:#64748b; margin-top:5px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
     
         /* ===== PAGE TITLE BAR ===== */
         .page-title-bar { display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 22px; margin-bottom:18px; box-shadow:0 2px 8px rgba(0,0,0,.03); }
@@ -131,14 +105,45 @@
         .toast.error { background:linear-gradient(135deg,#ef4444,#dc2626); }
         @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
     
-        /* ===== EXAM STYLES ===== */
-        .exam-card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; margin-bottom:14px; transition:all .3s; box-shadow:0 2px 8px rgba(0,0,0,.03); }
-        .exam-card:hover { border-color:#c7d2fe; box-shadow:0 6px 20px rgba(67,56,202,.1); }
-        .exam-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-        .exam-title { font-size:16px; font-weight:700; color:#0F172A; }
-        .exam-date { font-size:12px; color:#64748b; font-weight:500; }
-        .exam-details { font-size:14px; color:#475569; line-height:1.6; }
-        .no-exams { text-align:center; padding:40px; color:#64748b; font-size:14px; }
+        /* ===== EXAM FORM ===== */
+        .exam-form-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; margin-bottom:22px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .form-title { font-size:17px; font-weight:700; color:#0F172A; margin-bottom:20px; }
+        .form-row { display:flex; gap:14px; margin-bottom:14px; }
+        .form-group { flex:1; }
+        .form-label { display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
+        .form-input { width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#f8fafc; transition:all .3s; font-family:'Inter',sans-serif; box-sizing:border-box; }
+        .form-input:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); background:#fff; }
+        .form-select { width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#fff; cursor:pointer; transition:all .3s; font-family:'Inter',sans-serif; }
+        .form-select:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); }
+        .btn-schedule { width:100%; padding:14px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; transition:all .3s; box-shadow:0 4px 15px rgba(67,56,202,.25); margin-top:6px; }
+        .btn-schedule:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(67,56,202,.35); }
+
+        /* ===== SECTION HEADER + TABS ===== */
+        .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+        .tabs { display:flex; gap:6px; }
+        .tab-btn { padding:8px 18px; background:#fff; border:1px solid #e2e8f0; border-radius:8px; font-size:12px; font-weight:700; color:#64748b; cursor:pointer; transition:all .25s; }
+        .tab-btn:hover { background:#eef2ff; color:#4338CA; border-color:#c7d2fe; }
+        .tab-btn.active { background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border-color:transparent; box-shadow:0 3px 10px rgba(67,56,202,.25); }
+
+        /* ===== EXAMS TABLE ===== */
+        .exams-table { width:100%; background:#fff; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .exams-table table { width:100%; border-collapse:collapse; }
+        .exams-table th { background:linear-gradient(135deg,#0F172A,#1e293b); padding:14px; text-align:left; font-size:12px; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.5px; }
+        .exams-table td { padding:12px 14px; font-size:13px; border-bottom:1px solid #f1f5f9; color:#334155; }
+        .exams-table tr:hover { background:linear-gradient(135deg,#faf5ff,#eef2ff); }
+        .exam-status { padding:5px 12px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; display:inline-block; }
+        .exam-status.scheduled { background:#e0e7ff; color:#4338CA; }
+        .exam-status.completed { background:#d1fae5; color:#059669; }
+        .exam-status.cancelled { background:#fee2e2; color:#dc2626; }
+
+        /* ===== EXAM ACTION BUTTONS ===== */
+        .action-btn { width:30px; height:30px; border:none; border-radius:8px; cursor:pointer; font-size:14px; transition:all .2s; display:inline-flex; align-items:center; justify-content:center; margin:0 2px; }
+        .action-btn.complete { background:#d1fae5; color:#059669; }
+        .action-btn.complete:hover { background:#a7f3d0; }
+        .action-btn.cancel { background:#fef3c7; color:#d97706; }
+        .action-btn.cancel:hover { background:#fde68a; }
+        .action-btn.delete { background:#fee2e2; color:#dc2626; }
+        .action-btn.delete:hover { background:#fecaca; }
 
     </style>
 </head>
