@@ -7,195 +7,38 @@
     <title>Support Tickets - School Management System</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .tickets-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .tickets-table th,
-        .tickets-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .tickets-table th {
-            background-color: #333;
-            color: #fff;
-            font-weight: bold;
-        }
-
-        .tickets-table tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .status-progress {
-            background-color: #cce5ff;
-            color: #004085;
-        }
-
-        .status-resolved {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .ticket-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .ticket-modal.show {
-            display: flex;
-        }
-
-        .ticket-modal-content {
-            background: #fff;
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .ticket-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .ticket-modal-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .ticket-modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .ticket-detail-row {
-            margin-bottom: 15px;
-        }
-
-        .ticket-detail-label {
-            font-weight: bold;
-            color: #666;
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-
-        .ticket-detail-value {
-            font-size: 14px;
-            color: #333;
-        }
-
-        .ticket-message-box {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 10px;
-        }
-
-        .status-select {
-            padding: 8px 15px;
-            border: 2px solid #333;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .btn-update-status {
-            background: #333;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .btn-update-status:hover {
-            background: #555;
-        }
-
-        .search-filter-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 10px 15px;
-            border: 2px solid #333;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .filter-select {
-            padding: 10px 15px;
-            border: 2px solid #333;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .reply-textarea {
-            width: 100%;
-            min-height: 80px;
-            padding: 12px;
-            border: 2px solid #333;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: Arial, sans-serif;
-            resize: vertical;
-            margin-top: 10px;
-        }
-
-        .existing-reply {
-            background: #e8f5e9;
-            border: 1px solid #4caf50;
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 10px;
-        }
-
-        .reply-date {
-            font-size: 11px;
-            color: #666;
-            margin-top: 8px;
-        }
+        .tickets-table { width:100%; border-collapse:collapse; margin-top:20px; background:#fff; border-radius:14px; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .tickets-table th, .tickets-table td { padding:14px 16px; text-align:left; border-bottom:1px solid #f1f5f9; }
+        .tickets-table th { background:linear-gradient(135deg,#0F172A,#1e293b); color:#fff; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.5px; }
+        .tickets-table tr:hover { background:linear-gradient(135deg,#faf5ff,#eef2ff); }
+        .status-badge { padding:5px 14px; border-radius:20px; font-size:12px; font-weight:700; }
+        .status-pending { background:#fef3c7; color:#d97706; }
+        .status-progress { background:#dbeafe; color:#2563eb; }
+        .status-resolved { background:#d1fae5; color:#059669; }
+        .ticket-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,.6); backdrop-filter:blur(4px); z-index:1000; align-items:center; justify-content:center; }
+        .ticket-modal.show { display:flex; }
+        .ticket-modal-content { background:#fff; border-radius:20px; padding:32px; max-width:600px; width:90%; max-height:80vh; overflow-y:auto; box-shadow:0 25px 60px rgba(0,0,0,.2); }
+        .ticket-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:15px; border-bottom:2px solid #e2e8f0; }
+        .ticket-modal-title { font-size:20px; font-weight:800; color:#0F172A; }
+        .ticket-modal-close { background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8; transition:color .2s; }
+        .ticket-modal-close:hover { color:#0F172A; }
+        .ticket-detail-row { margin-bottom:15px; }
+        .ticket-detail-label { font-weight:700; color:#64748b; font-size:12px; margin-bottom:5px; text-transform:uppercase; letter-spacing:.5px; }
+        .ticket-detail-value { font-size:14px; color:#0F172A; font-weight:500; }
+        .ticket-message-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:15px; margin-top:10px; }
+        .status-select { padding:10px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; cursor:pointer; transition:all .3s; }
+        .status-select:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); }
+        .btn-update-status { background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; padding:10px 22px; border-radius:10px; cursor:pointer; margin-left:10px; font-weight:700; transition:all .3s; box-shadow:0 4px 12px rgba(67,56,202,.25); }
+        .btn-update-status:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(67,56,202,.35); }
+        .search-filter-row { display:flex; gap:15px; margin-bottom:20px; flex-wrap:wrap; }
+        .search-input { flex:1; min-width:200px; padding:10px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; transition:all .3s; }
+        .search-input:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); }
+        .filter-select { padding:10px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; cursor:pointer; transition:all .3s; }
+        .filter-select:focus { outline:none; border-color:#4338CA; }
+        .reply-textarea { width:100%; min-height:80px; padding:12px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-family:'Inter',sans-serif; resize:vertical; margin-top:10px; transition:all .3s; }
+        .reply-textarea:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); }
+        .existing-reply { background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:12px; margin-top:10px; }
+        .reply-date { font-size:11px; color:#64748b; margin-top:8px; }
     </style>
 </head>
 
