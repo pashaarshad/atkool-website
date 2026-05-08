@@ -60,14 +60,14 @@
             font-weight: bold;
             margin-bottom: 15px;
             padding: 12px 15px;
-            background: #333;
+            background:linear-gradient(135deg,#0F172A,#1e293b);
             color: #fff;
             border-radius: 10px;
         }
 
         .ticket-card {
             background: #fff;
-            border: 2px solid #333;
+            border:1px solid #e2e8f0;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 10px;
@@ -93,42 +93,42 @@
         }
 
         .status-pending {
-            background: #fff3cd;
-            color: #856404;
+            background:#fef3c7;
+            color:#d97706;
         }
 
         .status-progress {
-            background: #cce5ff;
-            color: #004085;
+            background:#dbeafe;
+            color:#2563eb;
         }
 
         .status-resolved {
-            background: #d4edda;
-            color: #155724;
+            background:#d1fae5;
+            color:#059669;
         }
 
         .ticket-message {
             font-size: 13px;
-            color: #666;
+            color:#475569;
             margin-bottom: 8px;
             line-height: 1.4;
         }
 
         .ticket-date {
             font-size: 11px;
-            color: #999;
+            color:#94a3b8;
         }
 
         .no-tickets {
             text-align: center;
             padding: 30px;
-            color: #666;
+            color:#64748b;
             font-size: 14px;
         }
 
         .ticket-reply {
-            background: #e8f5e9;
-            border-left: 3px solid #4caf50;
+            background:#ecfdf5;
+            border-left:3px solid #10b981;
             padding: 10px 12px;
             margin-top: 10px;
             border-radius: 0 8px 8px 0;
@@ -137,7 +137,7 @@
 
         .reply-label {
             font-weight: bold;
-            color: #2e7d32;
+            color:#059669;
             font-size: 11px;
             margin-bottom: 5px;
         }
@@ -146,13 +146,13 @@
             display: inline-block;
             width: 8px;
             height: 8px;
-            background: #000;
+            background:#4338CA;
             border-radius: 50%;
             margin-left: 5px;
         }
 
         .new-badge {
-            background: #f44336;
+            background:linear-gradient(135deg,#4338CA,#6366f1);
             color: #fff;
             font-size: 10px;
             padding: 2px 6px;
@@ -205,6 +205,29 @@
         .toast.success { background:linear-gradient(135deg,#10b981,#059669); }
         .toast.error { background:linear-gradient(135deg,#ef4444,#dc2626); }
         @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+    
+        /* ===== SUPPORT FORM ===== */
+        .support-form-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .support-form-card .form-row { display:flex; gap:12px; margin-bottom:14px; }
+        .support-form-card .form-input { flex:1; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#f8fafc; transition:all .3s; font-family:'Inter',sans-serif; }
+        .support-form-card .form-input:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); background:#fff; }
+        .form-select { flex:1; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#fff; cursor:pointer; transition:all .3s; font-family:'Inter',sans-serif; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234338CA' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+        .form-select:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); }
+        .form-textarea { width:100%; min-height:120px; padding:14px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#f8fafc; resize:vertical; font-family:'Inter',sans-serif; transition:all .3s; box-sizing:border-box; }
+        .form-textarea:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); background:#fff; }
+        .btn-send { width:100%; padding:14px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; transition:all .3s; box-shadow:0 4px 15px rgba(67,56,202,.25); margin-top:8px; }
+        .btn-send:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(67,56,202,.35); }
+
+        /* ===== CONTACT SECTION ===== */
+        .contact-section { margin-top:22px; background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .contact-row { display:flex; align-items:center; gap:16px; margin-bottom:14px; padding:10px 0; border-bottom:1px solid #f1f5f9; }
+        .contact-row:last-child { border-bottom:none; margin-bottom:0; }
+        .contact-icon { width:48px; height:48px; min-width:48px; background:linear-gradient(135deg,#eef2ff,#e0e7ff); border-radius:12px; display:flex; align-items:center; justify-content:center; }
+        .contact-icon svg { width:22px; height:22px; stroke:#4338CA; fill:none; }
+        .contact-info { flex:1; display:flex; gap:12px; flex-wrap:wrap; }
+        .contact-box { flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; font-size:14px; color:#334155; font-weight:600; min-width:140px; }
+        .contact-box-full { flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; font-size:14px; color:#334155; font-weight:600; }
+
     </style>
 </head>
 
@@ -334,7 +357,7 @@
 
                 <div class="contact-row">
                     <div class="contact-icon">
-                        <svg viewBox="0 0 24 24" stroke-width="2" fill="#333">
+                        <svg viewBox="0 0 24 24" stroke-width="2" fill="#4338CA">
                             <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                         </svg>
                     </div>

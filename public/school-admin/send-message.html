@@ -55,7 +55,7 @@
         .no-data {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color:#64748b;
         }
     
         /* ===== PAGE TITLE BAR ===== */
@@ -103,6 +103,31 @@
         .toast.success { background:linear-gradient(135deg,#10b981,#059669); }
         .toast.error { background:linear-gradient(135deg,#ef4444,#dc2626); }
         @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+    
+        /* ===== MESSAGE FORM ===== */
+        .message-form-card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:28px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .message-form-card .form-group { margin-bottom:20px; }
+        .message-form-card .form-label { display:block; font-size:13px; font-weight:700; color:#475569; margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+        .message-form-card .form-input { width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#f8fafc; transition:all .3s; box-sizing:border-box; font-family:'Inter',sans-serif; }
+        .message-form-card .form-input:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); background:#fff; }
+        .form-select { width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#fff; cursor:pointer; transition:all .3s; font-family:'Inter',sans-serif; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234338CA' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+        .form-select:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); }
+        .form-textarea { width:100%; min-height:120px; padding:14px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; background:#f8fafc; resize:vertical; font-family:'Inter',sans-serif; transition:all .3s; box-sizing:border-box; }
+        .form-textarea:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); background:#fff; }
+        .char-count { font-size:12px; color:#94a3b8; margin-top:6px; font-weight:500; }
+        .btn-send { padding:14px 32px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; transition:all .3s; box-shadow:0 4px 15px rgba(67,56,202,.25); margin-top:8px; }
+        .btn-send:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(67,56,202,.35); }
+        .btn-history { padding:10px 22px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all .3s; box-shadow:0 4px 12px rgba(67,56,202,.25); margin-bottom:16px; }
+        .btn-history:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(67,56,202,.35); }
+
+        /* ===== MESSAGE HISTORY ITEMS ===== */
+        .message-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:12px; border-left:4px solid #4338CA; }
+        .message-item-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+        .message-heading { font-weight:700; font-size:15px; color:#0F172A; }
+        .message-date { font-size:12px; color:#94a3b8; font-weight:500; }
+        .message-body { font-size:14px; color:#475569; line-height:1.6; margin-bottom:6px; }
+        .message-sendto { font-size:12px; color:#64748b; font-weight:600; }
+
     </style>
 </head>
 

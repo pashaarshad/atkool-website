@@ -97,6 +97,25 @@
         .toast.success { background:linear-gradient(135deg,#10b981,#059669); }
         .toast.error { background:linear-gradient(135deg,#ef4444,#dc2626); }
         @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+    
+        /* ===== OFFER / DEAL CARDS ===== */
+        .offer-card { background:linear-gradient(135deg,#0F172A,#1e293b); color:#fff; border:1px solid rgba(255,255,255,.1); border-radius:18px; padding:30px; margin-bottom:22px; box-shadow:0 8px 30px rgba(0,0,0,.2); }
+        .offer-title { font-size:18px; font-weight:800; text-align:center; margin-bottom:12px; letter-spacing:1px; color:#fff; }
+        .deal-card { background:#fff; border:1px solid #e2e8f0; border-radius:18px; padding:30px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .deal-title { font-size:16px; font-weight:700; color:#4338CA; margin-bottom:12px; text-align:center; }
+        .deal-features { list-style:none; padding:0; margin-top:16px; }
+        .deal-features li { padding:8px 16px; font-size:14px; color:#334155; border-bottom:1px solid #f1f5f9; position:relative; padding-left:28px; }
+        .deal-features li:last-child { border-bottom:none; }
+        .deal-features li::before { content:'•'; position:absolute; left:10px; color:#4338CA; font-weight:bold; font-size:18px; }
+        .pricing-row { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; }
+        .pricing-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:20px 28px; display:flex; align-items:center; gap:20px; transition:all .3s; }
+        .pricing-box:hover { border-color:#c7d2fe; box-shadow:0 4px 15px rgba(67,56,202,.1); }
+        .price-info { text-align:center; }
+        .price-label { font-size:13px; font-weight:600; color:#64748b; margin-bottom:4px; text-transform:uppercase; letter-spacing:.5px; }
+        .price-value { font-size:28px; font-weight:800; color:#0F172A; }
+        .pay-btn { padding:14px 28px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:12px; font-size:14px; font-weight:700; cursor:pointer; transition:all .3s; box-shadow:0 4px 15px rgba(67,56,202,.25); white-space:nowrap; }
+        .pay-btn:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(67,56,202,.35); }
+
     </style>
 </head>
 
