@@ -449,30 +449,79 @@ async function editSchool(id) {
 }
 
 async function deleteSchool(id) {
-    var confirmDelete = confirm('Are you sure you want to delete this school?');
-    if (!confirmDelete) {
+    var token = localStorage.getItem('adminToken');
+    try {
+        var res = await fetch('/api/schools/' + id, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) {
+            showToast('Error fetching school details', 'error');
+            return;
+        }
+        var school = await res.json();
+        
+        document.getElementById('deleteSchoolId').value = id;
+        document.getElementById('deleteSchoolName').textContent = school.name;
+        document.getElementById('deleteOtpInput').value = '';
+        
+        showToast('Sending OTP to Super Admin...', 'info');
+        
+        var otpRes = await fetch('/api/schools/' + id + '/request-delete-otp', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        
+        var otpData = await otpRes.json();
+        if (otpRes.ok) {
+            document.getElementById('deleteOtpModal').classList.add('show');
+            showToast('OTP sent successfully!', 'success');
+        } else {
+            showToast(otpData.message || 'Failed to send OTP', 'error');
+        }
+    } catch (err) {
+        console.error('Delete school error:', err);
+        showToast('Error initiating deletion process', 'error');
+    }
+}
+
+function closeDeleteOtpModal() {
+    document.getElementById('deleteOtpModal').classList.remove('show');
+    document.getElementById('deleteSchoolId').value = '';
+    document.getElementById('deleteSchoolName').textContent = '';
+    document.getElementById('deleteOtpInput').value = '';
+}
+
+async function confirmDeleteSchool() {
+    var id = document.getElementById('deleteSchoolId').value;
+    var otp = document.getElementById('deleteOtpInput').value.trim();
+    var token = localStorage.getItem('adminToken');
+    
+    if (!otp || otp.length !== 6) {
+        showToast('Please enter a valid 6-digit OTP', 'error');
         return;
     }
-
-    var token = localStorage.getItem('adminToken');
-
+    
     try {
         var response = await fetch('/api/schools/' + id, {
             method: 'DELETE',
             headers: {
-                'Authorization': 'Bearer ' + token
-            }
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ otp: otp })
         });
-
+        
+        var data = await response.json();
+        
         if (response.ok) {
+            closeDeleteOtpModal();
             loadSchools();
             showToast('School deleted successfully!', 'success');
         } else {
-            var data = await response.json();
             showToast(data.message || 'Error deleting school', 'error');
         }
     } catch (error) {
-        console.error('Delete school error:', error);
+        console.error('Confirm delete error:', error);
         showToast('Error deleting school', 'error');
     }
 }

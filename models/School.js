@@ -59,6 +59,11 @@ const schoolSchema = new mongoose.Schema({
     // School Images (maximum 6)
     schoolImages: [String],
 
+    deleteOtp: {
+        code: { type: String },
+        expiresAt: { type: Date }
+    },
+
     createdAt: {
         type: Date,
         default: Date.now

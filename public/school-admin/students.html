@@ -221,8 +221,9 @@
     <div class="school-main">
         <div class="school-sidebar">
             <a href="dashboard.html" class="school-sidebar-item">HOME</a>
-            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="teachers.html" class="school-sidebar-item">STAFF</a>
             <a href="students.html" class="school-sidebar-item active">STUDENTS</a>
+            <a href="vans.html" class="school-sidebar-item">SCHOOL VAN</a>
             <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
             <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
             <a href="plans.html" class="school-sidebar-item">PLANS</a>
@@ -303,8 +304,8 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Roll No</label>
-                    <input type="text" id="addRollNo" placeholder="Roll number">
+                    <label>Student ID *</label>
+                    <input type="text" id="addStudentId" placeholder="Enter Student ID">
                 </div>
                 <div class="form-group">
                     <label>Mobile No</label>
@@ -320,6 +321,48 @@
                     <label>Parent Mobile</label>
                     <input type="text" id="addParentMobile" placeholder="Parent mobile">
                 </div>
+            </div>
+            <div class="form-group">
+                <label>Guardian Contact Number (Secondary)</label>
+                <input type="text" id="addGuardianMobile" placeholder="Guardian contact number">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Assigned Van / Bus</label>
+                    <select id="addVanSelect">
+                        <option value="">-- No Van Assigned --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pickup Point</label>
+                    <input type="text" id="addPickupPoint" placeholder="e.g. Main Gate, Sector 4 Cross">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Student Photo</label>
+                <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px;">
+                    <input type="file" id="studentPhotoFile" accept="image/jpeg,image/png" style="flex: 1;">
+                    <button type="button" class="btn-add" id="btnStartStudentCamera" onclick="startStudentWebcam()" style="padding: 8px 14px; margin: 0; background: linear-gradient(135deg,#0F172A,#1e293b);">📷 Use Camera</button>
+                </div>
+                
+                <!-- Webcam Stream Container -->
+                <div id="studentWebcamContainer" style="display: none; flex-direction: column; align-items: center; gap: 10px; padding: 10px; background: #f1f5f9; border-radius: 8px; margin-bottom: 10px;">
+                    <video id="studentWebcamVideo" width="320" height="240" autoplay style="border-radius: 8px; border: 2px solid #cbd5e1; transform: scaleX(-1);"></video>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn-approve" onclick="captureStudentPhoto()">Capture</button>
+                        <button type="button" class="btn-reject" onclick="stopStudentWebcam()" style="margin: 0;">Cancel</button>
+                    </div>
+                </div>
+                
+                <!-- Captured Image Preview & Hidden Base64 Storage -->
+                <div id="studentPhotoPreviewContainer" style="display: none; align-items: center; gap: 15px; margin-top: 10px; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                    <img id="studentPhotoPreview" src="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #4338CA;">
+                    <div>
+                        <span style="font-size: 13px; font-weight: 600; color: #334155;">Photo selected / captured</span>
+                        <button type="button" class="btn-reject" onclick="removeStudentPhoto()" style="padding: 4px 8px; font-size: 11px; margin-top: 5px; display: block;">Remove Photo</button>
+                    </div>
+                </div>
+                <input type="hidden" id="studentPhotoBase64">
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeAddStudentModal()">Cancel</button>
@@ -505,6 +548,96 @@
 
         var allTeachers = []; // cache teachers with classAssignments
 
+        var studentLocalStream = null;
+
+        function startStudentWebcam() {
+            var video = document.getElementById('studentWebcamVideo');
+            var container = document.getElementById('studentWebcamContainer');
+            
+            container.style.display = 'flex';
+            document.getElementById('btnStartStudentCamera').style.display = 'none';
+            
+            navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
+                .then(function (stream) {
+                    studentLocalStream = stream;
+                    video.srcObject = stream;
+                })
+                .catch(function (error) {
+                    console.error("Webcam access error:", error);
+                    showToast("Failed to access webcam. Please ensure permissions are granted.", "error");
+                    stopStudentWebcam();
+                });
+        }
+
+        function stopStudentWebcam() {
+            var container = document.getElementById('studentWebcamContainer');
+            var video = document.getElementById('studentWebcamVideo');
+            
+            container.style.display = 'none';
+            document.getElementById('btnStartStudentCamera').style.display = 'inline-block';
+            
+            if (studentLocalStream) {
+                studentLocalStream.getTracks().forEach(function(track) {
+                    track.stop();
+                });
+                studentLocalStream = null;
+            }
+            if (video) {
+                video.srcObject = null;
+            }
+        }
+
+        function captureStudentPhoto() {
+            var video = document.getElementById('studentWebcamVideo');
+            var canvas = document.createElement('canvas');
+            canvas.width = 320;
+            canvas.height = 240;
+            
+            var ctx = canvas.getContext('2d');
+            
+            // Mirror image
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            var base64 = canvas.toDataURL('image/jpeg');
+            document.getElementById('studentPhotoBase64').value = base64;
+            
+            var preview = document.getElementById('studentPhotoPreview');
+            preview.src = base64;
+            document.getElementById('studentPhotoPreviewContainer').style.display = 'flex';
+            
+            stopStudentWebcam();
+        }
+
+        function removeStudentPhoto() {
+            document.getElementById('studentPhotoBase64').value = '';
+            document.getElementById('studentPhotoPreview').src = '';
+            document.getElementById('studentPhotoPreviewContainer').style.display = 'none';
+            document.getElementById('studentPhotoFile').value = '';
+        }
+
+        // Add file upload base64 listener for student photo
+        document.addEventListener('DOMContentLoaded', function() {
+            var fileInput = document.getElementById('studentPhotoFile');
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    var file = this.files[0];
+                    if (!file) return;
+                    
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var base64 = e.target.result;
+                        document.getElementById('studentPhotoBase64').value = base64;
+                        document.getElementById('studentPhotoPreview').src = base64;
+                        document.getElementById('studentPhotoPreviewContainer').style.display = 'flex';
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+
         async function openAddStudentModal() {
             var token = localStorage.getItem('schoolToken');
             var select = document.getElementById('addTeacherSelect');
@@ -512,22 +645,48 @@
             document.getElementById('addClassSelect').innerHTML = '<option value="">-- Select Class --</option>';
             document.getElementById('addSectionSelect').innerHTML = '<option value="">-- Select Section --</option>';
             document.getElementById('addStudentName').value = '';
-            document.getElementById('addRollNo').value = '';
+            document.getElementById('addStudentId').value = '';
             document.getElementById('addMobileNo').value = '';
             document.getElementById('addParentName').value = '';
             document.getElementById('addParentMobile').value = '';
+            document.getElementById('addGuardianMobile').value = '';
+            document.getElementById('addPickupPoint').value = '';
+            document.getElementById('addVanSelect').innerHTML = '<option value="">-- No Van Assigned --</option>';
+            removeStudentPhoto();
 
             try {
                 var response = await fetch('/api/teachers', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 allTeachers = await response.json();
+                
+                // Only active teachers can be assigned students
+                var activeTeachers = allTeachers.filter(function(t) { return t.role === 'Teacher'; });
+                
                 select.innerHTML = '<option value="">-- Select Teacher --</option>' +
-                    allTeachers.map(function(t) {
+                    activeTeachers.map(function(t) {
                         return '<option value="' + t._id + '">' + t.name + '</option>';
                     }).join('');
             } catch(e) {
                 select.innerHTML = '<option value="">Error loading teachers</option>';
+            }
+
+            // Load school vans
+            try {
+                var vanRes = await fetch('/api/school-vans', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (vanRes.ok) {
+                    var vans = await vanRes.json();
+                    if (vans && vans.length > 0) {
+                        var vanOptions = vans.map(function(v) {
+                            return '<option value="' + v._id + '">' + v.vehicleNumber + ' (' + v.driverName + ')</option>';
+                        }).join('');
+                        document.getElementById('addVanSelect').innerHTML += vanOptions;
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading vans:", err);
             }
 
             document.getElementById('addStudentModal').classList.add('show');
@@ -580,9 +739,10 @@
             var className = document.getElementById('addClassSelect').value;
             var section = document.getElementById('addSectionSelect').value;
             var name = document.getElementById('addStudentName').value.trim();
+            var studentId = document.getElementById('addStudentId').value.trim();
 
-            if (!teacherId || !className || !section || !name) {
-                showToast('Teacher, class, section and student name are required', 'error');
+            if (!teacherId || !className || !section || !name || !studentId) {
+                showToast('Teacher, class, section, student name and student ID are required', 'error');
                 return;
             }
 
@@ -600,10 +760,15 @@
                         className: className,
                         section: section,
                         teacherId: teacherId,
-                        rollNo: document.getElementById('addRollNo').value.trim(),
+                        studentId: studentId,
+                        rollNo: studentId, // compatibility
                         mobileNo: document.getElementById('addMobileNo').value.trim(),
                         parentName: document.getElementById('addParentName').value.trim(),
-                        parentMobile: document.getElementById('addParentMobile').value.trim()
+                        parentMobile: document.getElementById('addParentMobile').value.trim(),
+                        guardianMobile: document.getElementById('addGuardianMobile').value.trim(),
+                        vanId: document.getElementById('addVanSelect').value || null,
+                        pickupPoint: document.getElementById('addPickupPoint').value.trim(),
+                        photo: document.getElementById('studentPhotoBase64').value
                     })
                 });
                 var data = await response.json();
@@ -623,6 +788,7 @@
         }
 
         function closeAddStudentModal() {
+            stopStudentWebcam();
             document.getElementById('addStudentModal').classList.remove('show');
         }
 

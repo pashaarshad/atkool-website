@@ -217,6 +217,33 @@
         </div>
     </div>
 
+    <!-- Secure Delete OTP Modal -->
+    <div class="modal-overlay" id="deleteOtpModal">
+        <div class="confirm-modal" style="max-width: 400px;">
+            <div class="confirm-modal-icon" style="background: #fee2e2; color: #ef4444; border-color: #fca5a5;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="stroke: #ef4444; width:36px; height:36px;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <h2>Verify Deletion</h2>
+            <p class="confirm-modal-text" style="color: #4b5563;">You are about to permanently delete</p>
+            <p class="confirm-modal-name" id="deleteSchoolName" style="color: #ef4444; font-weight: bold; margin: 5px 0;"></p>
+            <p style="font-size: 13px; color: #6b7280; margin-bottom: 15px;">An OTP has been sent to your super admin email. Enter the 6-digit OTP code below to confirm deletion.</p>
+            
+            <input type="hidden" id="deleteSchoolId">
+            <div class="form-group" style="margin-bottom: 20px;">
+                <input type="text" id="deleteOtpInput" placeholder="Enter OTP" maxlength="6" style="text-align: center; font-size: 20px; font-weight: bold; letter-spacing: 5px; padding: 10px; width: 100%; border: 2px solid #e2e8f0; border-radius: 8px;">
+            </div>
+            
+            <div class="confirm-modal-actions" style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" class="btn btn-cancel" onclick="closeDeleteOtpModal()" style="flex: 1;">Cancel</button>
+                <button type="button" class="btn btn-confirm" onclick="confirmDeleteSchool()" style="background: #ef4444; color: #fff; flex: 1;">Confirm Delete</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function togglePlansMenu(event) {
             event.stopPropagation();

@@ -227,10 +227,10 @@
     <div class="school-main">
         <div class="school-sidebar">
             <a href="dashboard.html" class="school-sidebar-item active">HOME</a>
-            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="teachers.html" class="school-sidebar-item">STAFF</a>
             <a href="students.html" class="school-sidebar-item">STUDENTS</a>
-            <a href="pending-students.html" class="school-sidebar-item" id="pendingLink">PENDING<span id="pendingDot"
-                    style="display:none;width:8px;height:8px;background:#e74c3c;border-radius:50%;margin-left:5px;"></span></a>
+            <a href="vans.html" class="school-sidebar-item">SCHOOL VAN</a>
+            <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
             <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
             <a href="plans.html" class="school-sidebar-item">PLANS</a>
             <a href="support.html" class="school-sidebar-item">SUPPORT</a>
@@ -238,6 +238,7 @@
             <a href="events.html" class="school-sidebar-item">EVENTS</a>
             <a href="exams.html" class="school-sidebar-item">EXAMS</a>
             <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
         </div>
 
         <div class="school-content">
@@ -572,7 +573,7 @@
                     '<div class="plan-detail-item"><span class="plan-detail-label">Due Date</span><span class="plan-detail-value">' + formatDate(sub.dueDate) + '</span></div>' +
                     '<div class="plan-detail-item"><span class="plan-detail-label">Teachers Allowed</span><span class="plan-detail-value">' + (sub.numberOfTeachers || 0) + '</span></div>' +
                     '<div class="plan-detail-item"><span class="plan-detail-label">Students Allowed</span><span class="plan-detail-value">' + (sub.numberOfStudents || 0) + '</span></div>' +
-                    '<div class="plan-detail-item"><span class="plan-detail-label">Amount Paid</span><span class="plan-detail-value">₹' + (sub.amount || 0) + '</span></div>' +
+                    (sub.amount ? '<div class="plan-detail-item"><span class="plan-detail-label">Amount Paid</span><span class="plan-detail-value">₹' + sub.amount + '</span></div>' : '') +
                     '</div>';
             } else {
                 card.classList.add('expired');

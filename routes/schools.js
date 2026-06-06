@@ -3,6 +3,7 @@ const router = express.Router();
 const School = require('../models/School');
 const Subscription = require('../models/Subscription');
 const auth = require('../middleware/auth');
+const { sendDeleteOTP } = require('../utils/mailer');
 
 router.get('/', auth, async (req, res) => {
     try {
@@ -116,15 +117,65 @@ router.put('/:id', auth, async (req, res) => {
     }
 });
 
-router.delete('/:id', auth, async (req, res) => {
+// Request delete OTP
+router.post('/:id/request-delete-otp', auth, async (req, res) => {
     try {
-        const school = await School.findByIdAndDelete(req.params.id);
-
+        const school = await School.findById(req.params.id);
         if (!school) {
             return res.status(404).json({ message: 'School not found' });
         }
 
-        res.json({ message: 'School deleted successfully' });
+        const { otp, expiresAt } = await sendDeleteOTP(school.name, school._id);
+        
+        school.deleteOtp = {
+            code: otp,
+            expiresAt: expiresAt
+        };
+        await school.save();
+
+        res.json({ success: true, message: 'Verification OTP has been sent' });
+    } catch (error) {
+        console.error('Request delete OTP error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Delete school with OTP verification
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        const otp = req.body.otp || req.query.otp;
+
+        if (!otp) {
+            return res.status(400).json({ message: 'Verification OTP code is required' });
+        }
+
+        const school = await School.findById(req.params.id);
+        if (!school) {
+            return res.status(404).json({ message: 'School not found' });
+        }
+
+        // Verify OTP
+        if (!school.deleteOtp || !school.deleteOtp.code || school.deleteOtp.code !== otp) {
+            return res.status(400).json({ message: 'Invalid verification OTP code' });
+        }
+
+        if (new Date() > school.deleteOtp.expiresAt) {
+            return res.status(400).json({ message: 'Verification OTP code has expired. Please request a new one.' });
+        }
+
+        // Delete associated records (cascade delete)
+        const Student = require('../models/Student');
+        const Teacher = require('../models/Teacher');
+        const Subscription = require('../models/Subscription');
+
+        await Student.deleteMany({ schoolId: school._id });
+        await Teacher.deleteMany({ schoolId: school._id });
+        await Subscription.deleteMany({ schoolId: school._id });
+
+        // Delete the school
+        await School.findByIdAndDelete(school._id);
+
+        res.json({ message: 'School and all associated data deleted successfully' });
     } catch (error) {
         console.error('Delete school error:', error);
         res.status(500).json({ message: 'Server error' });

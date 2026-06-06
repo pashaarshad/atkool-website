@@ -29,7 +29,7 @@ function teacherAuth(req, res, next) {
     }
 }
 
-// Get students for teacher (optionally filtered by class/section)
+// Get students for teacher (limited to assigned classes/sections)
 router.get('/students', teacherAuth, async (req, res) => {
     try {
         const teacher = await Teacher.findById(req.teacherId);
@@ -37,23 +37,41 @@ router.get('/students', teacherAuth, async (req, res) => {
             return res.status(404).json({ message: 'Teacher not found' });
         }
 
+        // Gather all assigned classes
+        const classes = [];
+        if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+            teacher.classAssignments.forEach(c => {
+                classes.push({ className: c.className, section: c.section });
+            });
+        }
+        if (teacher.isClassTeacher && teacher.classTeacherFor && teacher.classTeacherFor.className) {
+            classes.push({
+                className: teacher.classTeacherFor.className,
+                section: teacher.classTeacherFor.section
+            });
+        }
+
+        if (classes.length === 0) {
+            return res.json([]);
+        }
+
         const { className, section } = req.query;
-        const classAssignments = teacher.classAssignments || [];
+        let query = { schoolId: req.schoolId, approvalStatus: 'Approved' };
 
-        let query = { schoolId: req.schoolId, teacherId: req.teacherId, approvalStatus: 'Approved' };
-
-        // If className and section are provided as query params, filter by them
         if (className && section) {
+            // Check if teacher is assigned to this class
+            const isAssigned = classes.some(c => c.className === className && c.section === section);
+            if (!isAssigned) {
+                return res.status(403).json({ message: 'Access denied: not assigned to this class' });
+            }
             query.className = className;
             query.section = section;
+        } else {
+            // Return all students in any of the assigned classes
+            query.$or = classes.map(c => ({ className: c.className, section: c.section }));
         }
-        // No class filter needed otherwise — teacherId already scopes to this teacher's students
 
         const students = await Student.find(query).sort({ rollNo: 1, name: 1 });
-
-        console.log('Student query:', JSON.stringify(query));
-        console.log('Students found:', students.length);
-
         res.json(students);
     } catch (error) {
         console.error('Get teacher students error:', error);
@@ -61,13 +79,30 @@ router.get('/students', teacherAuth, async (req, res) => {
     }
 });
 
-// Add student by teacher
+// Add student by teacher (Class Teacher ONLY for their assigned class)
 router.post('/students', teacherAuth, async (req, res) => {
     try {
-        const { name, className, section, rollNo, email, mobileNo, parentName, parentMobile, address } = req.body;
+        const { name, className, section, rollNo, studentId, email, mobileNo, parentName, parentMobile, guardianMobile, vanId, pickupPoint, address, photo } = req.body;
 
         if (!name || !className) {
             return res.status(400).json({ message: 'Name and class are required' });
+        }
+
+        const teacher = await Teacher.findById(req.teacherId);
+        if (!teacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+
+        // Class Teacher Restriction
+        if (!teacher.isClassTeacher) {
+            return res.status(403).json({ message: 'Access denied: only Class Teachers can add students' });
+        }
+
+        const primaryClass = teacher.classTeacherFor;
+        if (!primaryClass || primaryClass.className !== className || primaryClass.section !== (section || 'A')) {
+            return res.status(403).json({ 
+                message: `Access denied: you can only add students to your assigned class (${primaryClass ? primaryClass.className + ' ' + primaryClass.section : 'None'})` 
+            });
         }
 
         const student = await Student.create({
@@ -76,17 +111,20 @@ router.post('/students', teacherAuth, async (req, res) => {
             name,
             className,
             section: section || 'A',
-            rollNo,
+            rollNo: rollNo || studentId,
+            studentId,
             email,
             mobileNo,
             parentName,
             parentMobile,
+            guardianMobile,
+            vanId: vanId || null,
+            pickupPoint,
             address,
             status: 'Active',
-            approvalStatus: 'Pending' // New students start as Pending until admin approves
+            approvalStatus: 'Pending', // New students start as Pending until admin approves
+            photo
         });
-
-        // Don't increment school student count - will be done when admin approves
 
         res.status(201).json({
             ...student.toObject(),

@@ -81,6 +81,7 @@ app.get('/terms', (req, res) => {
 });
 
 app.use('/api/school-auth', require('./routes/school-auth'));
+app.use('/api/school-vans', require('./routes/school-vans'));
 app.use('/api/teachers', require('./routes/teachers'));
 app.use('/api/students', require('./routes/students'));
 app.use('/api/school-messages', require('./routes/school-messages'));

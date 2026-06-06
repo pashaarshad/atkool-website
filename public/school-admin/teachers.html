@@ -273,8 +273,9 @@
     <div class="school-main">
         <div class="school-sidebar">
             <a href="dashboard.html" class="school-sidebar-item">HOME</a>
-            <a href="teachers.html" class="school-sidebar-item active">TEACHER</a>
+            <a href="teachers.html" class="school-sidebar-item active">STAFF</a>
             <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="vans.html" class="school-sidebar-item">SCHOOL VAN</a>
             <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
             <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
             <a href="plans.html" class="school-sidebar-item">PLANS</a>
@@ -294,12 +295,11 @@
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
-                    Teachers
+                    Staff Management
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn-add" onclick="exportTeachers()"
                         style="background-color: #28a745;">Export</button>
-                    <!-- Add Teacher moved to quick actions, but keeping here if user wants redundancy, or remove? User asked for 4 buttons. I will keep it consistent with request and remove the specific button here if it duplicates, BUT the design usually keeps a primary action top right. The user said "add a dive area above search related make full width i want atlest 4 button". I will place the quick actions below title bar. -->
                 </div>
             </div>
 
@@ -313,7 +313,7 @@
                             <line x1="20" y1="8" x2="20" y2="14"></line>
                             <line x1="23" y1="11" x2="17" y2="11"></line>
                         </svg>
-                        Add Teacher
+                        Add Staff
                     </button>
                     <button class="quick-action-btn" onclick="window.location.href='students.html'">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -357,6 +357,7 @@
                         <tr>
                             <th>S.No.</th>
                             <th>Name</th>
+                            <th>Role</th>
                             <th>Email</th>
                             <th>Mobile</th>
                             <th>Class</th>
@@ -369,7 +370,7 @@
                     </thead>
                     <tbody id="teachersTableBody">
                         <tr>
-                            <td colspan="10" style="text-align:center;padding:20px;">Loading...</td>
+                            <td colspan="11" style="text-align:center;padding:20px;">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -391,7 +392,7 @@
                     <input type="email" id="teacherEmail">
                 </div>
                 <div class="form-group">
-                    <label>Password (for teacher login)</label>
+                    <label>Password (for staff login)</label>
                     <input type="password" id="teacherPassword" placeholder="Leave empty to keep unchanged">
                 </div>
                 <div class="form-group">
@@ -400,27 +401,103 @@
                         title="Please enter exactly 10 digits" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                         placeholder="Enter 10 digit mobile number">
                 </div>
-                <div class="class-assignments-container">
-                    <div class="class-assignments-header">
-                        <label>Class Assignments</label>
-                        <button type="button" class="btn-add-class" id="btnAddClass" onclick="addClassAssignment()">
-                            + Add Class
-                        </button>
+                <div class="form-group">
+                    <label>Staff Role *</label>
+                    <select id="teacherRole" onchange="toggleRoleFields()" required>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Principal">Principal</option>
+                        <option value="Non-Teaching">Non-Teaching Staff</option>
+                    </select>
+                </div>
+                
+                <div id="teacherOnlyFields">
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-bottom: 15px;">
+                        <input type="checkbox" id="teacherIsClassTeacher" onchange="toggleClassTeacherFields()" style="width:auto; margin:0;">
+                        <label for="teacherIsClassTeacher" style="margin:0; font-weight:normal; cursor:pointer;">Is Class Teacher?</label>
                     </div>
-                    <div id="classAssignmentsList">
-                        <div class="no-assignments-msg">No classes assigned. Click "Add Class" to assign.</div>
+                    
+                    <div id="classTeacherContainer" class="form-row" style="display:none; margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label>Class Teacher For (Class)</label>
+                            <select id="classTeacherClass">
+                                <option value="">Select Class</option>
+                                <option value="1">Class 1</option>
+                                <option value="2">Class 2</option>
+                                <option value="3">Class 3</option>
+                                <option value="4">Class 4</option>
+                                <option value="5">Class 5</option>
+                                <option value="6">Class 6</option>
+                                <option value="7">Class 7</option>
+                                <option value="8">Class 8</option>
+                                <option value="9">Class 9</option>
+                                <option value="10">Class 10</option>
+                                <option value="11">Class 11</option>
+                                <option value="12">Class 12</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Class Teacher For (Section)</label>
+                            <select id="classTeacherSection">
+                                <option value="">Select Section</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="class-assignments-container">
+                        <div class="class-assignments-header">
+                            <label>Class Assignments (Subject Classes)</label>
+                            <button type="button" class="btn-add-class" id="btnAddClass" onclick="addClassAssignment()">
+                                + Add Class
+                            </button>
+                        </div>
+                        <div id="classAssignmentsList">
+                            <div class="no-assignments-msg">No classes assigned. Click "Add Class" to assign.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Subjects</label>
+                        <div class="subject-tags-container" id="subjectTagsContainer"></div>
+                        <div style="display:flex;gap:8px;margin-top:6px;">
+                            <input type="text" id="subjectInput" placeholder="Type subject and press Add" style="flex:1;">
+                            <button type="button" onclick="addSubjectTag()" style="padding:8px 14px;background:#000;color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:bold;">Add</button>
+                        </div>
                     </div>
                 </div>
+
                 <div class="form-group">
-                    <label>Subjects</label>
-                    <div class="subject-tags-container" id="subjectTagsContainer"></div>
-                    <div style="display:flex;gap:8px;margin-top:6px;">
-                        <input type="text" id="subjectInput" placeholder="Type subject and press Add" style="flex:1;">
-                        <button type="button" onclick="addSubjectTag()" style="padding:8px 14px;background:#000;color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:bold;">Add</button>
+                    <label>Staff Photo</label>
+                    <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px;">
+                        <input type="file" id="teacherPhotoFile" accept="image/jpeg,image/png" style="flex: 1;">
+                        <button type="button" class="btn-add" id="btnStartCamera" onclick="startWebcam()" style="padding: 8px 14px; margin: 0; background: linear-gradient(135deg,#0F172A,#1e293b);">📷 Use Camera</button>
                     </div>
+                    
+                    <!-- Webcam Stream Container -->
+                    <div id="webcamContainer" style="display: none; flex-direction: column; align-items: center; gap: 10px; padding: 10px; background: #f1f5f9; border-radius: 8px; margin-bottom: 10px;">
+                        <video id="webcamVideo" width="320" height="240" autoplay style="border-radius: 8px; border: 2px solid #cbd5e1; transform: scaleX(-1);"></video>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn-approve" onclick="capturePhoto()">Capture</button>
+                            <button type="button" class="btn-reject" onclick="stopWebcam()" style="margin: 0;">Cancel</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Captured Image Preview & Hidden Base64 Storage -->
+                    <div id="photoPreviewContainer" style="display: none; align-items: center; gap: 15px; margin-top: 10px; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                        <img id="teacherPhotoPreview" src="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #4338CA;">
+                        <div>
+                            <span style="font-size: 13px; font-weight: 600; color: #334155;">Photo selected / captured</span>
+                            <button type="button" class="btn-reject" onclick="removePhoto()" style="padding: 4px 8px; font-size: 11px; margin-top: 5px; display: block;">Remove Photo</button>
+                        </div>
+                    </div>
+                    <input type="hidden" id="teacherPhotoBase64">
                 </div>
+
                 <div class="form-group">
-                    <label>Students</label>
+                    <label>Students (Total Students under supervision)</label>
                     <input type="number" id="teacherStudents" value="0">
                 </div>
                 <div class="form-group">
@@ -587,25 +664,32 @@
                 });
 
                 if (!response.ok) {
-                    tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;">Error loading teachers</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;">Error loading staff</td></tr>';
                     return;
                 }
 
                 var teachers = await response.json();
 
                 if (teachers.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;">No teachers found</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;">No staff found</td></tr>';
                     return;
                 }
 
                 tableBody.innerHTML = teachers.map(function (teacher, index) {
                     var classDisplay = '-';
-                    if (teacher.classAssignments && teacher.classAssignments.length > 0) {
-                        classDisplay = teacher.classAssignments.map(function (ca) {
-                            return '<span class="class-badge">' + ca.className + '-' + ca.section + '</span>';
-                        }).join('');
-                    } else if (teacher.className) {
-                        classDisplay = teacher.className;
+                    if (teacher.role === 'Teacher') {
+                        if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+                            classDisplay = teacher.classAssignments.map(function (ca) {
+                                return '<span class="class-badge">' + ca.className + '-' + ca.section + '</span>';
+                            }).join('');
+                        } else if (teacher.className) {
+                            classDisplay = teacher.className;
+                        }
+                        if (teacher.isClassTeacher && teacher.classTeacherFor) {
+                            classDisplay += ' <br><span style="font-size: 11px; background:#d1fae5; color:#065f46; padding:2px 6px; border-radius:10px;">Class Tr: ' + teacher.classTeacherFor.className + '-' + teacher.classTeacherFor.section + '</span>';
+                        }
+                    } else {
+                        classDisplay = '<span style="color: #94a3b8; font-style: italic;">N/A</span>';
                     }
 
                     // Status badge
@@ -640,13 +724,16 @@
                         joiningDate = day + '-' + month + '-' + year;
                     }
 
+                    var roleBadge = '<span style="font-weight: 600; color: #1e293b;">' + (teacher.role || 'Teacher') + '</span>';
+
                     return '<tr>' +
                         '<td>' + (index + 1) + '</td>' +
                         '<td>' + teacher.name + '</td>' +
+                        '<td>' + roleBadge + '</td>' +
                         '<td>' + (teacher.email || 'N/A') + '</td>' +
                         '<td>' + (teacher.mobileNo || 'N/A') + '</td>' +
                         '<td>' + classDisplay + '</td>' +
-                        '<td>' + (teacher.subject || '-') + '</td>' +
+                        '<td>' + (teacher.role === 'Teacher' ? (teacher.subject || '-') : '<span style="color: #94a3b8; font-style: italic;">N/A</span>') + '</td>' +
                         '<td>' + statusBadge + '</td>' +
                         '<td>' + deviceInfo + '</td>' +
                         '<td>' + joiningDate + '</td>' +
@@ -662,9 +749,127 @@
 
             } catch (error) {
                 console.error('Load teachers error:', error);
-                tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;">Error loading teachers</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;">Error loading staff</td></tr>';
             }
         }
+
+        function toggleRoleFields() {
+            var role = document.getElementById('teacherRole').value;
+            var onlyFields = document.getElementById('teacherOnlyFields');
+            if (role === 'Teacher') {
+                onlyFields.style.display = 'block';
+            } else {
+                onlyFields.style.display = 'none';
+                document.getElementById('teacherIsClassTeacher').checked = false;
+                toggleClassTeacherFields();
+            }
+        }
+
+        function toggleClassTeacherFields() {
+            var isClassTeacher = document.getElementById('teacherIsClassTeacher').checked;
+            var container = document.getElementById('classTeacherContainer');
+            if (isClassTeacher) {
+                container.style.display = 'flex';
+                document.getElementById('classTeacherClass').setAttribute('required', 'required');
+                document.getElementById('classTeacherSection').setAttribute('required', 'required');
+            } else {
+                container.style.display = 'none';
+                document.getElementById('classTeacherClass').removeAttribute('required');
+                document.getElementById('classTeacherSection').removeAttribute('required');
+                document.getElementById('classTeacherClass').value = '';
+                document.getElementById('classTeacherSection').value = '';
+            }
+        }
+
+        var localStream = null;
+
+        function startWebcam() {
+            var video = document.getElementById('webcamVideo');
+            var container = document.getElementById('webcamContainer');
+            
+            container.style.display = 'flex';
+            document.getElementById('btnStartCamera').style.display = 'none';
+            
+            navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
+                .then(function (stream) {
+                    localStream = stream;
+                    video.srcObject = stream;
+                })
+                .catch(function (error) {
+                    console.error("Webcam access error:", error);
+                    showToast("Failed to access webcam. Please ensure permissions are granted.", "error");
+                    stopWebcam();
+                });
+        }
+
+        function stopWebcam() {
+            var container = document.getElementById('webcamContainer');
+            var video = document.getElementById('webcamVideo');
+            
+            container.style.display = 'none';
+            document.getElementById('btnStartCamera').style.display = 'inline-block';
+            
+            if (localStream) {
+                localStream.getTracks().forEach(function(track) {
+                    track.stop();
+                });
+                localStream = null;
+            }
+            if (video) {
+                video.srcObject = null;
+            }
+        }
+
+        function capturePhoto() {
+            var video = document.getElementById('webcamVideo');
+            var canvas = document.createElement('canvas');
+            canvas.width = 320;
+            canvas.height = 240;
+            
+            var ctx = canvas.getContext('2d');
+            
+            // Mirror image
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            var base64 = canvas.toDataURL('image/jpeg');
+            document.getElementById('teacherPhotoBase64').value = base64;
+            
+            var preview = document.getElementById('teacherPhotoPreview');
+            preview.src = base64;
+            document.getElementById('photoPreviewContainer').style.display = 'flex';
+            
+            stopWebcam();
+        }
+
+        function removePhoto() {
+            document.getElementById('teacherPhotoBase64').value = '';
+            document.getElementById('teacherPhotoPreview').src = '';
+            document.getElementById('photoPreviewContainer').style.display = 'none';
+            document.getElementById('teacherPhotoFile').value = '';
+        }
+
+        // Add file upload base64 listener
+        document.addEventListener('DOMContentLoaded', function() {
+            var fileInput = document.getElementById('teacherPhotoFile');
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    var file = this.files[0];
+                    if (!file) return;
+                    
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var base64 = e.target.result;
+                        document.getElementById('teacherPhotoBase64').value = base64;
+                        document.getElementById('teacherPhotoPreview').src = base64;
+                        document.getElementById('photoPreviewContainer').style.display = 'flex';
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
 
         function openModal(teacher) {
             var modal = document.getElementById('teacherModal');
@@ -673,16 +878,34 @@
             // Reset class assignments
             document.getElementById('classAssignmentsList').innerHTML = '<div class="no-assignments-msg">No classes assigned. Click "Add Class" to assign.</div>';
             updateAddClassButton();
+            removePhoto();
 
             if (teacher) {
-                modalTitle.textContent = 'Edit Teacher';
+                modalTitle.textContent = 'Edit Staff Details';
                 document.getElementById('teacherId').value = teacher._id;
                 document.getElementById('teacherName').value = teacher.name;
                 document.getElementById('teacherEmail').value = teacher.email || '';
                 document.getElementById('teacherMobile').value = teacher.mobileNo || '';
+                document.getElementById('teacherRole').value = teacher.role || 'Teacher';
+                document.getElementById('teacherIsClassTeacher').checked = teacher.isClassTeacher || false;
+                
+                toggleRoleFields();
+                toggleClassTeacherFields();
+                
+                if (teacher.isClassTeacher && teacher.classTeacherFor) {
+                    document.getElementById('classTeacherClass').value = teacher.classTeacherFor.className || '';
+                    document.getElementById('classTeacherSection').value = teacher.classTeacherFor.section || '';
+                }
+                
                 setSubjects(teacher.subject || '');
                 document.getElementById('teacherStudents').value = teacher.students || 0;
                 document.getElementById('teacherStatus').value = teacher.status;
+
+                if (teacher.photo) {
+                    document.getElementById('teacherPhotoBase64').value = teacher.photo;
+                    document.getElementById('teacherPhotoPreview').src = teacher.photo;
+                    document.getElementById('photoPreviewContainer').style.display = 'flex';
+                }
 
                 // Load class assignments
                 if (teacher.classAssignments && teacher.classAssignments.length > 0) {
@@ -692,9 +915,13 @@
                     });
                 }
             } else {
-                modalTitle.textContent = 'Add Teacher';
+                modalTitle.textContent = 'Add Staff Member';
                 document.getElementById('teacherForm').reset();
                 document.getElementById('teacherId').value = '';
+                document.getElementById('teacherRole').value = 'Teacher';
+                document.getElementById('teacherIsClassTeacher').checked = false;
+                toggleRoleFields();
+                toggleClassTeacherFields();
                 document.getElementById('subjectTagsContainer').innerHTML = '';
             }
 
@@ -702,35 +929,48 @@
         }
 
         function closeModal() {
+            stopWebcam();
             document.getElementById('teacherModal').classList.remove('show');
         }
 
         async function saveTeacher() {
             var token = localStorage.getItem('schoolToken');
             var teacherId = document.getElementById('teacherId').value;
+            var role = document.getElementById('teacherRole').value;
 
             // Collect class assignments
             var classAssignments = [];
-            var rows = document.querySelectorAll('.class-assignment-row');
-            rows.forEach(function (row) {
-                var classSelect = row.querySelector('.class-select');
-                var sectionSelect = row.querySelector('.section-select');
-                if (classSelect && sectionSelect && classSelect.value && sectionSelect.value) {
-                    classAssignments.push({
-                        className: classSelect.value,
-                        section: sectionSelect.value
-                    });
-                }
-            });
+            if (role === 'Teacher') {
+                var rows = document.querySelectorAll('.class-assignment-row');
+                rows.forEach(function (row) {
+                    var classSelect = row.querySelector('.class-select');
+                    var sectionSelect = row.querySelector('.section-select');
+                    if (classSelect && sectionSelect && classSelect.value && sectionSelect.value) {
+                        classAssignments.push({
+                            className: classSelect.value,
+                            section: sectionSelect.value
+                        });
+                    }
+                });
+            }
+
+            var isClassTeacher = (role === 'Teacher') && document.getElementById('teacherIsClassTeacher').checked;
 
             var teacherData = {
                 name: document.getElementById('teacherName').value,
                 email: document.getElementById('teacherEmail').value,
                 mobileNo: document.getElementById('teacherMobile').value,
+                role: role,
+                isClassTeacher: isClassTeacher,
+                classTeacherFor: isClassTeacher ? {
+                    className: document.getElementById('classTeacherClass').value,
+                    section: document.getElementById('classTeacherSection').value
+                } : null,
                 classAssignments: classAssignments,
-                subject: getSubjects().join(', '),
+                subject: role === 'Teacher' ? getSubjects().join(', ') : '',
                 students: parseInt(document.getElementById('teacherStudents').value) || 0,
-                status: document.getElementById('teacherStatus').value
+                status: document.getElementById('teacherStatus').value,
+                photo: document.getElementById('teacherPhotoBase64').value
             };
 
             // Add password only if provided
@@ -755,14 +995,14 @@
                 if (response.ok) {
                     closeModal();
                     loadTeachers();
-                    showToast('Teacher saved successfully!', 'success');
+                    showToast('Staff saved successfully!', 'success');
                 } else {
                     var data = await response.json();
-                    showToast(data.message || 'Error saving teacher', 'error');
+                    showToast(data.message || 'Error saving staff', 'error');
                 }
             } catch (error) {
-                console.error('Save teacher error:', error);
-                showToast('Error saving teacher', 'error');
+                console.error('Save staff error:', error);
+                showToast('Error saving staff', 'error');
             }
         }
 
@@ -774,19 +1014,34 @@
                 });
                 var teacher = await response.json();
 
+                var photoHtml = teacher.photo ? 
+                    '<div style="text-align: center; margin-bottom: 20px;"><img src="' + teacher.photo + '" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #4338CA;"></div>' : 
+                    '<div style="text-align: center; margin-bottom: 20px;"><div style="width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; color: #64748b; font-weight: bold;">' + teacher.name.charAt(0) + '</div></div>';
+
                 var classDisplay = 'N/A';
-                if (teacher.classAssignments && teacher.classAssignments.length > 0) {
-                    classDisplay = teacher.classAssignments.map(function (ca) {
-                        return '<span class="class-badge">' + ca.className + '-' + ca.section + '</span>';
-                    }).join(' ');
-                } else if (teacher.className) {
-                    classDisplay = teacher.className;
+                if (teacher.role === 'Teacher') {
+                    if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+                        classDisplay = teacher.classAssignments.map(function (ca) {
+                            return '<span class="class-badge">' + ca.className + '-' + ca.section + '</span>';
+                        }).join(' ');
+                    } else if (teacher.className) {
+                        classDisplay = teacher.className;
+                    }
+                    if (teacher.isClassTeacher && teacher.classTeacherFor) {
+                        classDisplay += ' <br><span style="font-size: 11px; background:#d1fae5; color:#065f46; padding:2px 6px; border-radius:10px; margin-top: 5px; display: inline-block;">Class Teacher: ' + teacher.classTeacherFor.className + '-' + teacher.classTeacherFor.section + '</span>';
+                    }
+                } else {
+                    classDisplay = '<span style="color: #94a3b8; font-style: italic;">N/A (Non-Teaching/Principal)</span>';
                 }
 
-                var content =
+                var content = photoHtml +
                     '<div class="view-detail-row">' +
                     '<span class="view-detail-label">Name:</span>' +
                     '<span class="view-detail-value">' + teacher.name + '</span>' +
+                    '</div>' +
+                    '<div class="view-detail-row">' +
+                    '<span class="view-detail-label">Role:</span>' +
+                    '<span class="view-detail-value"><strong>' + (teacher.role || 'Teacher') + '</strong></span>' +
                     '</div>' +
                     '<div class="view-detail-row">' +
                     '<span class="view-detail-label">Email:</span>' +
@@ -802,10 +1057,10 @@
                     '</div>' +
                     '<div class="view-detail-row">' +
                     '<span class="view-detail-label">Subject:</span>' +
-                    '<span class="view-detail-value">' + (teacher.subject || 'N/A') + '</span>' +
+                    '<span class="view-detail-value">' + (teacher.role === 'Teacher' ? (teacher.subject || 'N/A') : 'N/A') + '</span>' +
                     '</div>' +
                     '<div class="view-detail-row">' +
-                    '<span class="view-detail-label">Students:</span>' +
+                    '<span class="view-detail-label">Supervision Students:</span>' +
                     '<span class="view-detail-value">' + (teacher.students || 0) + '</span>' +
                     '</div>' +
                     '<div class="view-detail-row">' +
@@ -816,7 +1071,7 @@
                 document.getElementById('viewTeacherContent').innerHTML = content;
                 document.getElementById('viewTeacherModal').classList.add('show');
             } catch (error) {
-                showToast('Error loading teacher', 'error');
+                showToast('Error loading details', 'error');
             }
         }
 

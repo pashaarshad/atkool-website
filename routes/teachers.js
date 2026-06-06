@@ -15,12 +15,15 @@ function schoolAuth(req, res, next) {
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_admin_secret_key_2024');
 
-        if (decoded.type !== 'school') {
-            return res.status(401).json({ message: 'Invalid token type' });
+        if (decoded.type === 'school') {
+            req.schoolId = decoded.schoolId;
+            next();
+        } else if (decoded.type === 'teacher' && decoded.role === 'Principal') {
+            req.schoolId = decoded.schoolId;
+            next();
+        } else {
+            return res.status(403).json({ message: 'Access denied' });
         }
-
-        req.schoolId = decoded.schoolId;
-        next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid token' });
     }
@@ -64,7 +67,7 @@ router.get('/:id', schoolAuth, async (req, res) => {
 
 router.post('/', schoolAuth, async (req, res) => {
     try {
-        const { name, email, mobileNo, className, classAssignments, subject, students, status, salary, address, photo, password } = req.body;
+        const { name, email, mobileNo, className, classAssignments, subject, students, status, salary, address, photo, password, role, isClassTeacher, classTeacherFor } = req.body;
 
         if (!name) {
             return res.status(400).json({ message: 'Teacher name is required' });
@@ -82,7 +85,10 @@ router.post('/', schoolAuth, async (req, res) => {
             status: status || 'Active',
             salary: salary || 0,
             address,
-            photo
+            photo,
+            role: role || 'Teacher',
+            isClassTeacher: isClassTeacher || false,
+            classTeacherFor: classTeacherFor || null
         };
 
         // Hash password if provided
@@ -144,9 +150,9 @@ router.put('/:id/mark-leave', schoolAuth, async (req, res) => {
 
 router.put('/:id', schoolAuth, async (req, res) => {
     try {
-        const { name, email, password, mobileNo, className, classAssignments, subject, students, status, salary, address, photo } = req.body;
+        const { name, email, password, mobileNo, className, classAssignments, subject, students, status, salary, address, photo, role, isClassTeacher, classTeacherFor } = req.body;
 
-        const updateData = { name, email, mobileNo, className, classAssignments: classAssignments || [], subject, students, status, salary, address, photo };
+        const updateData = { name, email, mobileNo, className, classAssignments: classAssignments || [], subject, students, status, salary, address, photo, role, isClassTeacher, classTeacherFor };
 
         // Hash password if provided
         if (password) {

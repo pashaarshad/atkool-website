@@ -75,7 +75,7 @@ router.post('/login', async (req, res) => {
         const school = await School.findById(teacher.schoolId);
 
         const token = jwt.sign(
-            { teacherId: teacher._id, schoolId: teacher.schoolId, email: teacher.email, type: 'teacher' },
+            { teacherId: teacher._id, schoolId: teacher.schoolId, email: teacher.email, type: 'teacher', role: teacher.role || 'Teacher' },
             process.env.JWT_SECRET || 'super_admin_secret_key_2024',
             { expiresIn: '24h' }
         );
@@ -86,6 +86,7 @@ router.post('/login', async (req, res) => {
                 id: teacher._id,
                 name: teacher.name,
                 email: teacher.email,
+                role: teacher.role || 'Teacher',
                 mobileNo: teacher.mobileNo,
                 className: teacher.className,
                 classAssignments: teacher.classAssignments || [],
@@ -131,6 +132,7 @@ router.get('/me', async (req, res) => {
             id: teacher._id,
             name: teacher.name,
             email: teacher.email,
+            role: teacher.role || 'Teacher',
             mobileNo: teacher.mobileNo,
             className: teacher.className,
             classAssignments: teacher.classAssignments || [],

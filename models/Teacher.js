@@ -19,6 +19,19 @@ const teacherSchema = new mongoose.Schema({
     mobileNo: {
         type: String
     },
+    role: {
+        type: String,
+        enum: ['Teacher', 'Principal', 'Non-Teaching'],
+        default: 'Teacher'
+    },
+    isClassTeacher: {
+        type: Boolean,
+        default: false
+    },
+    classTeacherFor: {
+        className: { type: String },
+        section: { type: String }
+    },
     className: {
         type: String
     },
