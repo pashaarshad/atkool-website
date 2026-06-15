@@ -93,6 +93,9 @@ app.use('/api/teacher-auth', require('./routes/teacher-auth'));
 app.use('/api/parent-auth', require('./routes/parent-auth'));
 app.use('/api/teacher', require('./routes/teacher'));
 app.use('/api/office-staff', require('./routes/office-staff'));
+app.use('/api/school-fees', require('./routes/school-fees'));
+app.use('/api/parent-fees', require('./routes/parent-fees'));
+app.use('/api/leaves', require('./routes/leaves'));
 
 app.get('/support', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'support.html'));

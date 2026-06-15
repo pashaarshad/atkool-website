@@ -184,4 +184,85 @@ router.get('/attendance', parentAuth, async (req, res) => {
     }
 });
 
+// Change Parent Password
+router.put('/change-password', parentAuth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Current and new passwords are required' });
+        }
+
+        const student = await Student.findById(req.studentId);
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        if (student.parentPassword !== currentPassword) {
+            return res.status(400).json({ message: 'Invalid current password' });
+        }
+
+        student.parentPassword = newPassword;
+        await student.save();
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Change parent password error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Change Parent Email
+router.put('/change-email', parentAuth, async (req, res) => {
+    try {
+        const { newEmail } = req.body;
+        if (!newEmail) {
+            return res.status(400).json({ message: 'New email is required' });
+        }
+
+        const student = await Student.findById(req.studentId);
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        student.email = newEmail;
+        await student.save();
+
+        res.json({ message: 'Email updated successfully', email: newEmail });
+// Get exams for student's class
+router.get('/exams', parentAuth, async (req, res) => {
+    try {
+        const Exam = require('../models/Exam');
+        const student = await Student.findById(req.studentId);
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        const exams = await Exam.find({
+            schoolId: req.schoolId,
+            className: student.className
+        }).sort({ examDate: 1 });
+
+        res.json(exams);
+    } catch (error) {
+        console.error('Get parent exams error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get broadcast messages for parents/students
+router.get('/messages', parentAuth, async (req, res) => {
+    try {
+        const SchoolMessage = require('../models/SchoolMessage');
+        const messages = await SchoolMessage.find({
+            schoolId: req.schoolId,
+            sendTo: { $in: ['All', 'Students'] }
+        }).sort({ createdAt: -1 });
+
+        res.json(messages);
+    } catch (error) {
+        console.error('Get parent messages error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router;
