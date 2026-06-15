@@ -29,9 +29,11 @@ function showToast(msg, type = 'success') {
 // ============ SIDEBAR ============
 const menuItems = [
     { id:'dashboard', label:'Overview', icon:'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+    { id:'my-classes', label:'My Classes', icon:'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
     { id:'students', label:'My Students', icon:'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
     { id:'attendance', label:'Take Attendance', icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
     { id:'history', label:'Attendance History', icon:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { id:'chat', label:'Chat', icon:'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
     { id:'add-student', label:'Add Student', icon:'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
     { id:'requests', label:'Student Requests', icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
     { id:'events', label:'School Events', icon:'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
@@ -43,16 +45,43 @@ menuItems.forEach((m, i) => {
     const div = document.createElement('div');
     div.className = `menu-item${i === 0 ? ' active' : ''}`;
     div.onclick = () => loadView(m.id, div);
-    div.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${m.icon}"></path></svg>${m.label}`;
+    div.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${m.icon}"></path></svg>${m.label}${m.id === 'chat' ? '<span class="chat-badge" id="chatBadge" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;margin-left:auto"></span>' : ''}`;
     sidebar.appendChild(div);
 });
+
+// Load unread chat count for badge
+async function updateChatBadge() {
+    try {
+        const data = await fetchAPI('/api/chat/teacher/unread-count');
+        const badge = document.getElementById('chatBadge');
+        if (data && data.count > 0) {
+            badge.textContent = data.count;
+            badge.style.display = 'inline';
+        } else {
+            badge.style.display = 'none';
+        }
+    } catch(e) {}
+}
+updateChatBadge();
+setInterval(updateChatBadge, 30000); // Refresh every 30 seconds
 
 function loadView(view, el) {
     document.querySelectorAll('.menu-item').forEach(e => e.classList.remove('active'));
     if (el) el.classList.add('active');
     const c = document.getElementById('mainContent');
     c.innerHTML = '<div class="loader">Loading...</div>';
-    const views = { dashboard: loadDashboard, students: loadStudents, attendance: loadAttendance, history: loadHistory, 'add-student': loadAddStudent, requests: loadRequests, events: loadEvents, exams: loadExams };
+    const views = { 
+        dashboard: loadDashboard, 
+        'my-classes': loadMyClasses, 
+        students: loadStudents, 
+        attendance: loadAttendance, 
+        history: loadHistory, 
+        chat: loadChat, 
+        'add-student': loadAddStudent, 
+        requests: loadRequests, 
+        events: loadEvents, 
+        exams: loadExams 
+    };
     (views[view] || loadDashboard)();
 }
 
@@ -79,15 +108,139 @@ async function loadDashboard() {
             <div class="stat-card bg-purple"><div class="icon">📊</div><div class="value">${attendPct}%</div><div class="label">Attendance Rate</div></div>
         </div>
         <div class="quick-actions">
+            <div class="action-tile" onclick="loadView('my-classes')"><div class="tile-icon" style="background:linear-gradient(135deg,#4338CA,#7C3AED)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#fff"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div><div class="tile-label">My Classes</div></div>
             <div class="action-tile" onclick="loadView('attendance')"><div class="tile-icon" style="background:#28A745"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#fff"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg></div><div class="tile-label">Take Attendance</div></div>
-            <div class="action-tile" onclick="loadView('students')"><div class="tile-icon" style="background:#007BFF"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#fff"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div><div class="tile-label">My Students</div></div>
-            <div class="action-tile" onclick="loadView('add-student')"><div class="tile-icon" style="background:#FF9800"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#fff"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg></div><div class="tile-label">Add Student</div></div>
+            <div class="action-tile" onclick="loadView('chat')"><div class="tile-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#fff"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg></div><div class="tile-label">Chat with Parents</div></div>
         </div>
         ${pendingReqs > 0 ? `<div class="card"><div class="card-header">Pending Requests <span class="badge" style="background:#FF9800">${pendingReqs} pending</span></div><p style="color:#666">You have ${pendingReqs} student(s) waiting for school admin approval.</p><button class="btn btn-outline" style="margin-top:10px" onclick="loadView('requests')">View Requests</button></div>` : ''}
         <div class="card">
             <div class="card-header">Today's Attendance Summary</div>
             ${attendance && attendance.length > 0 ? `<table><thead><tr><th>Student</th><th>Class</th><th>Status</th></tr></thead><tbody>${attendance.map(a => `<tr><td><strong>${a.studentId?.name || 'N/A'}</strong></td><td>${a.className || ''} ${a.section || ''}</td><td><span class="badge ${a.status === 'present' ? 'badge-green' : 'badge-red'}">${a.status}</span></td></tr>`).join('')}</tbody></table>` : '<div class="empty-state"><p>No attendance recorded yet today. <a href="#" onclick="loadView(\'attendance\')">Take attendance now →</a></p></div>'}
         </div>`;
+}
+
+// ============ MY CLASSES ============
+async function loadMyClasses() {
+    const c = document.getElementById('mainContent');
+    const classes = await fetchAPI('/api/teacher/my-classes');
+    if (!classes) return;
+
+    if (classes.length === 0) {
+        c.innerHTML = `
+            <div class="card">
+                <div class="card-header">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;stroke:#4338CA"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    My Classes
+                </div>
+                <div class="empty-state">
+                    <p>No classes assigned to you yet. Please contact your school administrator.</p>
+                </div>
+            </div>`;
+        return;
+    }
+
+    const classCards = classes.map(cls => {
+        const gradients = [
+            'linear-gradient(135deg,#4338CA,#7C3AED)',
+            'linear-gradient(135deg,#3b82f6,#2563eb)',
+            'linear-gradient(135deg,#10b981,#059669)',
+            'linear-gradient(135deg,#f59e0b,#d97706)',
+            'linear-gradient(135deg,#ef4444,#dc2626)',
+            'linear-gradient(135deg,#8b5cf6,#7c3aed)',
+            'linear-gradient(135deg,#06b6d4,#0891b2)'
+        ];
+        const colorIndex = Math.abs((cls.className || '').charCodeAt(0) + (cls.section || 'A').charCodeAt(0)) % gradients.length;
+        
+        return `
+            <div class="class-card" onclick="loadClassStudents('${cls.className}','${cls.section}')" style="
+                background:#fff; border:2px solid #e2e8f0; border-radius:20px; padding:28px; cursor:pointer; 
+                transition:all .3s; position:relative; overflow:hidden;
+            " onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 12px 30px rgba(67,56,202,.15)';this.style.borderColor='#c7d2fe'" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor='#e2e8f0'">
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+                    <div style="width:56px;height:56px;border-radius:16px;background:${gradients[colorIndex]};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:28px;height:28px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:20px;font-weight:800;color:#0F172A;">Class ${cls.className}</div>
+                        <div style="font-size:14px;font-weight:600;color:#64748b;">Section ${cls.section}</div>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <svg fill="none" stroke="#64748b" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <span style="font-size:14px;font-weight:700;color:#334155;">${cls.studentCount} Students</span>
+                    </div>
+                    ${cls.isClassTeacher ? '<span style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px">CLASS TEACHER</span>' : '<span style="background:#f1f5f9;color:#64748b;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">SUBJECT TEACHER</span>'}
+                </div>
+            </div>`;
+    }).join('');
+
+    c.innerHTML = `
+        <div class="card" style="border:none;background:transparent;box-shadow:none;padding:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center">
+                        <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:24px;height:24px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:22px;font-weight:800;color:#0F172A">My Classes</div>
+                        <div style="font-size:13px;color:#64748b;font-weight:600">${classes.length} class${classes.length > 1 ? 'es' : ''} assigned</div>
+                    </div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">
+                ${classCards}
+            </div>
+        </div>`;
+}
+
+// ============ CLASS STUDENTS VIEW ============
+async function loadClassStudents(className, section) {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = '<div class="loader">Loading students...</div>';
+    const students = await fetchAPI(`/api/teacher/students?className=${encodeURIComponent(className)}&section=${encodeURIComponent(section)}`);
+    if (!students) return;
+
+    c.innerHTML = `
+        <div style="margin-bottom:20px;">
+            <button class="btn btn-outline" onclick="loadMyClasses()" style="margin-bottom:16px">← Back to My Classes</button>
+        </div>
+        <div class="card">
+            <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center">
+                    <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:22px;height:22px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </div>
+                <div>
+                    <div style="font-size:18px;font-weight:800;color:#0F172A">Class ${className} — Section ${section}</div>
+                    <div style="font-size:12px;color:#64748b;font-weight:600">${students.length} student${students.length !== 1 ? 's' : ''}</div>
+                </div>
+                <span class="badge" style="margin-left:auto">${students.length} total</span>
+            </div>
+            ${students.length === 0 ? '<div class="empty-state"><p>No approved students in this class yet.</p></div>' :
+            `<table>
+                <thead><tr><th>#</th><th>Roll No</th><th>Name</th><th>Parent</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                ${students.map((s, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${s.rollNo || s.studentId || '-'}</td>
+                        <td><strong>${s.name}</strong></td>
+                        <td>${s.parentName || 'N/A'}</td>
+                        <td>${s.parentMobile || s.mobileNo || 'N/A'}</td>
+                        <td><span class="badge ${s.approvalStatus === 'Approved' ? 'badge-green' : 'badge-orange'}">${s.approvalStatus || 'Pending'}</span></td>
+                        <td>
+                            <button class="btn btn-primary" style="padding:5px 12px;font-size:11px" onclick="openChatWithStudent('${s._id}','${s.name}','${s.parentName || 'Parent'}')">💬 Chat</button>
+                            <button class="btn btn-outline" style="padding:5px 12px;font-size:11px;margin-left:4px" onclick="generateParentLogin('${s._id}','${s.name}')">🔑 Login</button>
+                        </td>
+                    </tr>
+                `).join('')}
+                </tbody>
+            </table>`}
+        </div>`;
+}
+
+function openChatWithStudent(studentId, studentName, parentName) {
+    loadChatConversation(studentId, studentName, parentName);
 }
 
 // ============ STUDENTS LIST ============
@@ -99,7 +252,7 @@ async function loadStudents() {
         <div class="card">
             <div class="card-header">My Students <span class="badge">${students.length} total</span></div>
             ${students.length === 0 ? '<div class="empty-state"><p>No students assigned yet.</p><button class="btn btn-primary" onclick="loadView(\'add-student\')">+ Add Student</button></div>' :
-            `<table><thead><tr><th>Roll</th><th>Name</th><th>Class</th><th>Parent</th><th>Contact</th><th>Status</th><th>Parent Login</th></tr></thead><tbody>
+            `<table><thead><tr><th>Roll</th><th>Name</th><th>Class</th><th>Parent</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead><tbody>
             ${students.map(s => `<tr><td>${s.rollNo || '-'}</td><td><strong>${s.name}</strong></td><td>${s.className} ${s.section || ''}</td><td>${s.parentName || 'N/A'}</td><td>${s.parentMobile || 'N/A'}</td><td><span class="badge ${s.approvalStatus === 'Approved' ? 'badge-green' : 'badge-orange'}">${s.approvalStatus || 'Pending'}</span></td><td><button class="btn btn-primary" style="padding:6px 14px;font-size:12px" onclick="generateParentLogin('${s._id}','${s.name}')">🔑 Generate</button></td></tr>`).join('')}
             </tbody></table>`}
         </div>`;
@@ -245,6 +398,202 @@ async function fetchHistory() {
         <table><thead><tr><th>#</th><th>Student</th><th>Class</th><th>Status</th></tr></thead><tbody>
         ${data.map((a, i) => `<tr><td>${i + 1}</td><td><strong>${a.studentId?.name || 'N/A'}</strong></td><td>${a.className || ''} ${a.section || ''}</td><td><span class="badge ${a.status === 'present' ? 'badge-green' : 'badge-red'}">${a.status}</span></td></tr>`).join('')}
         </tbody></table>`;
+}
+
+// ============ CHAT ============
+let chatPollInterval = null;
+
+async function loadChat() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = '<div class="loader">Loading conversations...</div>';
+    
+    const conversations = await fetchAPI('/api/chat/teacher/conversations');
+    if (!conversations) return;
+
+    if (conversations.length === 0) {
+        c.innerHTML = `
+            <div class="card">
+                <div class="card-header" style="gap:12px">
+                    <svg fill="none" stroke="#4338CA" viewBox="0 0 24 24" style="width:24px;height:24px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    ATKOOL Connect — Chat
+                </div>
+                <div class="empty-state"><p>No students assigned yet. Students in your classes will appear here for chat.</p></div>
+            </div>`;
+        return;
+    }
+
+    const convListHtml = conversations.map(conv => {
+        const s = conv.student;
+        const lastMsg = conv.lastMessage;
+        const lastMsgText = lastMsg ? (lastMsg.senderType === 'teacher' ? 'You: ' : '') + (lastMsg.message.length > 40 ? lastMsg.message.substring(0, 40) + '...' : lastMsg.message) : 'No messages yet';
+        const lastTime = lastMsg ? formatChatTime(new Date(lastMsg.createdAt)) : '';
+        const unreadBadge = conv.unreadCount > 0 ? `<span style="background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:10px;min-width:20px;text-align:center">${conv.unreadCount}</span>` : '';
+        
+        return `
+            <div class="conv-item" onclick="loadChatConversation('${s._id}','${s.name}','${s.parentName || 'Parent'}')" style="
+                display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:all .2s;
+                ${conv.unreadCount > 0 ? 'background:#f8fafc;' : ''}
+            " onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='${conv.unreadCount > 0 ? '#f8fafc' : '#fff'}'">
+                <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:800;font-size:18px">
+                    ${s.name.charAt(0).toUpperCase()}
+                </div>
+                <div style="flex:1;min-width:0">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div style="font-weight:700;color:#0F172A;font-size:14px">${s.name}</div>
+                        <div style="font-size:11px;color:#94a3b8;font-weight:500">${lastTime}</div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px">
+                        <div style="font-size:12px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;${conv.unreadCount > 0 ? 'font-weight:700;color:#334155' : ''}">${lastMsgText}</div>
+                        ${unreadBadge}
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:2px">Class ${s.className}-${s.section} • Parent: ${s.parentName || 'N/A'}</div>
+                </div>
+            </div>`;
+    }).join('');
+
+    c.innerHTML = `
+        <div class="card" style="padding:0;overflow:hidden">
+            <div style="padding:20px 24px;border-bottom:2px solid #f1f5f9;display:flex;align-items:center;gap:12px">
+                <svg fill="none" stroke="#4338CA" viewBox="0 0 24 24" style="width:26px;height:26px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                <div>
+                    <div style="font-size:18px;font-weight:800;color:#0F172A">ATKOOL Connect</div>
+                    <div style="font-size:12px;color:#64748b;font-weight:600">${conversations.length} conversation${conversations.length > 1 ? 's' : ''}</div>
+                </div>
+            </div>
+            <div style="max-height:calc(100vh - 250px);overflow-y:auto">
+                ${convListHtml}
+            </div>
+        </div>`;
+
+    updateChatBadge();
+}
+
+async function loadChatConversation(studentId, studentName, parentName) {
+    if (chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
+    
+    const c = document.getElementById('mainContent');
+    c.innerHTML = '<div class="loader">Loading chat...</div>';
+
+    const messages = await fetchAPI(`/api/chat/teacher/messages/${studentId}`);
+    if (!messages) return;
+
+    const messagesHtml = messages.map(msg => {
+        const isMe = msg.senderType === 'teacher';
+        const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+        return `
+            <div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:8px">
+                <div style="
+                    max-width:70%;padding:12px 16px;border-radius:${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};
+                    background:${isMe ? 'linear-gradient(135deg,#4338CA,#6366f1)' : '#f1f5f9'};
+                    color:${isMe ? '#fff' : '#1e293b'};font-size:14px;line-height:1.5;
+                    box-shadow:0 2px 8px ${isMe ? 'rgba(67,56,202,.2)' : 'rgba(0,0,0,.04)'};
+                ">
+                    <div>${msg.message}</div>
+                    <div style="font-size:10px;margin-top:4px;opacity:.7;text-align:${isMe ? 'right' : 'left'}">${time}${isMe && msg.isRead ? ' ✓✓' : ''}</div>
+                </div>
+            </div>`;
+    }).join('');
+
+    c.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:calc(100vh - 140px);">
+            <!-- Chat Header -->
+            <div style="background:#fff;border-radius:16px 16px 0 0;padding:16px 24px;display:flex;align-items:center;gap:14px;border:1px solid #e2e8f0;border-bottom:2px solid #f1f5f9">
+                <button onclick="loadChat()" style="background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;transition:.2s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
+                    <svg fill="none" stroke="#64748b" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;flex-shrink:0">
+                    ${studentName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                    <div style="font-weight:700;color:#0F172A;font-size:15px">${studentName}</div>
+                    <div style="font-size:12px;color:#64748b;font-weight:500">Parent: ${parentName}</div>
+                </div>
+            </div>
+            
+            <!-- Messages Area -->
+            <div id="chatMessages" style="flex:1;overflow-y:auto;padding:20px 24px;background:#fafbfc;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0">
+                ${messages.length === 0 ? '<div style="text-align:center;color:#94a3b8;padding:40px;font-weight:500">Start a conversation with ' + parentName + '</div>' : messagesHtml}
+            </div>
+            
+            <!-- Input Area -->
+            <div style="background:#fff;border-radius:0 0 16px 16px;padding:16px 24px;display:flex;gap:12px;align-items:center;border:1px solid #e2e8f0;border-top:2px solid #f1f5f9">
+                <input type="text" id="chatInput" placeholder="Type a message..." style="flex:1;padding:12px 18px;border:2px solid #e2e8f0;border-radius:24px;font-size:14px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor='#4338CA'" onblur="this.style.borderColor='#e2e8f0'" onkeypress="if(event.key==='Enter')sendTeacherMessage('${studentId}')">
+                <button onclick="sendTeacherMessage('${studentId}')" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;box-shadow:0 4px 12px rgba(67,56,202,.3)" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
+                    <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                </button>
+            </div>
+        </div>`;
+
+    // Scroll to bottom
+    const chatDiv = document.getElementById('chatMessages');
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+
+    // Poll for new messages every 5 seconds
+    chatPollInterval = setInterval(async () => {
+        const newMessages = await fetchAPI(`/api/chat/teacher/messages/${studentId}`);
+        if (!newMessages) return;
+        const container = document.getElementById('chatMessages');
+        if (!container) { clearInterval(chatPollInterval); return; }
+        
+        const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
+        
+        if (newMessages.length > 0) {
+            container.innerHTML = newMessages.map(msg => {
+                const isMe = msg.senderType === 'teacher';
+                const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+                return `<div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:8px">
+                    <div style="max-width:70%;padding:12px 16px;border-radius:${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};background:${isMe ? 'linear-gradient(135deg,#4338CA,#6366f1)' : '#f1f5f9'};color:${isMe ? '#fff' : '#1e293b'};font-size:14px;line-height:1.5;box-shadow:0 2px 8px ${isMe ? 'rgba(67,56,202,.2)' : 'rgba(0,0,0,.04)'};">
+                        <div>${msg.message}</div>
+                        <div style="font-size:10px;margin-top:4px;opacity:.7;text-align:${isMe ? 'right' : 'left'}">${time}${isMe && msg.isRead ? ' ✓✓' : ''}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        
+        if (wasAtBottom) container.scrollTop = container.scrollHeight;
+        updateChatBadge();
+    }, 5000);
+}
+
+async function sendTeacherMessage(studentId) {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message) return;
+
+    input.value = '';
+    const result = await fetchAPI('/api/chat/teacher/send', {
+        method: 'POST',
+        body: JSON.stringify({ studentId, message })
+    });
+
+    if (result && result._id) {
+        // Add message to UI immediately
+        const chatDiv = document.getElementById('chatMessages');
+        const emptyMsg = chatDiv.querySelector('[style*="text-align:center"]');
+        if (emptyMsg) emptyMsg.remove();
+        
+        const time = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+        chatDiv.innerHTML += `
+            <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+                <div style="max-width:70%;padding:12px 16px;border-radius:16px 16px 4px 16px;background:linear-gradient(135deg,#4338CA,#6366f1);color:#fff;font-size:14px;line-height:1.5;box-shadow:0 2px 8px rgba(67,56,202,.2);">
+                    <div>${message}</div>
+                    <div style="font-size:10px;margin-top:4px;opacity:.7;text-align:right">${time}</div>
+                </div>
+            </div>`;
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+    } else {
+        showToast('Failed to send message', 'error');
+    }
+}
+
+function formatChatTime(date) {
+    const now = new Date();
+    const diff = now - date;
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+    if (diff < 86400000) return date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    if (diff < 604800000) return date.toLocaleDateString('en-US', { weekday:'short' });
+    return date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
 }
 
 // ============ ADD STUDENT ============
