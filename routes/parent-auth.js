@@ -228,6 +228,12 @@ router.put('/change-email', parentAuth, async (req, res) => {
         await student.save();
 
         res.json({ message: 'Email updated successfully', email: newEmail });
+    } catch (error) {
+        console.error('Change parent email error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Get exams for student's class
 router.get('/exams', parentAuth, async (req, res) => {
     try {

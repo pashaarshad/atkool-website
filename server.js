@@ -96,6 +96,7 @@ app.use('/api/office-staff', require('./routes/office-staff'));
 app.use('/api/school-fees', require('./routes/school-fees'));
 app.use('/api/parent-fees', require('./routes/parent-fees'));
 app.use('/api/leaves', require('./routes/leaves'));
+app.use('/api/chat', require('./routes/chat'));
 
 app.get('/support', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'support.html'));

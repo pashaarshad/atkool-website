@@ -454,4 +454,73 @@ router.get('/subscription-status', teacherAuth, async (req, res) => {
     }
 });
 
+// Get teacher's assigned classes with student counts
+router.get('/my-classes', teacherAuth, async (req, res) => {
+    try {
+        const teacher = await Teacher.findById(req.teacherId);
+        if (!teacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+
+        // Gather all assigned classes (deduped)
+        const classMap = new Map();
+        
+        if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+            teacher.classAssignments.forEach(c => {
+                const key = `${c.className}|${c.section || 'A'}`;
+                if (!classMap.has(key)) {
+                    classMap.set(key, { className: c.className, section: c.section || 'A', isClassTeacher: false });
+                }
+            });
+        }
+        
+        if (teacher.isClassTeacher && teacher.classTeacherFor && teacher.classTeacherFor.className) {
+            const key = `${teacher.classTeacherFor.className}|${teacher.classTeacherFor.section || 'A'}`;
+            if (classMap.has(key)) {
+                classMap.get(key).isClassTeacher = true;
+            } else {
+                classMap.set(key, { 
+                    className: teacher.classTeacherFor.className, 
+                    section: teacher.classTeacherFor.section || 'A', 
+                    isClassTeacher: true 
+                });
+            }
+        }
+
+        const classes = Array.from(classMap.values());
+
+        if (classes.length === 0) {
+            return res.json([]);
+        }
+
+        // Get student counts for each class
+        const result = await Promise.all(classes.map(async (cls) => {
+            const studentCount = await Student.countDocuments({
+                schoolId: req.schoolId,
+                className: cls.className,
+                section: cls.section,
+                approvalStatus: 'Approved'
+            });
+            return {
+                className: cls.className,
+                section: cls.section,
+                isClassTeacher: cls.isClassTeacher,
+                studentCount
+            };
+        }));
+
+        // Sort: class teachers first, then by className
+        result.sort((a, b) => {
+            if (a.isClassTeacher && !b.isClassTeacher) return -1;
+            if (!a.isClassTeacher && b.isClassTeacher) return 1;
+            return (a.className || '').localeCompare(b.className || '', undefined, { numeric: true });
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error('Get my classes error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router;
