@@ -73,6 +73,10 @@ const studentSchema = new mongoose.Schema({
     parentPassword: {
         type: String
     },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now

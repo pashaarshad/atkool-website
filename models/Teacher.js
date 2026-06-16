@@ -82,6 +82,10 @@ const teacherSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now

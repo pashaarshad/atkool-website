@@ -97,6 +97,10 @@ app.use('/api/school-fees', require('./routes/school-fees'));
 app.use('/api/parent-fees', require('./routes/parent-fees'));
 app.use('/api/leaves', require('./routes/leaves'));
 app.use('/api/chat', require('./routes/chat'));
+app.use('/api/homework', require('./routes/homework'));
+app.use('/api/results', require('./routes/results'));
+app.use('/api/timetable', require('./routes/timetable'));
+app.use('/api/email-verification', require('./routes/email-verification'));
 
 app.get('/support', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'support.html'));
