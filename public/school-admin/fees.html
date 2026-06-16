@@ -100,6 +100,7 @@
         .btn-cancel:hover { background:#e2e8f0; }
         .btn-confirm { padding:10px 20px; background:linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
     </style>
+    <link rel="stylesheet" href="../css/school-admin-layout.css">
 </head>
 
 <body>
@@ -164,15 +165,15 @@
             <div class="stats-circles">
                 <div class="stat-circle">
                     <span class="stat-circle-label">Total Allocated</span>
-                    <span class="stat-circle-value" id="statTotal">₹0</span>
+                    <span class="stat-circle-value" id="statTotal">&#8377;0</span>
                 </div>
                 <div class="stat-circle">
                     <span class="stat-circle-label">Collected</span>
-                    <span class="stat-circle-value" id="statCollected" style="background: linear-gradient(135deg,#10b981,#059669); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">₹0</span>
+                    <span class="stat-circle-value" id="statCollected" style="background: linear-gradient(135deg,#10b981,#059669); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">&#8377;0</span>
                 </div>
                 <div class="stat-circle">
                     <span class="stat-circle-label">Pending</span>
-                    <span class="stat-circle-value" id="statPending" style="background: linear-gradient(135deg,#ef4444,#dc2626); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">₹0</span>
+                    <span class="stat-circle-value" id="statPending" style="background: linear-gradient(135deg,#ef4444,#dc2626); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">&#8377;0</span>
                 </div>
             </div>
 
@@ -399,7 +400,7 @@
                     return '<tr>' +
                         '<td>' + (index + 1) + '</td>' +
                         '<td><strong>' + s.feeName + '</strong></td>' +
-                        '<td>₹' + s.amount.toLocaleString() + '</td>' +
+                        '<td>&#8377;' + s.amount.toLocaleString() + '</td>' +
                         '<td>' + (s.className === 'All' ? 'All Classes' : 'Class ' + s.className) + '</td>' +
                         '<td>' + new Date(s.dueDate).toLocaleDateString() + '</td>' +
                         '</tr>';
@@ -506,7 +507,7 @@
                         '<td><strong>' + (student.name || 'N/A') + '</strong></td>' +
                         '<td>' + (student.className || 'N/A') + '-' + (student.section || 'A') + '</td>' +
                         '<td>' + (structure.feeName || 'N/A') + '</td>' +
-                        '<td>₹' + (structure.amount || 0).toLocaleString() + '</td>' +
+                        '<td>&#8377;' + (structure.amount || 0).toLocaleString() + '</td>' +
                         '<td>' + statusBadge + '</td>' +
                         '<td>' + collectDate + '</td>' +
                         '<td>' + actionBtn + '</td>' +

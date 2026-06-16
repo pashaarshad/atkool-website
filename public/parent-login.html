@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parent Portal - ATKool</title>
+    <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { margin:0; font-family:'Inter',sans-serif; background:linear-gradient(135deg,#0F172A 0%,#1e293b 50%,#4338CA 100%); display:flex; align-items:center; justify-content:center; min-height:100vh; }
@@ -51,6 +52,11 @@
             </div>
             <button type="submit" class="btn-login">LOGIN</button>
         </form>
+        <div id="verifyBox" style="display:none;margin-top:18px;padding:14px;border:1px solid #c7d2fe;background:#eef2ff;border-radius:12px;color:#334155;font-size:13px;line-height:1.5">
+            <strong>Email verification required.</strong>
+            <div style="margin-top:6px">Please verify your registered email address, or request a fresh verification link.</div>
+            <button type="button" onclick="requestParentVerification()" style="margin-top:12px;padding:10px 14px;border:none;border-radius:10px;background:#4338CA;color:#fff;font-weight:700;cursor:pointer">Send Verification Link</button>
+        </div>
     </div>
 
     <script>
@@ -89,6 +95,9 @@
                         window.location.href = '/parent-dashboard.html'; // We will build this next
                     }, 1000);
                 } else {
+                    if (data.verificationRequired) {
+                        document.getElementById('verifyBox').style.display = 'block';
+                    }
                     showToast(data.message || 'Login failed', 'error');
                     btn.innerText = 'LOGIN';
                     btn.disabled = false;
@@ -100,6 +109,27 @@
                 btn.disabled = false;
             }
         });
+
+        async function requestParentVerification() {
+            const username = document.getElementById('username').value;
+            if (!username) {
+                showToast('Enter your username first', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/email-verification/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userType: 'parent', username })
+                });
+                const data = await response.json();
+                showToast(data.message || (response.ok ? 'Verification link sent' : 'Unable to send link'), response.ok ? 'success' : 'error');
+            } catch (error) {
+                showToast('Error connecting to server', 'error');
+            }
+        }
     </script>
+<script src="/js/pwa.js"></script>
 </body>
 </html>

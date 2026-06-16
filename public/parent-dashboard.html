@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parent Dashboard - ATKool</title>
+    <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -58,6 +59,10 @@
         .status-late { background:#fef3c7; color:#d97706; }
         .status-paid { background:#d1fae5; color:#059669; }
         .status-unpaid { background:#fee2e2; color:#dc2626; }
+        .status-partial { background:#fef3c7; color:#d97706; }
+        .status-submitted { background:#dbeafe; color:#2563eb; }
+        .status-graded { background:#d1fae5; color:#059669; }
+        .status-pending { background:#fef3c7; color:#d97706; }
         
         .loader { text-align:center; padding:40px; color:#64748b; font-weight:600; font-size:14px; }
 
@@ -76,8 +81,8 @@
 
         .form-group { margin-bottom:16px; }
         .form-group label { display:block; font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
-        .form-group input { width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-family:inherit; outline:none; transition:.2s; }
-        .form-group input:focus { border-color:#4338CA; }
+        .form-group input,.form-group textarea { width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-family:inherit; outline:none; transition:.2s; }
+        .form-group input:focus,.form-group textarea:focus { border-color:#4338CA; }
 
         .toast { position:fixed; bottom:30px; right:30px; padding:14px 24px; border-radius:12px; color:#fff; font-weight:600; z-index:999; transform:translateY(100px); opacity:0; transition:.3s; }
         .toast.show { transform:translateY(0); opacity:1; }
@@ -122,6 +127,18 @@
             <div class="menu-item" onclick="loadView('datesheets', this)">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                 DateSheets
+            </div>
+            <div class="menu-item" onclick="loadView('homework', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 6.253v13M12 6.253C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253M12 6.253C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                Homework
+            </div>
+            <div class="menu-item" onclick="loadView('results', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 12l2 2 4-4"></path><path d="M7 3h10a2 2 0 012 2v14l-4-2-3 2-3-2-4 2V5a2 2 0 012-2z"></path></svg>
+                Report Card
+            </div>
+            <div class="menu-item" onclick="loadView('timetable', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Timetable
             </div>
             <div class="menu-item" onclick="loadView('messages', this)">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
@@ -196,6 +213,15 @@
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
+        function escapeHTML(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // ============ CHAT BADGE ============
         async function updateParentChatBadge() {
             try {
@@ -223,7 +249,8 @@
                 el.classList.add('active');
             } else {
                 const items = document.querySelectorAll('.menu-item');
-                const idx = view === 'dashboard' ? 0 : view === 'attendance' ? 1 : 0;
+                const order = ['dashboard', 'attendance', 'chat', 'fees', 'datesheets', 'homework', 'results', 'timetable', 'messages', 'settings'];
+                const idx = Math.max(0, order.indexOf(view));
                 if (items[idx]) items[idx].classList.add('active');
             }
 
@@ -236,6 +263,9 @@
                 chat: loadParentChat,
                 fees: loadFees,
                 datesheets: loadDateSheets,
+                homework: loadHomework,
+                results: loadReportCard,
+                timetable: loadTimetable,
                 messages: loadMessages,
                 settings: loadSettings
             };
@@ -537,7 +567,7 @@
                 if (fees.length === 0) {
                     html += '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No fee records found.</div>';
                 } else {
-                    html += `<table><thead><tr><th>Fee Name</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Payment Date</th></tr></thead><tbody>`;
+                    html += `<table><thead><tr><th>Fee Name</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Payment Date</th><th>Action</th></tr></thead><tbody>`;
                     fees.forEach(f => {
                         const structure = f.feeStructureId || {};
                         html += `<tr>
@@ -546,6 +576,7 @@
                             <td>${structure.dueDate ? new Date(structure.dueDate).toLocaleDateString() : '-'}</td>
                             <td><span class="status-badge status-${f.status === 'Paid' ? 'paid' : 'unpaid'}">${f.status}</span></td>
                             <td>${f.paymentDate ? new Date(f.paymentDate).toLocaleDateString() : '-'}</td>
+                            <td>${f.status === 'Paid' ? '<span style="color:#64748b;font-size:12px;font-weight:700">Paid</span>' : `<button class="btn btn-primary" style="padding:8px 14px;font-size:12px" onclick="startParentPayment('${f._id}')">Pay Now</button>`}</td>
                         </tr>`;
                     });
                     html += `</tbody></table>`;
@@ -554,6 +585,72 @@
                 content.innerHTML = html;
             } catch(e) {
                 content.innerHTML = `<div class="card"><div class="card-header">Fees & Payments</div><div style="text-align:center;padding:30px;color:#64748b">No fee records available.</div></div>`;
+            }
+        }
+
+        function loadRazorpayScript() {
+            return new Promise((resolve, reject) => {
+                if (window.Razorpay) {
+                    resolve();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('Unable to load Razorpay checkout'));
+                document.body.appendChild(script);
+            });
+        }
+
+        async function startParentPayment(paymentId) {
+            const orderData = await fetchWithAuth(`/api/parent-fees/${paymentId}/create-order`, { method: 'POST' });
+            if (!orderData || orderData.message) {
+                showToast(orderData?.message || 'Unable to start payment', 'error');
+                return;
+            }
+
+            if (orderData.mode === 'mock') {
+                const result = await fetchWithAuth(`/api/parent-fees/${paymentId}/pay`, { method: 'POST' });
+                if (result && result.payment) {
+                    showToast('Demo payment completed.');
+                    loadFees();
+                } else {
+                    showToast(result?.message || 'Demo payment failed', 'error');
+                }
+                return;
+            }
+
+            try {
+                await loadRazorpayScript();
+                const options = {
+                    key: orderData.keyId,
+                    amount: orderData.order.amount,
+                    currency: orderData.order.currency || 'INR',
+                    name: 'ATKool',
+                    description: orderData.payment?.feeName || 'School fee payment',
+                    order_id: orderData.order.id,
+                    handler: async function (response) {
+                        const result = await fetchWithAuth(`/api/parent-fees/${paymentId}/verify`, {
+                            method: 'POST',
+                            body: JSON.stringify(response)
+                        });
+                        if (result && result.payment) {
+                            showToast('Payment successful.');
+                            loadFees();
+                        } else {
+                            showToast(result?.message || 'Payment verification failed', 'error');
+                        }
+                    },
+                    prefill: {
+                        name: studentData.parentName || studentData.name || ''
+                    },
+                    theme: {
+                        color: '#4338CA'
+                    }
+                };
+                new Razorpay(options).open();
+            } catch (error) {
+                showToast(error.message || 'Payment checkout failed', 'error');
             }
         }
 
@@ -626,6 +723,181 @@
                 content.innerHTML = html;
             } catch(e) {
                 content.innerHTML = `<div class="card"><div class="card-header">Notice Board</div><div style="text-align:center;padding:30px;color:#64748b">No announcements available.</div></div>`;
+            }
+        }
+
+        // ============ HOMEWORK ============
+        async function loadHomework() {
+            const content = document.getElementById('mainContent');
+            try {
+                const homeworks = await fetchWithAuth('/api/homework/parent');
+                if (!homeworks) return;
+
+                let html = `<div class="card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 6.253v13M12 6.253C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253M12 6.253C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        Homework
+                    </div>`;
+
+                if (homeworks.length === 0) {
+                    html += '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No homework assigned yet.</div>';
+                } else {
+                    homeworks.forEach(hw => {
+                        const submitted = !!hw.submission;
+                        const status = hw.submission?.status || 'Pending';
+                        const teacherName = hw.teacherId?.name || 'Teacher';
+                        html += `
+                            <div style="border:1px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:14px">
+                                <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start">
+                                    <div>
+                                        <div style="font-size:16px;font-weight:800;color:#0F172A">${escapeHTML(hw.title)}</div>
+                                        <div style="font-size:12px;color:#64748b;font-weight:700;margin:5px 0">${escapeHTML(hw.subject)} | ${escapeHTML(teacherName)} | Due ${hw.dueDate ? new Date(hw.dueDate).toLocaleDateString() : '-'}</div>
+                                        <div style="font-size:14px;color:#475569;line-height:1.6">${escapeHTML(hw.description)}</div>
+                                    </div>
+                                    <span class="status-badge status-${status.toLowerCase()}">${status}</span>
+                                </div>
+                                ${submitted ? `
+                                    <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-top:14px">
+                                        <div style="font-size:12px;font-weight:800;color:#64748b;text-transform:uppercase">Submitted Answer</div>
+                                        <div style="margin-top:6px;color:#334155">${escapeHTML(hw.submission.content)}</div>
+                                        ${hw.submission.grade ? `<div style="margin-top:8px;font-weight:700;color:#059669">Grade: ${escapeHTML(hw.submission.grade)}</div>` : ''}
+                                        ${hw.submission.feedback ? `<div style="margin-top:4px;color:#64748b">Feedback: ${escapeHTML(hw.submission.feedback)}</div>` : ''}
+                                    </div>
+                                ` : ''}
+                                <button class="btn ${submitted ? 'btn-outline' : 'btn-primary'}" style="margin-top:14px" onclick="openHomeworkSubmit('${hw._id}', '${escapeHTML(hw.title)}', '${escapeHTML(hw.submission?.content || '')}')">${submitted ? 'Update Submission' : 'Submit Homework'}</button>
+                            </div>`;
+                    });
+                }
+                html += `</div>`;
+                content.innerHTML = html;
+            } catch (e) {
+                content.innerHTML = `<div class="card"><div class="card-header">Homework</div><div style="text-align:center;padding:30px;color:#64748b">Homework could not be loaded.</div></div>`;
+            }
+        }
+
+        function openHomeworkSubmit(homeworkId, title, existingContent) {
+            const content = document.getElementById('mainContent');
+            content.innerHTML = `
+                <button class="btn btn-outline" onclick="loadHomework()" style="margin-bottom:16px">Back to Homework</button>
+                <div class="card">
+                    <div class="card-header">Submit Homework - ${escapeHTML(title)}</div>
+                    <form onsubmit="submitHomeworkAnswer(event, '${homeworkId}')">
+                        <div class="form-group">
+                            <label>Your Answer *</label>
+                            <textarea id="homeworkAnswer" required style="min-height:180px" placeholder="Write your answer here">${escapeHTML(existingContent)}</textarea>
+                        </div>
+                        <button class="btn btn-primary" id="homeworkAnswerBtn">Submit Answer</button>
+                    </form>
+                </div>`;
+        }
+
+        async function submitHomeworkAnswer(event, homeworkId) {
+            event.preventDefault();
+            const btn = document.getElementById('homeworkAnswerBtn');
+            const content = document.getElementById('homeworkAnswer').value.trim();
+            if (!content) {
+                showToast('Please enter your answer', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+            const result = await fetchWithAuth('/api/homework/parent/submit', {
+                method: 'POST',
+                body: JSON.stringify({ homeworkId, content })
+            });
+            btn.disabled = false;
+            btn.textContent = 'Submit Answer';
+
+            if (result && result._id) {
+                showToast('Homework submitted.');
+                loadHomework();
+            } else {
+                showToast(result?.message || 'Failed to submit homework', 'error');
+            }
+        }
+
+        // ============ REPORT CARD ============
+        async function loadReportCard() {
+            const content = document.getElementById('mainContent');
+            try {
+                const data = await fetchWithAuth('/api/results/parent');
+                if (!data) return;
+                const results = data.results || [];
+                const totalMarks = results.reduce((sum, r) => sum + (r.maxMarks || 0), 0);
+                const obtained = results.reduce((sum, r) => sum + (r.marksObtained || 0), 0);
+                const percentage = totalMarks > 0 ? Math.round((obtained / totalMarks) * 100) : 0;
+
+                content.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-value" style="color:#4338CA">${results.length}</div><div class="stat-label">Subjects Recorded</div></div>
+                        <div class="stat-card"><div class="stat-value" style="color:#059669">${obtained}/${totalMarks}</div><div class="stat-label">Marks</div></div>
+                        <div class="stat-card"><div class="stat-value" style="color:#dc2626">${percentage}%</div><div class="stat-label">Overall</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 12l2 2 4-4"></path><path d="M7 3h10a2 2 0 012 2v14l-4-2-3 2-3-2-4 2V5a2 2 0 012-2z"></path></svg>
+                            Report Card
+                        </div>
+                        ${results.length === 0 ? '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No marks published yet.</div>' : `
+                        <table>
+                            <thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Marks</th><th>Grade</th><th>Remarks</th></tr></thead>
+                            <tbody>
+                                ${results.map(r => `<tr>
+                                    <td><strong>${escapeHTML(r.examId?.name || 'Exam')}</strong></td>
+                                    <td>${escapeHTML(r.subject || '-')}</td>
+                                    <td>${r.examId?.examDate ? new Date(r.examId.examDate).toLocaleDateString() : '-'}</td>
+                                    <td>${r.marksObtained}/${r.maxMarks}</td>
+                                    <td><span class="status-badge" style="background:#eef2ff;color:#4338CA">${escapeHTML(r.grade || '-')}</span></td>
+                                    <td>${escapeHTML(r.remarks || '-')}</td>
+                                </tr>`).join('')}
+                            </tbody>
+                        </table>`}
+                    </div>`;
+            } catch (e) {
+                content.innerHTML = `<div class="card"><div class="card-header">Report Card</div><div style="text-align:center;padding:30px;color:#64748b">Report card could not be loaded.</div></div>`;
+            }
+        }
+
+        // ============ TIMETABLE ============
+        async function loadTimetable() {
+            const content = document.getElementById('mainContent');
+            try {
+                const timetable = await fetchWithAuth(`/api/timetable?className=${encodeURIComponent(studentData.className)}&section=${encodeURIComponent(studentData.section || 'A')}`);
+                if (!timetable) return;
+                const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                const sorted = [...timetable].sort((a, b) => dayOrder.indexOf(a.dayOfWeek) - dayOrder.indexOf(b.dayOfWeek));
+
+                let html = `<div class="card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        Timetable - Class ${escapeHTML(studentData.className)} ${escapeHTML(studentData.section || 'A')}
+                    </div>`;
+
+                if (sorted.length === 0) {
+                    html += '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No timetable published yet.</div>';
+                } else {
+                    sorted.forEach(day => {
+                        html += `<div style="margin-bottom:22px">
+                            <div style="font-weight:800;color:#0F172A;margin-bottom:10px">${escapeHTML(day.dayOfWeek)}</div>
+                            <table>
+                                <thead><tr><th>Period</th><th>Time</th><th>Subject</th><th>Teacher</th></tr></thead>
+                                <tbody>
+                                    ${(day.periods || []).sort((a, b) => a.periodNumber - b.periodNumber).map(p => `<tr>
+                                        <td>${p.periodNumber}</td>
+                                        <td>${escapeHTML(p.startTime)} - ${escapeHTML(p.endTime)}</td>
+                                        <td><strong>${escapeHTML(p.subject)}</strong></td>
+                                        <td>${escapeHTML(p.teacherId?.name || '-')}</td>
+                                    </tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>`;
+                    });
+                }
+                html += `</div>`;
+                content.innerHTML = html;
+            } catch (e) {
+                content.innerHTML = `<div class="card"><div class="card-header">Timetable</div><div style="text-align:center;padding:30px;color:#64748b">Timetable could not be loaded.</div></div>`;
             }
         }
 
@@ -716,8 +988,8 @@
                 body: JSON.stringify({ newEmail })
             });
 
-            if (result && result.message === 'Email updated successfully') {
-                showToast('Email updated successfully!');
+            if (result && result.email) {
+                showToast(result.message || 'Email updated successfully!');
                 document.getElementById('newEmail').value = '';
             } else {
                 showToast(result?.message || 'Failed to update email', 'error');
@@ -727,5 +999,6 @@
         // Load default view
         loadView('dashboard');
     </script>
+<script src="/js/pwa.js"></script>
 </body>
 </html>

@@ -817,5 +817,264 @@ async function submitLeaveRequest(e) {
     btn.disabled = false; btn.textContent = 'Submit Application';
 }
 
+// ============ HOMEWORK ============
+function escapeHTML(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+async function loadHomework() {
+    const c = document.getElementById('mainContent');
+    const [homeworks, classes] = await Promise.all([
+        fetchAPI('/api/homework/teacher'),
+        fetchAPI('/api/teacher/my-classes')
+    ]);
+    if (!homeworks || !classes) return;
+
+    const classOptions = classes.map(cls => `<option value="${escapeHTML(cls.className)}|${escapeHTML(cls.section || 'A')}">Class ${escapeHTML(cls.className)} - ${escapeHTML(cls.section || 'A')}</option>`).join('');
+
+    c.innerHTML = `
+        <div style="display:grid;grid-template-columns:320px 1fr;gap:22px">
+            <div class="card" style="height:fit-content">
+                <div class="card-header">Create Homework</div>
+                ${classes.length === 0 ? '<div class="empty-state"><p>No assigned classes found.</p></div>' : `
+                <form id="homeworkForm" onsubmit="submitHomework(event)">
+                    <div class="form-group">
+                        <label>Class *</label>
+                        <select id="homeworkClass" required>${classOptions}</select>
+                    </div>
+                    <div class="form-group">
+                        <label>Subject *</label>
+                        <input id="homeworkSubject" required value="${escapeHTML(teacherData.subject || '')}" placeholder="Subject">
+                    </div>
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input id="homeworkTitle" required placeholder="Chapter 4 exercises">
+                    </div>
+                    <div class="form-group">
+                        <label>Description *</label>
+                        <textarea id="homeworkDescription" required style="width:100%;min-height:110px;padding:10px 14px;border:2px solid #e0e0e0;border-radius:10px;font-family:inherit" placeholder="Assignment details"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Due Date *</label>
+                        <input id="homeworkDueDate" type="date" required>
+                    </div>
+                    <button class="btn btn-success" id="homeworkSubmitBtn" style="width:100%">Assign Homework</button>
+                </form>`}
+            </div>
+            <div class="card">
+                <div class="card-header">Assigned Homework <span class="badge">${homeworks.length}</span></div>
+                ${homeworks.length === 0 ? '<div class="empty-state"><p>No homework assigned yet.</p></div>' : `
+                <table>
+                    <thead><tr><th>Title</th><th>Class</th><th>Subject</th><th>Due</th><th>Submissions</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${homeworks.map(hw => `
+                            <tr>
+                                <td><strong>${escapeHTML(hw.title)}</strong><div style="font-size:12px;color:#64748b;margin-top:4px">${escapeHTML(hw.description).slice(0, 80)}${(hw.description || '').length > 80 ? '...' : ''}</div></td>
+                                <td>${escapeHTML(hw.className)}-${escapeHTML(hw.section || 'A')}</td>
+                                <td>${escapeHTML(hw.subject)}</td>
+                                <td>${hw.dueDate ? new Date(hw.dueDate).toLocaleDateString() : '-'}</td>
+                                <td>${hw.submissionsCount || 0} submitted / ${hw.gradedCount || 0} graded</td>
+                                <td>
+                                    <button class="btn btn-primary" style="padding:6px 12px;font-size:12px" onclick="loadHomeworkSubmissions('${hw._id}', '${escapeHTML(hw.title)}')">Review</button>
+                                    <button class="btn btn-outline" style="padding:6px 12px;font-size:12px;margin-left:5px" onclick="deleteHomework('${hw._id}')">Delete</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`}
+            </div>
+        </div>`;
+}
+
+async function submitHomework(e) {
+    e.preventDefault();
+    const btn = document.getElementById('homeworkSubmitBtn');
+    const [className, section] = document.getElementById('homeworkClass').value.split('|');
+    const payload = {
+        className,
+        section,
+        subject: document.getElementById('homeworkSubject').value.trim(),
+        title: document.getElementById('homeworkTitle').value.trim(),
+        description: document.getElementById('homeworkDescription').value.trim(),
+        dueDate: document.getElementById('homeworkDueDate').value
+    };
+
+    btn.disabled = true;
+    btn.textContent = 'Assigning...';
+    const result = await fetchAPI('/api/homework/teacher', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    });
+    btn.disabled = false;
+    btn.textContent = 'Assign Homework';
+
+    if (result && result._id) {
+        showToast('Homework assigned successfully!');
+        loadHomework();
+    } else {
+        showToast(result?.message || 'Failed to assign homework', 'error');
+    }
+}
+
+async function deleteHomework(homeworkId) {
+    if (!confirm('Delete this homework and its submissions?')) return;
+    const result = await fetchAPI(`/api/homework/teacher/${homeworkId}`, { method: 'DELETE' });
+    if (result && result.message) {
+        showToast('Homework deleted.');
+        loadHomework();
+    } else {
+        showToast(result?.message || 'Failed to delete homework', 'error');
+    }
+}
+
+async function loadHomeworkSubmissions(homeworkId, title) {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = '<div class="loader">Loading submissions...</div>';
+    const submissions = await fetchAPI(`/api/homework/teacher/${homeworkId}/submissions`);
+    if (!submissions) return;
+
+    c.innerHTML = `
+        <button class="btn btn-outline" onclick="loadHomework()" style="margin-bottom:16px">Back to Homework</button>
+        <div class="card">
+            <div class="card-header">Submissions - ${escapeHTML(title)} <span class="badge">${submissions.length}</span></div>
+            ${submissions.length === 0 ? '<div class="empty-state"><p>No submissions yet.</p></div>' : `
+            <table>
+                <thead><tr><th>Student</th><th>Submitted</th><th>Answer</th><th>Grade</th><th>Feedback</th><th>Action</th></tr></thead>
+                <tbody>
+                    ${submissions.map(sub => `
+                        <tr>
+                            <td><strong>${escapeHTML(sub.studentId?.name || 'Student')}</strong><div style="font-size:12px;color:#64748b">Roll: ${escapeHTML(sub.studentId?.rollNo || sub.studentId?.studentId || '-')}</div></td>
+                            <td>${sub.submittedAt ? new Date(sub.submittedAt).toLocaleString() : '-'}</td>
+                            <td style="max-width:260px;white-space:normal">${escapeHTML(sub.content)}</td>
+                            <td><input id="grade-${sub._id}" value="${escapeHTML(sub.grade || '')}" style="width:80px;padding:8px;border:1px solid #ddd;border-radius:8px"></td>
+                            <td><input id="feedback-${sub._id}" value="${escapeHTML(sub.feedback || '')}" style="width:180px;padding:8px;border:1px solid #ddd;border-radius:8px"></td>
+                            <td><button class="btn btn-success" style="padding:7px 12px;font-size:12px" onclick="gradeHomework('${sub._id}')">Save</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>`}
+        </div>`;
+}
+
+async function gradeHomework(submissionId) {
+    const grade = document.getElementById(`grade-${submissionId}`).value.trim();
+    const feedback = document.getElementById(`feedback-${submissionId}`).value.trim();
+    const result = await fetchAPI(`/api/homework/teacher/grade/${submissionId}`, {
+        method: 'POST',
+        body: JSON.stringify({ grade, feedback })
+    });
+    if (result && result._id) {
+        showToast('Submission graded.');
+    } else {
+        showToast(result?.message || 'Failed to grade submission', 'error');
+    }
+}
+
+// ============ MARKS ENTRY ============
+async function loadMarksEntry() {
+    const c = document.getElementById('mainContent');
+    const exams = await fetchAPI('/api/results/exams');
+    if (!exams) return;
+
+    c.innerHTML = `
+        <div class="card">
+            <div class="card-header">Marks Entry</div>
+            ${exams.length === 0 ? '<div class="empty-state"><p>No exams available for your assigned classes.</p></div>' : `
+            <div class="attendance-controls">
+                <select id="marksExamSelect" class="date-input" style="min-width:320px">
+                    <option value="">Select exam</option>
+                    ${exams.map(exam => `<option value="${exam._id}">${escapeHTML(exam.name || exam.examName || 'Exam')} - Class ${escapeHTML(exam.className)} - ${escapeHTML(exam.subject)} - ${exam.examDate ? new Date(exam.examDate).toLocaleDateString() : '-'}</option>`).join('')}
+                </select>
+                <button class="btn btn-primary" onclick="loadMarkSheet()">Load Mark Sheet</button>
+            </div>
+            <div id="marksSheetArea" class="empty-state"><p>Select an exam to enter marks.</p></div>`}
+        </div>`;
+}
+
+async function loadMarkSheet() {
+    const examId = document.getElementById('marksExamSelect').value;
+    const area = document.getElementById('marksSheetArea');
+    if (!examId) {
+        showToast('Please select an exam', 'error');
+        return;
+    }
+
+    area.innerHTML = '<div class="loader">Loading students...</div>';
+    const data = await fetchAPI(`/api/results/exam/${examId}`);
+    if (!data) return;
+    const exam = data.exam || {};
+    const rows = data.studentResults || [];
+    const maxMarks = exam.totalMarks || 100;
+
+    area.className = '';
+    area.innerHTML = rows.length === 0 ? '<div class="empty-state"><p>No approved students found for this exam class.</p></div>' : `
+        <div style="margin:12px 0 16px;color:#475569;font-weight:600">
+            ${escapeHTML(exam.name || 'Exam')} | Class ${escapeHTML(exam.className)} | ${escapeHTML(exam.subject)} | Max ${maxMarks}
+        </div>
+        <table>
+            <thead><tr><th>Roll</th><th>Student</th><th>Marks</th><th>Grade</th><th>Remarks</th></tr></thead>
+            <tbody id="marksRows">
+                ${rows.map(item => {
+                    const result = item.result || {};
+                    return `
+                        <tr data-student-id="${item.student._id}">
+                            <td>${escapeHTML(item.student.rollNo || '-')}</td>
+                            <td><strong>${escapeHTML(item.student.name)}</strong></td>
+                            <td><input class="marks-input" type="number" min="0" max="${maxMarks}" value="${result.marksObtained ?? ''}" oninput="syncGrade(this, ${maxMarks})" style="width:90px;padding:8px;border:1px solid #ddd;border-radius:8px"> / ${maxMarks}</td>
+                            <td><input class="grade-input" value="${escapeHTML(result.grade || '')}" style="width:80px;padding:8px;border:1px solid #ddd;border-radius:8px"></td>
+                            <td><input class="remarks-input" value="${escapeHTML(result.remarks || '')}" style="width:220px;padding:8px;border:1px solid #ddd;border-radius:8px"></td>
+                        </tr>`;
+                }).join('')}
+            </tbody>
+        </table>
+        <div style="display:flex;justify-content:flex-end;margin-top:18px">
+            <button class="btn btn-success" onclick="saveMarks('${exam._id}', ${maxMarks})">Save Marks</button>
+        </div>`;
+}
+
+function calculateGrade(marks, maxMarks) {
+    const percentage = maxMarks > 0 ? (Number(marks) / Number(maxMarks)) * 100 : 0;
+    if (percentage >= 90) return 'A+';
+    if (percentage >= 80) return 'A';
+    if (percentage >= 70) return 'B';
+    if (percentage >= 60) return 'C';
+    if (percentage >= 50) return 'D';
+    return 'E';
+}
+
+function syncGrade(input, maxMarks) {
+    const row = input.closest('tr');
+    const gradeInput = row.querySelector('.grade-input');
+    if (input.value !== '') {
+        gradeInput.value = calculateGrade(input.value, maxMarks);
+    }
+}
+
+async function saveMarks(examId, maxMarks) {
+    const rows = Array.from(document.querySelectorAll('#marksRows tr'));
+    const results = rows.map(row => ({
+        studentId: row.dataset.studentId,
+        marksObtained: row.querySelector('.marks-input').value || 0,
+        maxMarks,
+        grade: row.querySelector('.grade-input').value.trim(),
+        remarks: row.querySelector('.remarks-input').value.trim()
+    }));
+
+    const response = await fetchAPI('/api/results/bulk', {
+        method: 'POST',
+        body: JSON.stringify({ examId, results })
+    });
+    if (response && response.success) {
+        showToast('Marks saved successfully.');
+    } else {
+        showToast(response?.message || 'Failed to save marks', 'error');
+    }
+}
+
 // Load default view
 loadView('dashboard');

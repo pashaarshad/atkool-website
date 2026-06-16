@@ -146,6 +146,7 @@
         .action-btn.delete:hover { background:#fecaca; }
 
     </style>
+    <link rel="stylesheet" href="../css/school-admin-layout.css">
 </head>
 
 <body>
@@ -193,7 +194,6 @@
             <a href="exams.html" class="school-sidebar-item active">EXAMS</a>
             <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
         </div>
-        </div>
 
         <div class="school-content">
             <div class="page-title">
@@ -223,7 +223,7 @@
             </div>
 
             <div class="exam-form-card">
-                <div class="form-title">📝 Schedule New Exam</div>
+                <div class="form-title">&#128221; Schedule New Exam</div>
                 <form id="examForm">
                     <div class="form-row">
                         <div class="form-group">
@@ -474,9 +474,9 @@
                     '<td>' + exam.totalMarks + '</td>' +
                     '<td><span class="exam-status ' + statusClass + '">' + exam.status + '</span></td>' +
                     '<td>' +
-                    '<button class="action-btn complete" onclick="updateStatus(\'' + exam._id + '\', \'Completed\')">✓</button>' +
-                    '<button class="action-btn cancel" onclick="updateStatus(\'' + exam._id + '\', \'Cancelled\')">✕</button>' +
-                    '<button class="action-btn delete" onclick="deleteExam(\'' + exam._id + '\')">🗑</button>' +
+                    '<button class="action-btn complete" onclick="updateStatus(\'' + exam._id + '\', \'Completed\')">&#10003;</button>' +
+                    '<button class="action-btn cancel" onclick="updateStatus(\'' + exam._id + '\', \'Cancelled\')">&#10005;</button>' +
+                    '<button class="action-btn delete" onclick="deleteExam(\'' + exam._id + '\')">&#128465;</button>' +
                     '</td>' +
                     '</tr>';
             }).join('');

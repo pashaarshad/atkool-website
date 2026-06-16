@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable - School Admin</title>
+    <script src="plan-check.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#F1F5F9; }
+        .school-header { background:linear-gradient(135deg,#0F172A,#1e293b); border-radius:16px; margin:12px; padding:16px 28px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 20px rgba(0,0,0,.15); }
+        .school-logo { width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .school-logo img { width:100%; height:100%; object-fit:cover; }
+        .school-logo svg { width:30px; height:30px; stroke:#c7d2fe; }
+        .school-name { color:#fff; font-size:24px; font-weight:800; letter-spacing:1px; flex:1; text-align:center; }
+        .school-main { display:flex; padding:0 12px 12px; }
+        .school-sidebar { width:160px; display:flex; flex-direction:column; gap:6px; padding-right:15px; }
+        .school-sidebar-item { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 15px; text-align:center; font-size:13px; font-weight:700; color:#334155; cursor:pointer; text-decoration:none; display:block; transition:all .25s; }
+        .school-sidebar-item:hover { background:#eef2ff; color:#4338CA; border-color:#c7d2fe; }
+        .school-sidebar-item.active { background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border-color:transparent; box-shadow:0 4px 12px rgba(67,56,202,.3); }
+        .school-content { flex:1; padding:10px; }
+        .page-title-bar { display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 22px; margin-bottom:18px; box-shadow:0 2px 8px rgba(0,0,0,.03); }
+        .page-title { font-size:18px; font-weight:800; color:#0F172A; }
+        .card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:18px; }
+        label { display:block; font-size:12px; font-weight:800; color:#475569; text-transform:uppercase; margin-bottom:6px; }
+        select,input { width:100%; padding:10px 12px; border:2px solid #e2e8f0; border-radius:10px; font-family:inherit; font-size:14px; background:#fff; }
+        select:focus,input:focus { outline:none; border-color:#4338CA; }
+        .btn { padding:10px 18px; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-family:inherit; }
+        .btn-primary { background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; }
+        .btn-success { background:linear-gradient(135deg,#10b981,#059669); color:#fff; }
+        .btn-outline { background:#fff; border:2px solid #4338CA; color:#4338CA; }
+        table { width:100%; border-collapse:collapse; }
+        th { background:linear-gradient(135deg,#0F172A,#1e293b); color:#fff; padding:14px; font-size:12px; text-align:left; text-transform:uppercase; }
+        td { padding:10px 12px; border-bottom:1px solid #f1f5f9; color:#334155; font-size:13px; }
+        tr:hover td { background:#f8fafc; }
+        .empty-state { text-align:center; padding:40px; color:#64748b; font-weight:600; }
+        .toast-container { position:fixed; top:20px; right:20px; z-index:9999; }
+        .toast { padding:14px 22px; color:#fff; border-radius:12px; margin-bottom:10px; font-weight:800; box-shadow:0 4px 15px rgba(0,0,0,.15); }
+        .toast.success { background:#10b981; }
+        .toast.error { background:#ef4444; }
+    </style>
+    <link rel="stylesheet" href="../css/school-admin-layout.css">
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="school-header">
+        <div class="school-logo" id="schoolLogo">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path></svg>
+        </div>
+        <div class="school-name" id="schoolName">Loading...</div>
+    </div>
+
+    <div class="school-main">
+        <div class="school-sidebar">
+            <a href="dashboard.html" class="school-sidebar-item">HOME</a>
+            <a href="teachers.html" class="school-sidebar-item">STAFF</a>
+            <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="vans.html" class="school-sidebar-item">SCHOOL VAN</a>
+            <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="fees.html" class="school-sidebar-item">FEES</a>
+            <a href="leaves.html" class="school-sidebar-item">LEAVES</a>
+            <a href="results.html" class="school-sidebar-item">RESULTS</a>
+            <a href="timetable.html" class="school-sidebar-item active">TIMETABLE</a>
+            <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
+            <a href="plans.html" class="school-sidebar-item">PLANS</a>
+            <a href="support.html" class="school-sidebar-item">SUPPORT</a>
+            <a href="send-message.html" class="school-sidebar-item">SEND MESSAGE</a>
+            <a href="events.html" class="school-sidebar-item">EVENTS</a>
+            <a href="exams.html" class="school-sidebar-item">EXAMS</a>
+            <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
+
+        <div class="school-content">
+            <div class="page-title-bar">
+                <div class="page-title">Timetable Management</div>
+            </div>
+
+            <div class="card">
+                <div class="form-grid">
+                    <div>
+                        <label>Class</label>
+                        <select id="className"></select>
+                    </div>
+                    <div>
+                        <label>Section</label>
+                        <select id="section">
+                            <option>A</option><option>B</option><option>C</option><option>D</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Day</label>
+                        <select id="dayOfWeek">
+                            <option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+                        </select>
+                    </div>
+                    <div style="display:flex;align-items:end;gap:10px">
+                        <button class="btn btn-primary" onclick="loadExistingDay()">Load Day</button>
+                        <button class="btn btn-outline" onclick="addPeriodRow()">Add Period</button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead><tr><th>Period</th><th>Start</th><th>End</th><th>Subject</th><th>Teacher</th><th></th></tr></thead>
+                    <tbody id="periodRows"></tbody>
+                </table>
+
+                <div style="display:flex;justify-content:flex-end;margin-top:18px">
+                    <button class="btn btn-success" onclick="saveTimetable()">Save Timetable</button>
+                </div>
+            </div>
+
+            <div class="card" id="previewArea">
+                <div class="empty-state">Load a class and section to preview the timetable.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('schoolToken');
+        if (!token) window.location.href = 'index.html';
+        let teachers = [];
+
+        function showToast(message, type) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + (type || 'success');
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function logout() {
+            localStorage.removeItem('schoolToken');
+            localStorage.removeItem('schoolData');
+            window.location.href = 'index.html';
+        }
+
+        function escapeHTML(value) {
+            return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        async function fetchAPI(url, opts = {}) {
+            const response = await fetch(url, {
+                ...opts,
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', ...opts.headers }
+            });
+            if (response.status === 401) { logout(); return null; }
+            return response.json();
+        }
+
+        function teacherOptions(selectedId) {
+            return '<option value="">Unassigned</option>' + teachers.map(t => `<option value="${t._id}" ${selectedId === t._id ? 'selected' : ''}>${escapeHTML(t.name)}${t.subject ? ' - ' + escapeHTML(t.subject) : ''}</option>`).join('');
+        }
+
+        function addPeriodRow(period = {}) {
+            const rows = document.getElementById('periodRows');
+            const next = rows.querySelectorAll('tr').length + 1;
+            const number = period.periodNumber || next;
+            rows.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td><input class="period-number" type="number" min="1" value="${number}"></td>
+                    <td><input class="period-start" type="time" value="${escapeHTML(period.startTime || '')}"></td>
+                    <td><input class="period-end" type="time" value="${escapeHTML(period.endTime || '')}"></td>
+                    <td><input class="period-subject" value="${escapeHTML(period.subject || '')}" placeholder="Subject"></td>
+                    <td><select class="period-teacher">${teacherOptions(period.teacherId?._id || period.teacherId || '')}</select></td>
+                    <td><button class="btn btn-outline" onclick="this.closest('tr').remove()">Remove</button></td>
+                </tr>`);
+        }
+
+        async function loadSchool() {
+            const school = await fetchAPI('/api/school-auth/me');
+            if (!school) return;
+            document.getElementById('schoolName').textContent = (school.name || 'School').toUpperCase();
+            if (school.logo) document.getElementById('schoolLogo').innerHTML = '<img src="' + school.logo + '" alt="Logo">';
+        }
+
+        async function loadTeachers() {
+            teachers = await fetchAPI('/api/teachers') || [];
+        }
+
+        function fillClasses() {
+            const select = document.getElementById('className');
+            let html = '';
+            for (let i = 1; i <= 12; i++) {
+                html += `<option value="${i}">Class ${i}</option>`;
+            }
+            select.innerHTML = html;
+        }
+
+        async function loadExistingDay() {
+            const className = document.getElementById('className').value;
+            const section = document.getElementById('section').value;
+            const dayOfWeek = document.getElementById('dayOfWeek').value;
+            const rows = document.getElementById('periodRows');
+            rows.innerHTML = '';
+
+            const timetable = await fetchAPI(`/api/timetable?className=${encodeURIComponent(className)}&section=${encodeURIComponent(section)}`);
+            if (!timetable) return;
+            const day = timetable.find(item => item.dayOfWeek === dayOfWeek);
+            if (day && day.periods && day.periods.length > 0) {
+                day.periods.sort((a, b) => a.periodNumber - b.periodNumber).forEach(addPeriodRow);
+            } else {
+                for (let i = 1; i <= 6; i++) addPeriodRow({ periodNumber: i });
+            }
+            renderPreview(timetable);
+        }
+
+        function collectPeriods() {
+            return Array.from(document.querySelectorAll('#periodRows tr')).map(row => ({
+                periodNumber: Number(row.querySelector('.period-number').value),
+                startTime: row.querySelector('.period-start').value,
+                endTime: row.querySelector('.period-end').value,
+                subject: row.querySelector('.period-subject').value.trim(),
+                teacherId: row.querySelector('.period-teacher').value || null
+            })).filter(period => period.periodNumber && period.startTime && period.endTime && period.subject);
+        }
+
+        async function saveTimetable() {
+            const payload = {
+                className: document.getElementById('className').value,
+                section: document.getElementById('section').value,
+                dayOfWeek: document.getElementById('dayOfWeek').value,
+                periods: collectPeriods()
+            };
+            if (payload.periods.length === 0) {
+                showToast('Add at least one complete period', 'error');
+                return;
+            }
+
+            const response = await fetchAPI('/api/timetable', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            if (response && response._id) {
+                showToast('Timetable saved.');
+                loadExistingDay();
+            } else {
+                showToast(response?.message || 'Unable to save timetable', 'error');
+            }
+        }
+
+        function renderPreview(timetable) {
+            const area = document.getElementById('previewArea');
+            const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const sorted = [...(timetable || [])].sort((a, b) => dayOrder.indexOf(a.dayOfWeek) - dayOrder.indexOf(b.dayOfWeek));
+            if (sorted.length === 0) {
+                area.innerHTML = '<div class="empty-state">No timetable saved for this class yet.</div>';
+                return;
+            }
+
+            area.innerHTML = sorted.map(day => `
+                <div style="margin-bottom:22px">
+                    <div style="font-weight:800;color:#0F172A;margin-bottom:10px">${escapeHTML(day.dayOfWeek)}</div>
+                    <table>
+                        <thead><tr><th>Period</th><th>Time</th><th>Subject</th><th>Teacher</th></tr></thead>
+                        <tbody>
+                            ${(day.periods || []).sort((a, b) => a.periodNumber - b.periodNumber).map(p => `<tr>
+                                <td>${p.periodNumber}</td>
+                                <td>${escapeHTML(p.startTime)} - ${escapeHTML(p.endTime)}</td>
+                                <td><strong>${escapeHTML(p.subject)}</strong></td>
+                                <td>${escapeHTML(p.teacherId?.name || '-')}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>`).join('');
+        }
+
+        async function init() {
+            fillClasses();
+            await Promise.all([loadSchool(), loadTeachers()]);
+            loadExistingDay();
+        }
+
+        init();
+    </script>
+</body>
+</html>
