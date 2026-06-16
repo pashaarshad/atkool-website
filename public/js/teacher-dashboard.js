@@ -38,6 +38,7 @@ const menuItems = [
     { id:'requests', label:'Student Requests', icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
     { id:'events', label:'School Events', icon:'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
     { id:'exams', label:'Upcoming Exams', icon:'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+    { id:'leaves', label:'Leave Management', icon:'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' }
 ];
 
 const sidebar = document.getElementById('sidebarMenu');
@@ -80,7 +81,8 @@ function loadView(view, el) {
         'add-student': loadAddStudent, 
         requests: loadRequests, 
         events: loadEvents, 
-        exams: loadExams 
+        exams: loadExams,
+        leaves: loadLeaves
     };
     (views[view] || loadDashboard)();
 }
@@ -697,6 +699,118 @@ async function loadExams() {
 function todayStr() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ============ LEAVE MANAGEMENT ============
+async function loadLeaves() {
+    const c = document.getElementById('mainContent');
+    const [balances, list] = await Promise.all([
+        fetchAPI('/api/leaves/balances'),
+        fetchAPI('/api/leaves/list')
+    ]);
+    if (!balances || !list) return;
+
+    c.innerHTML = `
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+            <div class="stat-card bg-blue">
+                <div class="value">${balances.remaining.Casual} / ${balances.allocated.Casual}</div>
+                <div class="label">Casual Leave Remaining</div>
+            </div>
+            <div class="stat-card bg-green">
+                <div class="value">${balances.remaining.Sick} / ${balances.allocated.Sick}</div>
+                <div class="label">Sick Leave Remaining</div>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg, #a855f7, #7e22ce)">
+                <div class="value">${balances.remaining.Earned} / ${balances.allocated.Earned}</div>
+                <div class="label">Earned Leave Remaining</div>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;margin-top:24px">
+            <div class="card" style="height:fit-content">
+                <div class="card-header">Apply for Leave</div>
+                <form id="leaveRequestForm" onsubmit="submitLeaveRequest(event)" style="padding:16px">
+                    <div class="form-group" style="margin-bottom:12px">
+                        <label>Leave Type *</label>
+                        <select name="leaveType" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc">
+                            <option value="Casual">Casual Leave</option>
+                            <option value="Sick">Sick Leave</option>
+                            <option value="Earned">Earned Leave</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:12px">
+                        <label>Start Date *</label>
+                        <input type="date" name="startDate" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc">
+                    </div>
+                    <div class="form-group" style="margin-bottom:12px">
+                        <label>End Date *</label>
+                        <input type="date" name="endDate" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc">
+                    </div>
+                    <div class="form-group" style="margin-bottom:16px">
+                        <label>Reason *</label>
+                        <textarea name="reason" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;min-height:80px" placeholder="Reason for leave..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success" id="applyLeaveBtn" style="width:100%">Submit Application</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Leave History <span class="badge">${list.length}</span></div>
+                ${list.length === 0 ? '<div class="empty-state"><p>No leave requests found.</p></div>' : `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Duration</th>
+                            <th>Days</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${list.map(l => {
+                            const start = new Date(l.startDate);
+                            const end = new Date(l.endDate);
+                            const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+                            let badgeClass = 'badge-orange';
+                            if (l.status === 'Approved') badgeClass = 'badge-green';
+                            if (l.status === 'Rejected') badgeClass = 'badge-red';
+                            return `
+                                <tr>
+                                    <td><strong>${l.leaveType}</strong></td>
+                                    <td>${start.toLocaleDateString()} - ${end.toLocaleDateString()}</td>
+                                    <td>${diffDays}</td>
+                                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${l.reason}">${l.reason}</td>
+                                    <td><span class="badge ${badgeClass}">${l.status}</span></td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+                `}
+            </div>
+        </div>
+    `;
+}
+
+async function submitLeaveRequest(e) {
+    e.preventDefault();
+    const form = document.getElementById('leaveRequestForm');
+    const btn = document.getElementById('applyLeaveBtn');
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    
+    const fd = new FormData(form);
+    const body = {};
+    fd.forEach((v, k) => body[k] = v);
+
+    const result = await fetchAPI('/api/leaves/request', { method: 'POST', body: JSON.stringify(body) });
+    if (result && result._id) {
+        showToast('Leave request submitted successfully!');
+        loadLeaves();
+    } else {
+        showToast(result?.message || 'Failed to submit leave request', 'error');
+    }
+    btn.disabled = false; btn.textContent = 'Submit Application';
 }
 
 // Load default view

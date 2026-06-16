@@ -232,7 +232,7 @@ router.get('/parent/conversations', parentAuth, async (req, res) => {
             teacher = await Teacher.findById(student.teacherId).select('name email mobileNo subject photo className classAssignments');
         }
 
-        // Second try: find by classTeacherFor matching student's class
+        // Second try: find by classTeacherFor matching student's class and section
         if (!teacher) {
             teacher = await Teacher.findOne({
                 schoolId: req.schoolId,
@@ -242,7 +242,7 @@ router.get('/parent/conversations', parentAuth, async (req, res) => {
             }).select('name email mobileNo subject photo className classAssignments');
         }
 
-        // Third try: find any teacher assigned to student's class
+        // Third try: find any teacher assigned to student's class and section
         if (!teacher) {
             teacher = await Teacher.findOne({
                 schoolId: req.schoolId,
@@ -252,6 +252,38 @@ router.get('/parent/conversations', parentAuth, async (req, res) => {
                         section: student.section || 'A'
                     }
                 }
+            }).select('name email mobileNo subject photo className classAssignments');
+        }
+
+        // Fourth try: find class teacher matching student's class (ignore section)
+        if (!teacher) {
+            teacher = await Teacher.findOne({
+                schoolId: req.schoolId,
+                isClassTeacher: true,
+                'classTeacherFor.className': student.className
+            }).select('name email mobileNo subject photo className classAssignments');
+        }
+
+        // Fifth try: find any teacher assigned to student's class (ignore section)
+        if (!teacher) {
+            teacher = await Teacher.findOne({
+                schoolId: req.schoolId,
+                'classAssignments.className': student.className
+            }).select('name email mobileNo subject photo className classAssignments');
+        }
+
+        // Sixth try: fallback to any active teacher in the school
+        if (!teacher) {
+            teacher = await Teacher.findOne({
+                schoolId: req.schoolId,
+                status: 'Active'
+            }).select('name email mobileNo subject photo className classAssignments');
+        }
+
+        // Seventh try: fallback to any teacher in the school
+        if (!teacher) {
+            teacher = await Teacher.findOne({
+                schoolId: req.schoolId
             }).select('name email mobileNo subject photo className classAssignments');
         }
 
