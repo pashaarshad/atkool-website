@@ -106,7 +106,7 @@
         .deal-features { list-style:none; padding:0; margin-top:16px; }
         .deal-features li { padding:8px 16px; font-size:14px; color:#334155; border-bottom:1px solid #f1f5f9; position:relative; padding-left:28px; }
         .deal-features li:last-child { border-bottom:none; }
-        .deal-features li::before { content:'•'; position:absolute; left:10px; color:#4338CA; font-weight:bold; font-size:18px; }
+        .deal-features li::before { content:'\2022'; position:absolute; left:10px; color:#4338CA; font-weight:bold; font-size:18px; }
         .pricing-row { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; }
         .pricing-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:20px 28px; display:flex; align-items:center; gap:20px; transition:all .3s; }
         .pricing-box:hover { border-color:#c7d2fe; box-shadow:0 4px 15px rgba(67,56,202,.1); }
@@ -117,6 +117,7 @@
         .pay-btn:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(67,56,202,.35); }
 
     </style>
+    <link rel="stylesheet" href="../css/school-admin-layout.css">
 </head>
 
 <body>
@@ -150,9 +151,12 @@
     <div class="school-main">
         <div class="school-sidebar">
             <a href="dashboard.html" class="school-sidebar-item">HOME</a>
-            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="teachers.html" class="school-sidebar-item">STAFF</a>
             <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="vans.html" class="school-sidebar-item">SCHOOL VAN</a>
             <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="fees.html" class="school-sidebar-item">FEES</a>
+            <a href="leaves.html" class="school-sidebar-item">LEAVES</a>
             <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
             <a href="plans.html" class="school-sidebar-item active">PLANS</a>
             <a href="support.html" class="school-sidebar-item">SUPPORT</a>
@@ -165,45 +169,24 @@
         <div class="school-content">
             <!-- One-Time Unlimited Offer -->
             <div class="offer-card" style="background: #1a1a1a; color: #fff; border: 2px solid #333;">
-                <div class="offer-title" style="color: #fff;">🌟 ONE-TIME OFFER - UNLIMITED ACCESS 🌟</div>
-                <p style="text-align: center; margin-bottom: 20px; font-size: 16px;">Pay once and get
+                <div class="offer-title" style="color: #fff;">&#127775; ONE-TIME OFFER - UNLIMITED ACCESS &#127775;</div>
+                <p style="text-align: center; margin-bottom: 20px; font-size: 16px;">Get
                     <strong>UNLIMITED</strong> teachers, students & classes forever!
                 </p>
-                <div class="pricing-row" style="justify-content: center;">
-                    <div class="pricing-box"
-                        style="background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 15px; padding: 25px 40px;">
-                        <div class="price-info" style="border: none; background: transparent; padding: 0;">
-                            <div class="price-label" style="color: rgba(255,255,255,0.8);">One-Time Payment</div>
-                            <div class="price-value" id="brandingPrice" style="font-size: 36px; color: #fff;">Loading...
-                            </div>
-                        </div>
-                        <button class="pay-btn" onclick="payNow('branding')"
-                            style="background: #fff; color: #1a1a1a; margin-left: 20px;">GET<br>NOW</button>
-                    </div>
-                </div>
                 <ul
                     style="list-style: none; display: flex; justify-content: center; gap: 30px; margin-top: 20px; flex-wrap: wrap;">
-                    <li style="display: flex; align-items: center; gap: 8px;">✅ Unlimited Teachers</li>
-                    <li style="display: flex; align-items: center; gap: 8px;">✅ Unlimited Students</li>
-                    <li style="display: flex; align-items: center; gap: 8px;">✅ Unlimited Classes</li>
-                    <li style="display: flex; align-items: center; gap: 8px;">✅ Own Branding</li>
+                    <li style="display: flex; align-items: center; gap: 8px;">&#9989; Unlimited Teachers</li>
+                    <li style="display: flex; align-items: center; gap: 8px;">&#9989; Unlimited Students</li>
+                    <li style="display: flex; align-items: center; gap: 8px;">&#9989; Unlimited Classes</li>
+                    <li style="display: flex; align-items: center; gap: 8px;">&#9989; Own Branding</li>
                 </ul>
             </div>
 
             <!-- Yearly Subscription (Required) -->
             <div class="deal-card" style="margin-top: 20px;">
-                <div class="deal-title">📅 YEARLY SUBSCRIPTION (Required)</div>
+                <div class="deal-title">&#128197; YEARLY SUBSCRIPTION (Required)</div>
                 <p style="text-align: center; color: #666; margin-bottom: 20px;">Annual subscription required to access
                     the system</p>
-                <div class="pricing-row" style="justify-content: center; margin-bottom: 20px;">
-                    <div class="pricing-box">
-                        <div class="price-info">
-                            <div class="price-label">Per Year</div>
-                            <div class="price-value" id="yearlyPrice">Loading...</div>
-                        </div>
-                        <button class="pay-btn" onclick="payNow('yearly')">PAY<br>NOW</button>
-                    </div>
-                </div>
                 <ul class="deal-features">
                     <li>Full App Access</li>
                     <li>24/7 Support System</li>
@@ -237,10 +220,6 @@
 
             document.addEventListener('click', function () {
                 document.getElementById('profileDropdown').classList.remove('show');
-            });
-
-            document.getElementById('studentCount').addEventListener('input', function () {
-                updateStudentPrice();
             });
         }
 
@@ -277,23 +256,19 @@
                 var response = await fetch('/api/plans/public');
                 if (response.ok) {
                     planData = await response.json();
-                    document.getElementById('yearlyPrice').textContent = planData.perYearSubscription.toLocaleString() + '/-';
-                    document.getElementById('brandingPrice').textContent = '₹' + planData.ownBrandingSetup.toLocaleString() + '/-';
+                    var yearlyPriceEl = document.getElementById('yearlyPrice');
+                    if (yearlyPriceEl) yearlyPriceEl.textContent = planData.perYearSubscription.toLocaleString() + '/-';
+                    var brandingPriceEl = document.getElementById('brandingPrice');
+                    if (brandingPriceEl) brandingPriceEl.textContent = '₹' + planData.ownBrandingSetup.toLocaleString() + '/-';
                     document.getElementById('teachersLimitDisplay').textContent = planData.teachersLimit || 50;
                     document.getElementById('studentsLimitDisplay').textContent = planData.studentsLimit || 500;
                 }
             } catch (error) {
                 console.error('Load plan pricing error:', error);
-                document.getElementById('yearlyPrice').textContent = '5,000/-';
-                document.getElementById('brandingPrice').textContent = '₹4,000/-';
-            }
-        }
-
-        function payNow(type) {
-            if (type === 'branding') {
-                alert('One-time payment for Unlimited Access initiated. Amount: ₹' + planData.ownBrandingSetup.toLocaleString());
-            } else if (type === 'yearly') {
-                alert('Yearly subscription payment initiated. Amount: ₹' + planData.perYearSubscription.toLocaleString());
+                var yearlyPriceEl = document.getElementById('yearlyPrice');
+                if (yearlyPriceEl) yearlyPriceEl.textContent = '5,000/-';
+                var brandingPriceEl = document.getElementById('brandingPrice');
+                if (brandingPriceEl) brandingPriceEl.textContent = '₹4,000/-';
             }
         }
 

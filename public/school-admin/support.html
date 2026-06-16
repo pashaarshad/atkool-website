@@ -229,6 +229,7 @@
         .contact-box-full { flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; font-size:14px; color:#334155; font-weight:600; }
 
     </style>
+    <link rel="stylesheet" href="../css/school-admin-layout.css">
 </head>
 
 <body>
@@ -262,17 +263,20 @@
     <div class="school-main">
         <div class="school-sidebar">
             <a href="dashboard.html" class="school-sidebar-item">HOME</a>
-            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="teachers.html" class="school-sidebar-item">STAFF</a>
             <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="vans.html" class="school-sidebar-item">SCHOOL VAN</a>
             <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="fees.html" class="school-sidebar-item">FEES</a>
+            <a href="leaves.html" class="school-sidebar-item">LEAVES</a>
             <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
             <a href="plans.html" class="school-sidebar-item">PLANS</a>
-            <a href="support.html" class="school-sidebar-item active">SUPPORT<span id="unreadDot" style="display:none;"
-                    class="unread-dot"></span></a>
+            <a href="support.html" class="school-sidebar-item active">SUPPORT</a>
             <a href="send-message.html" class="school-sidebar-item">SEND MESSAGE</a>
             <a href="events.html" class="school-sidebar-item">EVENTS</a>
             <a href="exams.html" class="school-sidebar-item">EXAMS</a>
             <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
         </div>
 
         <div class="school-content">
@@ -296,7 +300,7 @@
 
             <!-- Ticket History Section -->
             <div class="history-section">
-                <div class="history-title">📋 Your Ticket History</div>
+                <div class="history-title">&#128203; Your Ticket History</div>
                 <div id="ticketHistoryContainer">
                     <div class="no-tickets">Loading...</div>
                 </div>
@@ -523,7 +527,7 @@
                         var newBadge = !ticket.isReadBySchool ? '<span class="new-badge">NEW</span>' : '';
                         var replyDate = ticket.repliedAt ? new Date(ticket.repliedAt).toLocaleDateString() : '';
                         replyHtml = '<div class="ticket-reply" onclick="markAsRead(\'' + ticket._id + '\')">' +
-                            '<div class="reply-label">📩 Support Reply' + newBadge + '</div>' +
+                            '<div class="reply-label">&#128233; Support Reply' + newBadge + '</div>' +
                             '<div>' + ticket.reply + '</div>' +
                             '<div class="ticket-date">Replied: ' + replyDate + '</div>' +
                             '</div>';

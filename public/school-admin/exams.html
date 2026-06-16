@@ -146,6 +146,7 @@
         .action-btn.delete:hover { background:#fecaca; }
 
     </style>
+    <link rel="stylesheet" href="../css/school-admin-layout.css">
 </head>
 
 <body>
@@ -179,9 +180,12 @@
     <div class="school-main">
         <div class="school-sidebar">
             <a href="dashboard.html" class="school-sidebar-item">HOME</a>
-            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="teachers.html" class="school-sidebar-item">STAFF</a>
             <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="vans.html" class="school-sidebar-item">SCHOOL VAN</a>
             <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="fees.html" class="school-sidebar-item">FEES</a>
+            <a href="leaves.html" class="school-sidebar-item">LEAVES</a>
             <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
             <a href="plans.html" class="school-sidebar-item">PLANS</a>
             <a href="support.html" class="school-sidebar-item">SUPPORT</a>
@@ -219,7 +223,7 @@
             </div>
 
             <div class="exam-form-card">
-                <div class="form-title">📝 Schedule New Exam</div>
+                <div class="form-title">&#128221; Schedule New Exam</div>
                 <form id="examForm">
                     <div class="form-row">
                         <div class="form-group">
@@ -470,9 +474,9 @@
                     '<td>' + exam.totalMarks + '</td>' +
                     '<td><span class="exam-status ' + statusClass + '">' + exam.status + '</span></td>' +
                     '<td>' +
-                    '<button class="action-btn complete" onclick="updateStatus(\'' + exam._id + '\', \'Completed\')">✓</button>' +
-                    '<button class="action-btn cancel" onclick="updateStatus(\'' + exam._id + '\', \'Cancelled\')">✕</button>' +
-                    '<button class="action-btn delete" onclick="deleteExam(\'' + exam._id + '\')">🗑</button>' +
+                    '<button class="action-btn complete" onclick="updateStatus(\'' + exam._id + '\', \'Completed\')">&#10003;</button>' +
+                    '<button class="action-btn cancel" onclick="updateStatus(\'' + exam._id + '\', \'Cancelled\')">&#10005;</button>' +
+                    '<button class="action-btn delete" onclick="deleteExam(\'' + exam._id + '\')">&#128465;</button>' +
                     '</td>' +
                     '</tr>';
             }).join('');

@@ -60,7 +60,10 @@ router.get('/me', async (req, res) => {
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_admin_secret_key_2024');
 
-        if (decoded.type !== 'school') {
+        let isPrincipal = false;
+        if (decoded.type === 'teacher' && decoded.role === 'Principal') {
+            isPrincipal = true;
+        } else if (decoded.type !== 'school') {
             return res.status(401).json({ message: 'Invalid token type' });
         }
 
@@ -89,7 +92,8 @@ router.get('/me', async (req, res) => {
                 startDate: activeSubscription.startDate,
                 endDate: activeSubscription.endDate,
                 dueDate: activeSubscription.dueDate,
-                amount: activeSubscription.amount,
+                // Hide amount details from school admin / principal
+                amount: null,
                 numberOfTeachers: activeSubscription.numberOfTeachers,
                 numberOfStudents: activeSubscription.numberOfStudents,
                 status: activeSubscription.status
@@ -115,10 +119,12 @@ router.get('/me', async (req, res) => {
             teachers: teacherCount,
             students: studentCount,
             status: school.status,
-            amount: school.amount,
+            // Hide subscription amount details
+            amount: null,
             createdAt: school.createdAt,
             hasActivePlan: hasActivePlan,
-            subscription: subscriptionInfo
+            subscription: subscriptionInfo,
+            role: isPrincipal ? 'Principal' : 'School Admin'
         });
     } catch (error) {
         console.error('Get school profile error:', error);

@@ -5,6 +5,7 @@ const Student = require('../models/Student');
 const Teacher = require('../models/Teacher');
 const School = require('../models/School');
 const Attendance = require('../models/Attendance');
+const { sendVerificationEmail } = require('../utils/emailService');
 
 // Teacher authentication middleware
 function teacherAuth(req, res, next) {
@@ -29,7 +30,11 @@ function teacherAuth(req, res, next) {
     }
 }
 
-// Get students for teacher (optionally filtered by class/section)
+function getBaseUrl(req) {
+    return process.env.APP_BASE_URL || `${req.protocol}://${req.get('host')}`;
+}
+
+// Get students for teacher (limited to assigned classes/sections)
 router.get('/students', teacherAuth, async (req, res) => {
     try {
         const teacher = await Teacher.findById(req.teacherId);
@@ -37,23 +42,41 @@ router.get('/students', teacherAuth, async (req, res) => {
             return res.status(404).json({ message: 'Teacher not found' });
         }
 
+        // Gather all assigned classes
+        const classes = [];
+        if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+            teacher.classAssignments.forEach(c => {
+                classes.push({ className: c.className, section: c.section });
+            });
+        }
+        if (teacher.isClassTeacher && teacher.classTeacherFor && teacher.classTeacherFor.className) {
+            classes.push({
+                className: teacher.classTeacherFor.className,
+                section: teacher.classTeacherFor.section
+            });
+        }
+
+        if (classes.length === 0) {
+            return res.json([]);
+        }
+
         const { className, section } = req.query;
-        const classAssignments = teacher.classAssignments || [];
+        let query = { schoolId: req.schoolId, approvalStatus: 'Approved' };
 
-        let query = { schoolId: req.schoolId, teacherId: req.teacherId, approvalStatus: 'Approved' };
-
-        // If className and section are provided as query params, filter by them
         if (className && section) {
+            // Check if teacher is assigned to this class
+            const isAssigned = classes.some(c => c.className === className && c.section === section);
+            if (!isAssigned) {
+                return res.status(403).json({ message: 'Access denied: not assigned to this class' });
+            }
             query.className = className;
             query.section = section;
+        } else {
+            // Return all students in any of the assigned classes
+            query.$or = classes.map(c => ({ className: c.className, section: c.section }));
         }
-        // No class filter needed otherwise — teacherId already scopes to this teacher's students
 
         const students = await Student.find(query).sort({ rollNo: 1, name: 1 });
-
-        console.log('Student query:', JSON.stringify(query));
-        console.log('Students found:', students.length);
-
         res.json(students);
     } catch (error) {
         console.error('Get teacher students error:', error);
@@ -61,13 +84,30 @@ router.get('/students', teacherAuth, async (req, res) => {
     }
 });
 
-// Add student by teacher
+// Add student by teacher (Class Teacher ONLY for their assigned class)
 router.post('/students', teacherAuth, async (req, res) => {
     try {
-        const { name, className, section, rollNo, email, mobileNo, parentName, parentMobile, address } = req.body;
+        const { name, className, section, rollNo, studentId, email, mobileNo, parentName, parentMobile, guardianMobile, vanId, pickupPoint, address, photo } = req.body;
 
         if (!name || !className) {
             return res.status(400).json({ message: 'Name and class are required' });
+        }
+
+        const teacher = await Teacher.findById(req.teacherId);
+        if (!teacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+
+        // Class Teacher Restriction
+        if (!teacher.isClassTeacher) {
+            return res.status(403).json({ message: 'Access denied: only Class Teachers can add students' });
+        }
+
+        const primaryClass = teacher.classTeacherFor;
+        if (!primaryClass || primaryClass.className !== className || primaryClass.section !== (section || 'A')) {
+            return res.status(403).json({ 
+                message: `Access denied: you can only add students to your assigned class (${primaryClass ? primaryClass.className + ' ' + primaryClass.section : 'None'})` 
+            });
         }
 
         const student = await Student.create({
@@ -76,17 +116,20 @@ router.post('/students', teacherAuth, async (req, res) => {
             name,
             className,
             section: section || 'A',
-            rollNo,
+            rollNo: rollNo || studentId,
+            studentId,
             email,
             mobileNo,
             parentName,
             parentMobile,
+            guardianMobile,
+            vanId: vanId || null,
+            pickupPoint,
             address,
             status: 'Active',
-            approvalStatus: 'Pending' // New students start as Pending until admin approves
+            approvalStatus: 'Pending', // New students start as Pending until admin approves
+            photo
         });
-
-        // Don't increment school student count - will be done when admin approves
 
         res.status(201).json({
             ...student.toObject(),
@@ -143,10 +186,21 @@ router.post('/generate-parent-login', teacherAuth, async (req, res) => {
 
         // Check if already has login
         if (student.parentUsername && student.parentPassword) {
+            let verification = null;
+            if (student.email && !student.isEmailVerified) {
+                verification = await sendVerificationEmail(student, 'parent', { baseUrl: getBaseUrl(req) });
+            }
+
             return res.json({
                 parentUsername: student.parentUsername,
                 parentPassword: student.parentPassword,
-                existing: true
+                existing: true,
+                verification: verification ? {
+                    email: verification.email,
+                    linkGenerated: true
+                } : {
+                    linkGenerated: false
+                }
             });
         }
 
@@ -165,12 +219,25 @@ router.post('/generate-parent-login', teacherAuth, async (req, res) => {
         // Update student with login credentials
         student.parentUsername = parentUsername;
         student.parentPassword = parentPassword;
+        if (student.email) {
+            student.isEmailVerified = false;
+        }
         await student.save();
+
+        const verification = student.email
+            ? await sendVerificationEmail(student, 'parent', { baseUrl: getBaseUrl(req) })
+            : null;
 
         res.json({
             parentUsername,
             parentPassword,
-            existing: false
+            existing: false,
+            verification: verification ? {
+                email: verification.email,
+                linkGenerated: true
+            } : {
+                linkGenerated: false
+            }
         });
     } catch (error) {
         console.error('Generate parent login error:', error);
@@ -412,6 +479,75 @@ router.get('/subscription-status', teacherAuth, async (req, res) => {
         });
     } catch (error) {
         console.error('Check subscription error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get teacher's assigned classes with student counts
+router.get('/my-classes', teacherAuth, async (req, res) => {
+    try {
+        const teacher = await Teacher.findById(req.teacherId);
+        if (!teacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+
+        // Gather all assigned classes (deduped)
+        const classMap = new Map();
+        
+        if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+            teacher.classAssignments.forEach(c => {
+                const key = `${c.className}|${c.section || 'A'}`;
+                if (!classMap.has(key)) {
+                    classMap.set(key, { className: c.className, section: c.section || 'A', isClassTeacher: false });
+                }
+            });
+        }
+        
+        if (teacher.isClassTeacher && teacher.classTeacherFor && teacher.classTeacherFor.className) {
+            const key = `${teacher.classTeacherFor.className}|${teacher.classTeacherFor.section || 'A'}`;
+            if (classMap.has(key)) {
+                classMap.get(key).isClassTeacher = true;
+            } else {
+                classMap.set(key, { 
+                    className: teacher.classTeacherFor.className, 
+                    section: teacher.classTeacherFor.section || 'A', 
+                    isClassTeacher: true 
+                });
+            }
+        }
+
+        const classes = Array.from(classMap.values());
+
+        if (classes.length === 0) {
+            return res.json([]);
+        }
+
+        // Get student counts for each class
+        const result = await Promise.all(classes.map(async (cls) => {
+            const studentCount = await Student.countDocuments({
+                schoolId: req.schoolId,
+                className: cls.className,
+                section: cls.section,
+                approvalStatus: 'Approved'
+            });
+            return {
+                className: cls.className,
+                section: cls.section,
+                isClassTeacher: cls.isClassTeacher,
+                studentCount
+            };
+        }));
+
+        // Sort: class teachers first, then by className
+        result.sort((a, b) => {
+            if (a.isClassTeacher && !b.isClassTeacher) return -1;
+            if (!a.isClassTeacher && b.isClassTeacher) return 1;
+            return (a.className || '').localeCompare(b.className || '', undefined, { numeric: true });
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error('Get my classes error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

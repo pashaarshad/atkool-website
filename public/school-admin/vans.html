@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Van Management - School Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="plan-check.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#F1F5F9; }
+        .school-header { background:linear-gradient(135deg,#0F172A,#1e293b); border:none; border-radius:16px; margin:12px; padding:16px 28px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 20px rgba(0,0,0,.15); }
+        .school-header-left { display:flex; align-items:center; gap:20px; }
+        .school-logo { width:48px; height:48px; border-radius:12px; border:none; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; cursor:pointer; transition:all .3s; }
+        .school-logo:hover { transform:scale(1.05); }
+        .school-logo img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+        .school-logo svg { width:30px; height:30px; stroke:#c7d2fe; }
+        .school-name { color:#fff; font-size:24px; font-weight:800; letter-spacing:1px; flex:1; text-align:center; }
+        .school-header-right { display:flex; align-items:center; gap:16px; }
+        .header-icon { width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:rgba(255,255,255,.08); border-radius:10px; transition:all .2s; }
+        .header-icon:hover { background:rgba(67,56,202,.3); }
+        .header-icon svg { width:24px; height:24px; stroke:#c7d2fe; }
+        .school-main { display:flex; gap:0; padding:0 12px 12px; }
+        .school-sidebar { width:160px; display:flex; flex-direction:column; gap:6px; padding-right:15px; }
+        .school-sidebar-item { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 15px; text-align:center; font-size:13px; font-weight:700; color:#334155; cursor:pointer; text-decoration:none; display:block; transition:all .25s; }
+        .school-sidebar-item:hover { background:#eef2ff; color:#4338CA; border-color:#c7d2fe; }
+        .school-sidebar-item.active { background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border-color:transparent; box-shadow:0 4px 12px rgba(67,56,202,.3); }
+        .school-content { flex:1; padding:10px; }
+        .content-section { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .profile-wrapper { position:relative; }
+        .profile-dropdown { display:none; position:absolute; top:50px; right:0; background:#fff; border:1px solid #e2e8f0; border-radius:14px; min-width:160px; box-shadow:0 10px 40px rgba(0,0,0,.15); z-index:1000; overflow:hidden; }
+        .profile-dropdown.show { display:block; }
+        .profile-dropdown-item { padding:12px 20px; cursor:pointer; font-size:13px; font-weight:600; color:#334155; border-bottom:1px solid #f1f5f9; transition:all .2s; }
+        .profile-dropdown-item:last-child { border-bottom:none; }
+        .profile-dropdown-item:hover { background:#eef2ff; color:#4338CA; }
+        .profile-dropdown-item.logout { color:#dc2626; }
+        .profile-dropdown-item.logout:hover { background:#fef2f2; }
+
+        /* ===== PAGE TITLE BAR ===== */
+        .page-title-bar { display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 22px; margin-bottom:18px; box-shadow:0 2px 8px rgba(0,0,0,.03); }
+        .page-title { display:flex; align-items:center; gap:10px; font-size:18px; font-weight:700; color:#0F172A; }
+        .page-title svg { width:26px; height:26px; stroke:#4338CA; flex-shrink:0; }
+
+        /* ===== TABLES ===== */
+        .vans-table { width:100%; background:#fff; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .vans-table table { width:100%; border-collapse:collapse; }
+        .vans-table th { background:linear-gradient(135deg,#0F172A,#1e293b); padding:14px 14px; text-align:left; font-size:12px; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.5px; }
+        .vans-table td { padding:12px 14px; font-size:13px; border-bottom:1px solid #f1f5f9; color:#334155; }
+        .vans-table tr:hover { background:linear-gradient(135deg,#faf5ff,#eef2ff); }
+
+        /* ===== ACTION BUTTONS ===== */
+        .btn-add { padding:10px 22px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer; transition:all .3s; box-shadow:0 4px 12px rgba(67,56,202,.25); }
+        .btn-add:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(67,56,202,.35); }
+
+        /* ===== TOAST ===== */
+        .toast-container { position:fixed; top:20px; right:20px; z-index:9999; }
+        .toast { padding:15px 25px; border-radius:12px; margin-bottom:10px; color:#fff; font-weight:700; animation:slideIn .3s ease; box-shadow:0 4px 15px rgba(0,0,0,.15); }
+        .toast.success { background:linear-gradient(135deg,#10b981,#059669); }
+        .toast.error { background:linear-gradient(135deg,#ef4444,#dc2626); }
+        @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+
+        /* ===== MODALS ===== */
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center; }
+        .modal-overlay.show { display:flex; }
+        .modal { background:#fff; border-radius:18px; width:90%; max-width:500px; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+        .modal h2 { font-size:20px; font-weight:800; color:#0F172A; margin-bottom:20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; color: #555; }
+        .form-group input, .form-group textarea { width: 100%; padding: 9px 12px; border: 2px solid #ccc; border-radius: 7px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #4338CA; }
+        .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid #f1f5f9; }
+        .btn-cancel { padding:10px 24px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; }
+        .btn-cancel:hover { background:#e2e8f0; }
+        .btn-save { padding:10px 24px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 4px 12px rgba(67,56,202,.25); }
+        .btn-save:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(67,56,202,.35); }
+
+        .action-btn { border: none; background: none; cursor: pointer; padding: 4px; border-radius: 4px; transition: background 0.2s; margin-right: 5px; }
+        .action-btn:hover { background: #f1f5f9; }
+        .action-btn svg { width: 18px; height: 18px; }
+    </style>
+    <link rel="stylesheet" href="../css/school-admin-layout.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="school-header">
+        <div class="school-header-left">
+            <div class="school-logo" id="schoolLogo">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <path d="M3 21h18M3 7v14M21 7v14M6 21V10M18 21V10M9 21V17h6v4M12 7V3l8 4M4 7l8-4"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="school-name" id="schoolName">Loading...</div>
+        <div class="school-header-right">
+            <div class="profile-wrapper">
+                <div class="header-icon" id="profileIcon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="profile-dropdown-item" id="profileEmail">Loading...</div>
+                    <div class="profile-dropdown-item logout" onclick="logout()">Logout</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="school-main">
+        <div class="school-sidebar">
+            <a href="dashboard.html" class="school-sidebar-item">HOME</a>
+            <a href="teachers.html" class="school-sidebar-item">STAFF</a>
+            <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="vans.html" class="school-sidebar-item active">SCHOOL VAN</a>
+            <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="fees.html" class="school-sidebar-item">FEES</a>
+            <a href="leaves.html" class="school-sidebar-item">LEAVES</a>
+            <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
+            <a href="plans.html" class="school-sidebar-item">PLANS</a>
+            <a href="support.html" class="school-sidebar-item">SUPPORT</a>
+            <a href="send-message.html" class="school-sidebar-item">SEND MESSAGE</a>
+            <a href="events.html" class="school-sidebar-item">EVENTS</a>
+            <a href="exams.html" class="school-sidebar-item">EXAMS</a>
+            <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
+
+        <div class="school-content">
+            <div class="page-title-bar">
+                <div class="page-title">
+                    <!-- Transport/Van Icon -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"></rect>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg>
+                    School Van / Transport Management
+                </div>
+                <button class="btn-add" onclick="openModal()">+ Add Van / Route</button>
+            </div>
+
+            <div class="vans-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No.</th>
+                            <th>Vehicle Number</th>
+                            <th>Driver Name</th>
+                            <th>Driver Contact</th>
+                            <th>Route Details</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vansTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align:center;padding:20px;">Loading vans...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Van Modal -->
+    <div class="modal-overlay" id="vanModal">
+        <div class="modal">
+            <h2 id="modalTitle">Add School Van</h2>
+            <form id="vanForm">
+                <input type="hidden" id="vanId">
+                <div class="form-group">
+                    <label>Vehicle Number *</label>
+                    <input type="text" id="vehicleNumber" required placeholder="e.g. MH-12-AB-1234">
+                </div>
+                <div class="form-group">
+                    <label>Driver Name *</label>
+                    <input type="text" id="driverName" required placeholder="Enter driver's name">
+                </div>
+                <div class="form-group">
+                    <label>Driver Contact Number *</label>
+                    <input type="text" id="driverContact" required maxlength="10" pattern="\d{10}"
+                        title="Please enter exactly 10 digits" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                        placeholder="10 digit contact number">
+                </div>
+                <div class="form-group">
+                    <label>Route & Stop Details</label>
+                    <textarea id="routeDetails" rows="3" placeholder="Describe the routes, stops, and timings..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        var editIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+        var deleteIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+
+        function showToast(message, type) {
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast ' + (type || 'info');
+            toast.innerHTML = '<span class="toast-message">' + message + '</span>';
+            container.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var token = localStorage.getItem('schoolToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadSchoolData();
+            loadVans();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('profileIcon').addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.getElementById('profileDropdown').classList.toggle('show');
+            });
+
+            document.addEventListener('click', function () {
+                document.getElementById('profileDropdown').classList.remove('show');
+            });
+
+            document.getElementById('vanForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                saveVan();
+            });
+        }
+
+        async function loadSchoolData() {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-auth/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                var school = await response.json();
+                document.getElementById('schoolName').textContent = school.name.toUpperCase();
+                document.getElementById('profileEmail').textContent = school.email || 'Profile';
+                if (school.logo) {
+                    document.getElementById('schoolLogo').innerHTML = '<img src="' + school.logo + '" alt="Logo">';
+                }
+            } catch (error) {
+                console.error('Load school data error:', error);
+            }
+        }
+
+        async function loadVans() {
+            var token = localStorage.getItem('schoolToken');
+            var tableBody = document.getElementById('vansTableBody');
+
+            try {
+                var response = await fetch('/api/school-vans', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!response.ok) {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">Error loading vans</td></tr>';
+                    return;
+                }
+
+                var vans = await response.json();
+
+                if (vans.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">No school vans registered yet</td></tr>';
+                    return;
+                }
+
+                tableBody.innerHTML = vans.map(function (van, index) {
+                    return '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td><strong>' + van.vehicleNumber + '</strong></td>' +
+                        '<td>' + van.driverName + '</td>' +
+                        '<td>' + van.driverContact + '</td>' +
+                        '<td>' + (van.routeDetails || '-') + '</td>' +
+                        '<td>' +
+                        '<button class="action-btn" onclick="editVan(\'' + van._id + '\')" title="Edit">' + editIcon + '</button>' +
+                        '<button class="action-btn" onclick="deleteVan(\'' + van._id + '\')" title="Delete">' + deleteIcon + '</button>' +
+                        '</td>' +
+                        '</tr>';
+                }).join('');
+
+            } catch (error) {
+                console.error('Load vans error:', error);
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">Error loading vans</td></tr>';
+            }
+        }
+
+        function openModal(van) {
+            var modal = document.getElementById('vanModal');
+            var modalTitle = document.getElementById('modalTitle');
+
+            if (van) {
+                modalTitle.textContent = 'Edit Van Details';
+                document.getElementById('vanId').value = van._id;
+                document.getElementById('vehicleNumber').value = van.vehicleNumber;
+                document.getElementById('driverName').value = van.driverName;
+                document.getElementById('driverContact').value = van.driverContact;
+                document.getElementById('routeDetails').value = van.routeDetails || '';
+            } else {
+                modalTitle.textContent = 'Add School Van';
+                document.getElementById('vanForm').reset();
+                document.getElementById('vanId').value = '';
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('vanModal').classList.remove('show');
+        }
+
+        async function saveVan() {
+            var token = localStorage.getItem('schoolToken');
+            var vanId = document.getElementById('vanId').value;
+
+            var vanData = {
+                vehicleNumber: document.getElementById('vehicleNumber').value.trim(),
+                driverName: document.getElementById('driverName').value.trim(),
+                driverContact: document.getElementById('driverContact').value.trim(),
+                routeDetails: document.getElementById('routeDetails').value.trim()
+            };
+
+            try {
+                var url = vanId ? '/api/school-vans/' + vanId : '/api/school-vans';
+                var method = vanId ? 'PUT' : 'POST';
+
+                var response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(vanData)
+                });
+
+                if (response.ok) {
+                    closeModal();
+                    loadVans();
+                    showToast('School van saved successfully!', 'success');
+                } else {
+                    var data = await response.json();
+                    showToast(data.message || 'Error saving van details', 'error');
+                }
+            } catch (error) {
+                console.error('Save van error:', error);
+                showToast('Error saving van details', 'error');
+            }
+        }
+
+        async function editVan(id) {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-vans/' + id, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var van = await response.json();
+                openModal(van);
+            } catch (error) {
+                showToast('Error loading van data', 'error');
+            }
+        }
+
+        async function deleteVan(id) {
+            if (!confirm('Are you sure you want to delete this van? This will also unassign all students currently linked to this van.')) return;
+
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-vans/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    loadVans();
+                    showToast('Van deleted successfully!', 'success');
+                } else {
+                    showToast('Error deleting van', 'error');
+                }
+            } catch (error) {
+                showToast('Error deleting van', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('schoolToken');
+            localStorage.removeItem('schoolData');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

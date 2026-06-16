@@ -16,12 +16,15 @@ function schoolAuth(req, res, next) {
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_admin_secret_key_2024');
 
-        if (decoded.type !== 'school') {
-            return res.status(401).json({ message: 'Invalid token type' });
+        if (decoded.type === 'school') {
+            req.schoolId = decoded.schoolId;
+            next();
+        } else if (decoded.type === 'teacher' && decoded.role === 'Principal') {
+            req.schoolId = decoded.schoolId;
+            next();
+        } else {
+            return res.status(403).json({ message: 'Access denied' });
         }
-
-        req.schoolId = decoded.schoolId;
-        next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid token' });
     }
@@ -119,7 +122,7 @@ router.get('/:id', schoolAuth, async (req, res) => {
 
 router.post('/', schoolAuth, async (req, res) => {
     try {
-        const { name, rollNo, className, section, email, mobileNo, parentName, parentMobile, address, teacherId, status, parentUsername, parentPassword } = req.body;
+        const { name, rollNo, studentId, className, section, email, mobileNo, parentName, parentMobile, guardianMobile, vanId, pickupPoint, address, teacherId, status, parentUsername, parentPassword, photo } = req.body;
 
         if (!name || !className) {
             return res.status(400).json({ message: 'Name and class are required' });
@@ -128,19 +131,24 @@ router.post('/', schoolAuth, async (req, res) => {
         const student = await Student.create({
             schoolId: req.schoolId,
             name,
-            rollNo,
+            rollNo: rollNo || studentId, // map rollNo to studentId for backwards compatibility
+            studentId,
             className,
             section: section || 'A',
             email,
             mobileNo,
             parentName,
             parentMobile,
+            guardianMobile,
+            vanId: vanId || null,
+            pickupPoint,
             address,
-            teacherId,
+            teacherId: teacherId || null,
             status: status || 'Active',
             approvalStatus: 'Approved', // School admin adds directly = auto approved
             parentUsername,
-            parentPassword
+            parentPassword,
+            photo
         });
 
         await School.findByIdAndUpdate(req.schoolId, { $inc: { students: 1 } });
@@ -154,11 +162,29 @@ router.post('/', schoolAuth, async (req, res) => {
 
 router.put('/:id', schoolAuth, async (req, res) => {
     try {
-        const { name, rollNo, className, section, email, mobileNo, parentName, parentMobile, address, teacherId, status, parentUsername, parentPassword } = req.body;
+        const { name, rollNo, studentId, className, section, email, mobileNo, parentName, parentMobile, guardianMobile, vanId, pickupPoint, address, teacherId, status, parentUsername, parentPassword, photo } = req.body;
 
-        const updateData = { name, rollNo, className, section, email, mobileNo, parentName, parentMobile, address, teacherId, status };
+        const updateData = { 
+            name, 
+            rollNo: rollNo || studentId, 
+            studentId, 
+            className, 
+            section, 
+            email, 
+            mobileNo, 
+            parentName, 
+            parentMobile, 
+            guardianMobile, 
+            vanId: vanId || null, 
+            pickupPoint, 
+            address, 
+            teacherId: teacherId || null, 
+            status 
+        };
+        
         if (parentUsername) updateData.parentUsername = parentUsername;
         if (parentPassword) updateData.parentPassword = parentPassword;
+        if (photo) updateData.photo = photo;
 
         const student = await Student.findOneAndUpdate(
             { _id: req.params.id, schoolId: req.schoolId },

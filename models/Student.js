@@ -17,6 +17,9 @@ const studentSchema = new mongoose.Schema({
     rollNo: {
         type: String
     },
+    studentId: {
+        type: String
+    },
     className: {
         type: String,
         required: true
@@ -35,6 +38,17 @@ const studentSchema = new mongoose.Schema({
         type: String
     },
     parentMobile: {
+        type: String
+    },
+    guardianMobile: {
+        type: String
+    },
+    vanId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'SchoolVan',
+        default: null
+    },
+    pickupPoint: {
         type: String
     },
     address: {
@@ -58,6 +72,10 @@ const studentSchema = new mongoose.Schema({
     },
     parentPassword: {
         type: String
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
     },
     createdAt: {
         type: Date,

@@ -99,7 +99,7 @@
         .logo-instructions-title { font-weight:700; color:#0F172A; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
         .logo-instructions-list { list-style:none; padding:0; margin:0; }
         .logo-instructions-list li { padding:5px 0; color:#64748b; font-size:13px; display:flex; align-items:center; gap:8px; }
-        .logo-instructions-list li::before { content:'✓'; color:#059669; font-weight:bold; }
+        .logo-instructions-list li::before { content:'\2713'; color:#059669; font-weight:bold; }
         .logo-preview-area { border:2px dashed #c7d2fe; border-radius:14px; padding:30px; text-align:center; margin-bottom:20px; transition:all .3s; cursor:pointer; }
         .logo-preview-area:hover { border-color:#4338CA; background:#faf5ff; }
         .logo-preview-area.has-image { border-style:solid; border-color:#059669; }
@@ -117,9 +117,7 @@
         .dont-show-again input { cursor:pointer; accent-color:#4338CA; }
         .dont-show-again label { cursor:pointer; }
     </style>
-
-
-    </style>
+    <link rel="stylesheet" href="../css/school-admin-layout.css">
 </head>
 
 <body>
@@ -129,7 +127,7 @@
     <div class="logo-modal-overlay" id="logoModalOverlay">
         <div class="logo-modal">
             <div class="logo-modal-header">
-                <span class="logo-modal-title">📷 Change School Logo</span>
+                <span class="logo-modal-title">&#128247; Change School Logo</span>
                 <button class="logo-modal-close" onclick="closeLogoModal()">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
                         <path d="M18 6L6 18M6 6l12 12"></path>
@@ -215,7 +213,7 @@
                     <span class="notification-badge" id="notificationBadge"></span>
                 </div>
                 <div class="notification-dropdown" id="notificationDropdown">
-                    <div class="notification-header">📢 Notifications</div>
+                    <div class="notification-header">&#128226; Notifications</div>
                     <div id="notificationList">
                         <div class="no-notifications">Loading...</div>
                     </div>
@@ -227,10 +225,14 @@
     <div class="school-main">
         <div class="school-sidebar">
             <a href="dashboard.html" class="school-sidebar-item active">HOME</a>
-            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="teachers.html" class="school-sidebar-item">STAFF</a>
             <a href="students.html" class="school-sidebar-item">STUDENTS</a>
-            <a href="pending-students.html" class="school-sidebar-item" id="pendingLink">PENDING<span id="pendingDot"
-                    style="display:none;width:8px;height:8px;background:#e74c3c;border-radius:50%;margin-left:5px;"></span></a>
+            <a href="vans.html" class="school-sidebar-item">SCHOOL VAN</a>
+            <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="fees.html" class="school-sidebar-item">FEES</a>
+            <a href="leaves.html" class="school-sidebar-item">LEAVES</a>
+            <a href="results.html" class="school-sidebar-item">RESULTS</a>
+            <a href="timetable.html" class="school-sidebar-item">TIMETABLE</a>
             <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
             <a href="plans.html" class="school-sidebar-item">PLANS</a>
             <a href="support.html" class="school-sidebar-item">SUPPORT</a>
@@ -572,12 +574,12 @@
                     '<div class="plan-detail-item"><span class="plan-detail-label">Due Date</span><span class="plan-detail-value">' + formatDate(sub.dueDate) + '</span></div>' +
                     '<div class="plan-detail-item"><span class="plan-detail-label">Teachers Allowed</span><span class="plan-detail-value">' + (sub.numberOfTeachers || 0) + '</span></div>' +
                     '<div class="plan-detail-item"><span class="plan-detail-label">Students Allowed</span><span class="plan-detail-value">' + (sub.numberOfStudents || 0) + '</span></div>' +
-                    '<div class="plan-detail-item"><span class="plan-detail-label">Amount Paid</span><span class="plan-detail-value">₹' + (sub.amount || 0) + '</span></div>' +
+                    (sub.amount ? '<div class="plan-detail-item"><span class="plan-detail-label">Amount Paid</span><span class="plan-detail-value">&#8377;' + sub.amount + '</span></div>' : '') +
                     '</div>';
             } else {
                 card.classList.add('expired');
                 card.classList.remove('active');
-                title.innerHTML = '<span style="color: #c62828;">⚠️ No Active Plan</span>';
+                title.innerHTML = '<span style="color: #c62828;">&#9888;&#65039; No Active Plan</span>';
                 content.innerHTML =
                     '<div class="no-plan-content">' +
                     '<p class="no-plan-text">Your subscription has expired or you don\'t have any active plan.<br>Please contact support to renew your subscription.</p>' +

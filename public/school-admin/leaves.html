@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Management - School Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="plan-check.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#F1F5F9; }
+        .school-header { background:linear-gradient(135deg,#0F172A,#1e293b); border:none; border-radius:16px; margin:12px; padding:16px 28px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 20px rgba(0,0,0,.15); }
+        .school-header-left { display:flex; align-items:center; gap:20px; }
+        .school-logo { width:48px; height:48px; border-radius:12px; border:none; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; cursor:pointer; transition:all .3s; }
+        .school-logo:hover { transform:scale(1.05); }
+        .school-logo img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+        .school-logo svg { width:30px; height:30px; stroke:#c7d2fe; }
+        .school-name { color:#fff; font-size:24px; font-weight:800; letter-spacing:1px; flex:1; text-align:center; }
+        .school-header-right { display:flex; align-items:center; gap:16px; }
+        .header-icon { width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:rgba(255,255,255,.08); border-radius:10px; transition:all .2s; }
+        .header-icon:hover { background:rgba(67,56,202,.3); }
+        .header-icon svg { width:24px; height:24px; stroke:#c7d2fe; }
+        .school-main { display:flex; gap:0; padding:0 12px 12px; }
+        .school-sidebar { width:160px; display:flex; flex-direction:column; gap:6px; padding-right:15px; }
+        .school-sidebar-item { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 15px; text-align:center; font-size:13px; font-weight:700; color:#334155; cursor:pointer; text-decoration:none; display:block; transition:all .25s; }
+        .school-sidebar-item:hover { background:#eef2ff; color:#4338CA; border-color:#c7d2fe; }
+        .school-sidebar-item.active { background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border-color:transparent; box-shadow:0 4px 12px rgba(67,56,202,.3); }
+        .school-content { flex:1; padding:10px; }
+        .stats-circles { display:flex; justify-content:center; gap:40px; margin-bottom:28px; padding:20px 0; }
+        .stat-circle { width:130px; height:130px; border-radius:50%; border:3px solid #e0e7ff; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(67,56,202,.1); transition:all .3s; }
+        .stat-circle:hover { border-color:#4338CA; transform:translateY(-3px); box-shadow:0 8px 25px rgba(67,56,202,.2); }
+        .stat-circle-label { font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+        .stat-circle-value { font-size:36px; font-weight:800; background:linear-gradient(135deg,#4338CA,#7C3AED); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .content-section { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        
+        .toast-container { position:fixed; top:20px; right:20px; z-index:9999; }
+        .toast { padding:15px 25px; border-radius:12px; margin-bottom:10px; color:#fff; font-weight:700; animation:slideIn .3s ease; box-shadow:0 4px 15px rgba(0,0,0,.15); }
+        .toast.success { background:linear-gradient(135deg,#10b981,#059669); }
+        .toast.error { background:linear-gradient(135deg,#ef4444,#dc2626); }
+        @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+
+        .page-title-bar { display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 22px; margin-bottom:18px; box-shadow:0 2px 8px rgba(0,0,0,.03); }
+        .page-title { display:flex; align-items:center; gap:10px; font-size:18px; font-weight:700; color:#0F172A; }
+        .page-title svg { width:26px; height:26px; stroke:#4338CA; flex-shrink:0; }
+
+        .leaves-table { width:100%; background:#fff; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,.04); }
+        .leaves-table table { width:100%; border-collapse:collapse; }
+        .leaves-table th { background:linear-gradient(135deg,#0F172A,#1e293b); padding:14px 14px; text-align:left; font-size:12px; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.5px; }
+        .leaves-table td { padding:12px 14px; font-size:13px; border-bottom:1px solid #f1f5f9; color:#334155; }
+        .leaves-table tr:hover { background:linear-gradient(135deg,#faf5ff,#eef2ff); }
+
+        .btn-approve { padding:6px 14px; background:linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; transition:all .2s; }
+        .btn-approve:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(16,185,129,.3); }
+        .btn-reject { padding:6px 14px; background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; border:none; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; transition:all .2s; margin-left:6px; }
+        .btn-reject:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(239,68,68,.3); }
+        .badge { padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700; color:#fff; display:inline-block; }
+        .badge-orange { background:linear-gradient(135deg,#ff9800,#f57c00); }
+        .badge-green { background:linear-gradient(135deg,#10b981,#059669); }
+        .badge-red { background:linear-gradient(135deg,#ef4444,#dc2626); }
+        .empty-state { text-align:center; padding:40px; color:#64748b; font-weight:600; }
+    </style>
+    <link rel="stylesheet" href="../css/school-admin-layout.css">
+</head>
+
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="school-header">
+        <div class="school-header-left">
+            <div class="school-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+            </div>
+            <div class="school-name" id="schoolName">School Admin Dashboard</div>
+        </div>
+    </div>
+
+    <div class="school-main">
+        <div class="school-sidebar">
+            <a href="dashboard.html" class="school-sidebar-item">HOME</a>
+            <a href="teachers.html" class="school-sidebar-item">STAFF</a>
+            <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="vans.html" class="school-sidebar-item">SCHOOL VAN</a>
+            <a href="pending-students.html" class="school-sidebar-item">PENDING</a>
+            <a href="fees.html" class="school-sidebar-item">FEES</a>
+            <a href="leaves.html" class="school-sidebar-item active">LEAVES</a>
+            <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
+            <a href="plans.html" class="school-sidebar-item">PLANS</a>
+            <a href="support.html" class="school-sidebar-item">SUPPORT</a>
+            <a href="send-message.html" class="school-sidebar-item">SEND MESSAGE</a>
+            <a href="events.html" class="school-sidebar-item">EVENTS</a>
+            <a href="exams.html" class="school-sidebar-item">EXAMS</a>
+            <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
+
+        <div class="school-content">
+            <div class="page-title-bar">
+                <div class="page-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>Staff Leave Applications</span>
+                </div>
+            </div>
+
+            <div class="stats-circles">
+                <div class="stat-circle">
+                    <span class="stat-circle-label">Pending</span>
+                    <span class="stat-circle-value" id="pendingCount">0</span>
+                </div>
+                <div class="stat-circle">
+                    <span class="stat-circle-label">Approved</span>
+                    <span class="stat-circle-value" id="approvedCount">0</span>
+                </div>
+                <div class="stat-circle">
+                    <span class="stat-circle-label">Total Recs</span>
+                    <span class="stat-circle-value" id="totalCount">0</span>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section-title">Leave History & Review</div>
+                <div class="leaves-table">
+                    <table id="leavesTable">
+                        <thead>
+                            <tr>
+                                <th>Staff Name</th>
+                                <th>Leave Type</th>
+                                <th>Duration</th>
+                                <th>Days</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leavesBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">Loading leave requests...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('schoolToken');
+        if (!token) { window.location.href = 'index.html'; }
+
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function logout() {
+            localStorage.removeItem('schoolToken');
+            window.location.href = 'index.html';
+        }
+
+        async function fetchAPI(url, opts = {}) {
+            const res = await fetch(url, {
+                ...opts,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    ...opts.headers
+                }
+            });
+            if (res.status === 401) { logout(); return null; }
+            return res.json();
+        }
+
+        async function loadLeaves() {
+            try {
+                const list = await fetchAPI('/api/leaves/admin/list');
+                if (!list) return;
+
+                const body = document.getElementById('leavesBody');
+                if (list.length === 0) {
+                    body.innerHTML = '<tr><td colspan="7" class="empty-state">No leave applications found.</td></tr>';
+                    document.getElementById('pendingCount').textContent = 0;
+                    document.getElementById('approvedCount').textContent = 0;
+                    document.getElementById('totalCount').textContent = 0;
+                    return;
+                }
+
+                let pending = 0;
+                let approved = 0;
+
+                body.innerHTML = list.map(l => {
+                    const start = new Date(l.startDate);
+                    const end = new Date(l.endDate);
+                    const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+                    
+                    let badgeClass = 'badge-orange';
+                    if (l.status === 'Approved') { approved++; badgeClass = 'badge-green'; }
+                    if (l.status === 'Rejected') badgeClass = 'badge-red';
+                    if (l.status === 'Pending') pending++;
+
+                    const teacherName = l.teacherId ? l.teacherId.name : 'Unknown';
+                    const actions = l.status === 'Pending' ? `
+                        <button class="btn-approve" onclick="reviewLeave('${l._id}', 'Approved')">Approve</button>
+                        <button class="btn-reject" onclick="reviewLeave('${l._id}', 'Rejected')">Reject</button>
+                    ` : '-';
+
+                    return `
+                        <tr>
+                            <td><strong>${teacherName}</strong></td>
+                            <td>${l.leaveType}</td>
+                            <td>${start.toLocaleDateString()} - ${end.toLocaleDateString()}</td>
+                            <td>${diffDays}</td>
+                            <td>${l.reason}</td>
+                            <td><span class="badge ${badgeClass}">${l.status}</span></td>
+                            <td>${actions}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                document.getElementById('pendingCount').textContent = pending;
+                document.getElementById('approvedCount').textContent = approved;
+                document.getElementById('totalCount').textContent = list.length;
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to load leave requests', 'error');
+            }
+        }
+
+        async function reviewLeave(id, status) {
+            if (!confirm(`Are you sure you want to mark this request as ${status}?`)) return;
+            const res = await fetchAPI(`/api/leaves/admin/review/${id}`, {
+                method: 'POST',
+                body: JSON.stringify({ status })
+            });
+
+            if (res && res.request) {
+                showToast(`Leave request ${status.toLowerCase()} successfully!`);
+                loadLeaves();
+            } else {
+                showToast(res?.message || 'Failed to update leave request', 'error');
+            }
+        }
+
+        // Init
+        loadLeaves();
+    </script>
+</body>
+
+</html>

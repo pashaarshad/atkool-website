@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parent Dashboard - ATKool</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Inter',sans-serif; background:#F1F5F9; display:flex; height:100vh; overflow:hidden; }
 
@@ -58,6 +57,12 @@
         .status-present { background:#d1fae5; color:#059669; }
         .status-absent { background:#fee2e2; color:#dc2626; }
         .status-late { background:#fef3c7; color:#d97706; }
+        .status-paid { background:#d1fae5; color:#059669; }
+        .status-unpaid { background:#fee2e2; color:#dc2626; }
+        .status-partial { background:#fef3c7; color:#d97706; }
+        .status-submitted { background:#dbeafe; color:#2563eb; }
+        .status-graded { background:#d1fae5; color:#059669; }
+        .status-pending { background:#fef3c7; color:#d97706; }
         
         .loader { text-align:center; padding:40px; color:#64748b; font-weight:600; font-size:14px; }
 
@@ -68,6 +73,27 @@
         .stat-icon svg { width:24px; height:24px; stroke:currentColor; }
         .stat-value { font-size:32px; font-weight:800; color:#0F172A; margin-bottom:6px; }
         .stat-label { color:#64748b; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+
+        .btn { padding:12px 24px; border:none; border-radius:10px; font-family:inherit; font-weight:600; cursor:pointer; transition:.2s; font-size:14px; }
+        .btn-primary { background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; box-shadow:0 4px 12px rgba(67,56,202,.25); }
+        .btn-primary:hover { transform:translateY(-1px); }
+        .btn-outline { background:transparent; border:2px solid #4338CA; color:#4338CA; }
+
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+        .form-group input,.form-group textarea { width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-family:inherit; outline:none; transition:.2s; }
+        .form-group input:focus,.form-group textarea:focus { border-color:#4338CA; }
+
+        .toast { position:fixed; bottom:30px; right:30px; padding:14px 24px; border-radius:12px; color:#fff; font-weight:600; z-index:999; transform:translateY(100px); opacity:0; transition:.3s; }
+        .toast.show { transform:translateY(0); opacity:1; }
+        .toast-success { background:#10b981; }
+        .toast-error { background:#ef4444; }
+
+        @media(max-width:768px) {
+            .sidebar { display:none; }
+            .stats-grid { grid-template-columns:1fr; }
+            .profile-grid { grid-template-columns:1fr; }
+        }
     </style>
 </head>
 
@@ -87,7 +113,40 @@
             </div>
             <div class="menu-item" onclick="loadView('attendance', this)">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                Attendance History
+                Attendance
+            </div>
+            <div class="menu-item" onclick="loadView('chat', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                Chat with Teacher
+                <span id="parentChatBadge" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;margin-left:auto"></span>
+            </div>
+            <div class="menu-item" onclick="loadView('fees', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                Fees & Payments
+            </div>
+            <div class="menu-item" onclick="loadView('datesheets', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                DateSheets
+            </div>
+            <div class="menu-item" onclick="loadView('homework', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 6.253v13M12 6.253C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253M12 6.253C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                Homework
+            </div>
+            <div class="menu-item" onclick="loadView('results', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 12l2 2 4-4"></path><path d="M7 3h10a2 2 0 012 2v14l-4-2-3 2-3-2-4 2V5a2 2 0 012-2z"></path></svg>
+                Report Card
+            </div>
+            <div class="menu-item" onclick="loadView('timetable', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Timetable
+            </div>
+            <div class="menu-item" onclick="loadView('messages', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                Notice Board
+            </div>
+            <div class="menu-item" onclick="loadView('settings', this)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Settings
             </div>
         </div>
         <div class="logout-btn" onclick="logout()">LOGOUT</div>
@@ -110,8 +169,10 @@
         </div>
     </div>
 
+    <div class="toast" id="toast"></div>
+
     <script>
-        // Authentication Check
+        // ============ AUTH ============
         const token = localStorage.getItem('parentToken');
         const parentDataStr = localStorage.getItem('parentData');
         
@@ -127,8 +188,8 @@
             <span>Welcome, ${studentData.parentName || 'Parent'}! <span style="color:#64748b;font-weight:600;font-size:15px;margin-left:8px">(Student: ${studentData.name})</span></span>
         `;
         
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('dateText').innerText = new Date().toLocaleDateString('en-US', options);
+        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('dateText').innerText = new Date().toLocaleDateString('en-US', dateOptions);
 
         function logout() {
             localStorage.removeItem('parentToken');
@@ -136,72 +197,147 @@
             window.location.href = '/parent-login.html';
         }
 
-        async function fetchWithAuth(url) {
+        async function fetchWithAuth(url, opts = {}) {
             const response = await fetch(url, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                ...opts,
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...opts.headers }
             });
-            if (response.status === 401) {
-                logout();
-                return null;
-            }
+            if (response.status === 401) { logout(); return null; }
             return response.json();
         }
 
-        // View Router
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast toast-${type} show`;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function escapeHTML(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // ============ CHAT BADGE ============
+        async function updateParentChatBadge() {
+            try {
+                const data = await fetchWithAuth('/api/chat/parent/unread-count');
+                const badge = document.getElementById('parentChatBadge');
+                if (data && data.count > 0) {
+                    badge.textContent = data.count;
+                    badge.style.display = 'inline';
+                } else if (badge) {
+                    badge.style.display = 'none';
+                }
+            } catch(e) {}
+        }
+        updateParentChatBadge();
+        setInterval(updateParentChatBadge, 30000);
+
+        // ============ VIEW ROUTER ============
+        let chatPollInterval = null;
+
         function loadView(view, el) {
+            if (chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
+            
             document.querySelectorAll('.menu-item').forEach(e => e.classList.remove('active'));
             if (el) {
                 el.classList.add('active');
             } else {
-                // Highlight first matching menu item
                 const items = document.querySelectorAll('.menu-item');
-                const idx = view === 'dashboard' ? 0 : view === 'attendance' ? 1 : 0;
+                const order = ['dashboard', 'attendance', 'chat', 'fees', 'datesheets', 'homework', 'results', 'timetable', 'messages', 'settings'];
+                const idx = Math.max(0, order.indexOf(view));
                 if (items[idx]) items[idx].classList.add('active');
             }
 
             const content = document.getElementById('mainContent');
             content.innerHTML = '<div class="loader">Loading data...</div>';
 
-            if (view === 'dashboard') {
-                content.innerHTML = `
-                    <div class="card">
-                        <div class="card-header">
-                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                            Student Profile Overview
-                        </div>
-                        <div class="profile-grid">
-                            <div class="profile-item">
-                                <div class="profile-label">Student Name</div>
-                                <div class="profile-value">${studentData.name}</div>
-                            </div>
-                            <div class="profile-item">
-                                <div class="profile-label">Class & Section</div>
-                                <div class="profile-value">${studentData.className} ${studentData.section || ''}</div>
-                            </div>
-                            <div class="profile-item">
-                                <div class="profile-label">Roll Number</div>
-                                <div class="profile-value">${studentData.rollNo || 'N/A'}</div>
-                            </div>
-                            <div class="profile-item">
-                                <div class="profile-label">Parent Name</div>
-                                <div class="profile-value">${studentData.parentName || 'N/A'}</div>
-                            </div>
-                            <div class="profile-item">
-                                <div class="profile-label">Account Status</div>
-                                <div class="profile-value"><span class="status-badge status-active">${studentData.status || 'Active'}</span></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (view === 'attendance') {
-                loadAttendance();
-            }
+            const views = {
+                dashboard: loadDashboard,
+                attendance: loadAttendance,
+                chat: loadParentChat,
+                fees: loadFees,
+                datesheets: loadDateSheets,
+                homework: loadHomework,
+                results: loadReportCard,
+                timetable: loadTimetable,
+                messages: loadMessages,
+                settings: loadSettings
+            };
+            (views[view] || loadDashboard)();
         }
 
+        // ============ DASHBOARD ============
+        function loadDashboard() {
+            const content = document.getElementById('mainContent');
+            content.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        Student Profile Overview
+                    </div>
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <div class="profile-label">Student Name</div>
+                            <div class="profile-value">${studentData.name}</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="profile-label">Class & Section</div>
+                            <div class="profile-value">${studentData.className} ${studentData.section || ''}</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="profile-label">Roll Number</div>
+                            <div class="profile-value">${studentData.rollNo || 'N/A'}</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="profile-label">Parent Name</div>
+                            <div class="profile-value">${studentData.parentName || 'N/A'}</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="profile-label">Account Status</div>
+                            <div class="profile-value"><span class="status-badge status-active">${studentData.status || 'Active'}</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
+                    <div class="card" onclick="loadView('attendance')" style="cursor:pointer;text-align:center;padding:24px;">
+                        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                            <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:24px;height:24px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        </div>
+                        <div style="font-weight:700;color:#0F172A;font-size:14px">Attendance</div>
+                    </div>
+                    <div class="card" onclick="loadView('chat')" style="cursor:pointer;text-align:center;padding:24px;">
+                        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#2563eb);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                            <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:24px;height:24px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        </div>
+                        <div style="font-weight:700;color:#0F172A;font-size:14px">Chat with Teacher</div>
+                    </div>
+                    <div class="card" onclick="loadView('fees')" style="cursor:pointer;text-align:center;padding:24px;">
+                        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                            <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:24px;height:24px" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+                        </div>
+                        <div style="font-weight:700;color:#0F172A;font-size:14px">Fees & Payments</div>
+                    </div>
+                    <div class="card" onclick="loadView('datesheets')" style="cursor:pointer;text-align:center;padding:24px;">
+                        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#8b5cf6,#7c3aed);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+                            <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:24px;height:24px" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        </div>
+                        <div style="font-weight:700;color:#0F172A;font-size:14px">DateSheets</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============ ATTENDANCE ============
         async function loadAttendance() {
             const content = document.getElementById('mainContent');
             const data = await fetchWithAuth('/api/parent-auth/attendance');
-            
             if (!data) return;
 
             let html = `
@@ -211,49 +347,658 @@
                         <div class="stat-label">Attendance Rate</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" style="color:#2e7d32;">${data.stats.present}</div>
+                        <div class="stat-value" style="color:#059669;">${data.stats.present}</div>
                         <div class="stat-label">Days Present</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" style="color:#c62828;">${data.stats.absent}</div>
+                        <div class="stat-value" style="color:#dc2626;">${data.stats.absent}</div>
                         <div class="stat-label">Days Absent</div>
                     </div>
                 </div>
-
                 <div class="card">
                     <div class="card-header">Recent Attendance History</div>
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+                        <thead><tr><th>Date</th><th>Status</th><th>Remarks</th></tr></thead>
+                        <tbody>`;
 
             if (data.records.length === 0) {
-                html += `<tr><td colspan="3" style="text-align: center;">No attendance records found for this period.</td></tr>`;
+                html += `<tr><td colspan="3" style="text-align:center;">No attendance records found.</td></tr>`;
             } else {
                 data.records.forEach(r => {
                     const dateObj = new Date(r.date);
-                    html += `
-                        <tr>
-                            <td><strong>${dateObj.toLocaleDateString()}</strong></td>
-                            <td><span class="status-badge status-${r.status.toLowerCase()}">${r.status}</span></td>
-                            <td>${r.remarks || '-'}</td>
-                        </tr>
-                    `;
+                    html += `<tr>
+                        <td><strong>${dateObj.toLocaleDateString()}</strong></td>
+                        <td><span class="status-badge status-${r.status.toLowerCase()}">${r.status}</span></td>
+                        <td>${r.remarks || '-'}</td>
+                    </tr>`;
                 });
             }
-
             html += `</tbody></table></div>`;
             content.innerHTML = html;
+        }
+
+        // ============ CHAT WITH TEACHER ============
+        async function loadParentChat() {
+            const content = document.getElementById('mainContent');
+            content.innerHTML = '<div class="loader">Loading chat...</div>';
+
+            try {
+                const data = await fetchWithAuth('/api/chat/parent/conversations');
+                if (!data) {
+                    content.innerHTML = `
+                        <div class="card">
+                            <div class="card-header">Chat with Teacher</div>
+                            <div style="text-align:center;padding:40px;color:#64748b">
+                                <p style="font-weight:600">Unable to load conversations.</p>
+                                <p style="margin-top:8px;font-size:13px">Please try refreshing the page.</p>
+                            </div>
+                        </div>`;
+                    return;
+                }
+
+                if (!data.conversations || data.conversations.length === 0) {
+                    content.innerHTML = `
+                        <div class="card">
+                            <div class="card-header">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                                Chat with Teacher
+                            </div>
+                            <div style="text-align:center;padding:40px;color:#64748b">
+                                <p style="font-weight:600">${data.message || 'No teacher assigned to your class yet.'}</p>
+                                <p style="margin-top:8px;font-size:13px">Please contact your school administrator.</p>
+                            </div>
+                        </div>`;
+                    return;
+                }
+
+                const conv = data.conversations[0];
+                openParentChatWindow(conv.teacher._id, conv.teacher.name, conv.teacher.subject);
+            } catch (err) {
+                console.error('Failed to load parent chat:', err);
+                content.innerHTML = `
+                    <div class="card">
+                        <div class="card-header">Chat with Teacher</div>
+                        <div style="text-align:center;padding:40px;color:#64748b">
+                            <p style="font-weight:600">Error loading chat interface.</p>
+                            <p style="margin-top:8px;font-size:13px">${err.message || 'Server connection failed.'}</p>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        async function openParentChatWindow(teacherId, teacherName, teacherSubject) {
+            const content = document.getElementById('mainContent');
+            content.innerHTML = '<div class="loader">Loading messages...</div>';
+
+            const messages = await fetchWithAuth(`/api/chat/parent/messages?teacherId=${teacherId}`);
+            if (!messages) return;
+
+            const messagesHtml = messages.map(msg => {
+                const isMe = msg.senderType === 'parent';
+                const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+                return `
+                    <div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:8px">
+                        <div style="
+                            max-width:70%;padding:12px 16px;border-radius:${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};
+                            background:${isMe ? 'linear-gradient(135deg,#4338CA,#6366f1)' : '#f1f5f9'};
+                            color:${isMe ? '#fff' : '#1e293b'};font-size:14px;line-height:1.5;
+                            box-shadow:0 2px 8px ${isMe ? 'rgba(67,56,202,.2)' : 'rgba(0,0,0,.04)'};
+                        ">
+                            <div>${msg.message}</div>
+                            <div style="font-size:10px;margin-top:4px;opacity:.7;text-align:${isMe ? 'right' : 'left'}">${time}${isMe && msg.isRead ? ' ✓✓' : ''}</div>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            content.innerHTML = `
+                <div style="display:flex;flex-direction:column;height:calc(100vh - 140px);">
+                    <div style="background:#fff;border-radius:16px 16px 0 0;padding:16px 24px;display:flex;align-items:center;gap:14px;border:1px solid #e2e8f0;border-bottom:2px solid #f1f5f9">
+                        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:20px;flex-shrink:0">
+                            ${teacherName.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="font-weight:700;color:#0F172A;font-size:16px">${teacherName}</div>
+                            <div style="font-size:12px;color:#64748b;font-weight:500">${teacherSubject ? teacherSubject + ' Teacher' : 'Class Teacher'} • ${studentData.className}-${studentData.section || 'A'}</div>
+                        </div>
+                        <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+                            <div style="width:8px;height:8px;background:#10b981;border-radius:50%"></div>
+                            <span style="font-size:11px;color:#10b981;font-weight:700">Online</span>
+                        </div>
+                    </div>
+                    
+                    <div id="parentChatMessages" style="flex:1;overflow-y:auto;padding:20px 24px;background:#fafbfc;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0">
+                        ${messages.length === 0 ? '<div style="text-align:center;color:#94a3b8;padding:40px;font-weight:500">Start a conversation with ' + teacherName + '</div>' : messagesHtml}
+                    </div>
+                    
+                    <div style="background:#fff;border-radius:0 0 16px 16px;padding:16px 24px;display:flex;gap:12px;align-items:center;border:1px solid #e2e8f0;border-top:2px solid #f1f5f9">
+                        <input type="text" id="parentChatInput" placeholder="Type a message..." style="flex:1;padding:12px 18px;border:2px solid #e2e8f0;border-radius:24px;font-size:14px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor='#4338CA'" onblur="this.style.borderColor='#e2e8f0'" onkeypress="if(event.key==='Enter')sendParentMessage('${teacherId}')">
+                        <button onclick="sendParentMessage('${teacherId}')" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;box-shadow:0 4px 12px rgba(67,56,202,.3)" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
+                            <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        </button>
+                    </div>
+                </div>`;
+
+            const chatDiv = document.getElementById('parentChatMessages');
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+
+            // Poll for new messages
+            chatPollInterval = setInterval(async () => {
+                const newMessages = await fetchWithAuth(`/api/chat/parent/messages?teacherId=${teacherId}`);
+                if (!newMessages) return;
+                const container = document.getElementById('parentChatMessages');
+                if (!container) { clearInterval(chatPollInterval); return; }
+                const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
+                if (newMessages.length > 0) {
+                    container.innerHTML = newMessages.map(msg => {
+                        const isMe = msg.senderType === 'parent';
+                        const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+                        return `<div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:8px">
+                            <div style="max-width:70%;padding:12px 16px;border-radius:${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};background:${isMe ? 'linear-gradient(135deg,#4338CA,#6366f1)' : '#f1f5f9'};color:${isMe ? '#fff' : '#1e293b'};font-size:14px;line-height:1.5;box-shadow:0 2px 8px ${isMe ? 'rgba(67,56,202,.2)' : 'rgba(0,0,0,.04)'};">
+                                <div>${msg.message}</div>
+                                <div style="font-size:10px;margin-top:4px;opacity:.7;text-align:${isMe ? 'right' : 'left'}">${time}${isMe && msg.isRead ? ' ✓✓' : ''}</div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+                if (wasAtBottom) container.scrollTop = container.scrollHeight;
+                updateParentChatBadge();
+            }, 5000);
+        }
+
+        async function sendParentMessage(teacherId) {
+            const input = document.getElementById('parentChatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            input.value = '';
+            const result = await fetchWithAuth('/api/chat/parent/send', {
+                method: 'POST',
+                body: JSON.stringify({ teacherId, message })
+            });
+            if (result && result._id) {
+                const chatDiv = document.getElementById('parentChatMessages');
+                const emptyMsg = chatDiv.querySelector('[style*="text-align:center"]');
+                if (emptyMsg) emptyMsg.remove();
+                const time = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+                chatDiv.innerHTML += `
+                    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+                        <div style="max-width:70%;padding:12px 16px;border-radius:16px 16px 4px 16px;background:linear-gradient(135deg,#4338CA,#6366f1);color:#fff;font-size:14px;line-height:1.5;box-shadow:0 2px 8px rgba(67,56,202,.2);">
+                            <div>${message}</div>
+                            <div style="font-size:10px;margin-top:4px;opacity:.7;text-align:right">${time}</div>
+                        </div>
+                    </div>`;
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+            } else {
+                showToast('Failed to send message', 'error');
+            }
+        }
+
+        // ============ FEES & PAYMENTS ============
+        async function loadFees() {
+            const content = document.getElementById('mainContent');
+            try {
+                const data = await fetchWithAuth('/api/parent-fees');
+                if (!data) return;
+
+                const fees = Array.isArray(data) ? data : [];
+                const totalDue = fees.filter(f => f.status === 'Unpaid').reduce((sum, f) => sum + (f.feeStructureId?.amount || 0), 0);
+                const totalPaid = fees.filter(f => f.status === 'Paid').reduce((sum, f) => sum + (f.feeStructureId?.amount || 0), 0);
+
+                let html = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" style="color:#4338CA">₹${(totalPaid + totalDue).toLocaleString()}</div>
+                            <div class="stat-label">Total Fees</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" style="color:#059669">₹${totalPaid.toLocaleString()}</div>
+                            <div class="stat-label">Paid</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" style="color:#dc2626">₹${totalDue.toLocaleString()}</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+                            Fee Ledger
+                        </div>`;
+
+                if (fees.length === 0) {
+                    html += '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No fee records found.</div>';
+                } else {
+                    html += `<table><thead><tr><th>Fee Name</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Payment Date</th><th>Action</th></tr></thead><tbody>`;
+                    fees.forEach(f => {
+                        const structure = f.feeStructureId || {};
+                        html += `<tr>
+                            <td><strong>${structure.feeName || 'N/A'}</strong></td>
+                            <td>₹${(structure.amount || 0).toLocaleString()}</td>
+                            <td>${structure.dueDate ? new Date(structure.dueDate).toLocaleDateString() : '-'}</td>
+                            <td><span class="status-badge status-${f.status === 'Paid' ? 'paid' : 'unpaid'}">${f.status}</span></td>
+                            <td>${f.paymentDate ? new Date(f.paymentDate).toLocaleDateString() : '-'}</td>
+                            <td>${f.status === 'Paid' ? '<span style="color:#64748b;font-size:12px;font-weight:700">Paid</span>' : `<button class="btn btn-primary" style="padding:8px 14px;font-size:12px" onclick="startParentPayment('${f._id}')">Pay Now</button>`}</td>
+                        </tr>`;
+                    });
+                    html += `</tbody></table>`;
+                }
+                html += `</div>`;
+                content.innerHTML = html;
+            } catch(e) {
+                content.innerHTML = `<div class="card"><div class="card-header">Fees & Payments</div><div style="text-align:center;padding:30px;color:#64748b">No fee records available.</div></div>`;
+            }
+        }
+
+        function loadRazorpayScript() {
+            return new Promise((resolve, reject) => {
+                if (window.Razorpay) {
+                    resolve();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('Unable to load Razorpay checkout'));
+                document.body.appendChild(script);
+            });
+        }
+
+        async function startParentPayment(paymentId) {
+            const orderData = await fetchWithAuth(`/api/parent-fees/${paymentId}/create-order`, { method: 'POST' });
+            if (!orderData || orderData.message) {
+                showToast(orderData?.message || 'Unable to start payment', 'error');
+                return;
+            }
+
+            if (orderData.mode === 'mock') {
+                const result = await fetchWithAuth(`/api/parent-fees/${paymentId}/pay`, { method: 'POST' });
+                if (result && result.payment) {
+                    showToast('Demo payment completed.');
+                    loadFees();
+                } else {
+                    showToast(result?.message || 'Demo payment failed', 'error');
+                }
+                return;
+            }
+
+            try {
+                await loadRazorpayScript();
+                const options = {
+                    key: orderData.keyId,
+                    amount: orderData.order.amount,
+                    currency: orderData.order.currency || 'INR',
+                    name: 'ATKool',
+                    description: orderData.payment?.feeName || 'School fee payment',
+                    order_id: orderData.order.id,
+                    handler: async function (response) {
+                        const result = await fetchWithAuth(`/api/parent-fees/${paymentId}/verify`, {
+                            method: 'POST',
+                            body: JSON.stringify(response)
+                        });
+                        if (result && result.payment) {
+                            showToast('Payment successful.');
+                            loadFees();
+                        } else {
+                            showToast(result?.message || 'Payment verification failed', 'error');
+                        }
+                    },
+                    prefill: {
+                        name: studentData.parentName || studentData.name || ''
+                    },
+                    theme: {
+                        color: '#4338CA'
+                    }
+                };
+                new Razorpay(options).open();
+            } catch (error) {
+                showToast(error.message || 'Payment checkout failed', 'error');
+            }
+        }
+
+        // ============ DATESHEETS ============
+        async function loadDateSheets() {
+            const content = document.getElementById('mainContent');
+            try {
+                const exams = await fetchWithAuth('/api/parent-auth/exams');
+                if (!exams) return;
+
+                let html = `<div class="card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        Exam DateSheets — Class ${studentData.className}
+                    </div>`;
+
+                if (!exams || exams.length === 0) {
+                    html += '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No upcoming exams scheduled.</div>';
+                } else {
+                    html += `<table><thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Time</th><th>Max Marks</th><th>Status</th></tr></thead><tbody>`;
+                    exams.forEach(e => {
+                        html += `<tr>
+                            <td><strong>${e.examName || 'Exam'}</strong></td>
+                            <td>${e.subject || '-'}</td>
+                            <td>${e.examDate ? new Date(e.examDate).toLocaleDateString() : '-'}</td>
+                            <td>${e.startTime || '-'} — ${e.endTime || '-'}</td>
+                            <td>${e.maxMarks || '-'}</td>
+                            <td><span class="status-badge" style="background:#eef2ff;color:#4338CA">${e.status || 'Scheduled'}</span></td>
+                        </tr>`;
+                    });
+                    html += `</tbody></table>`;
+                }
+                html += `</div>`;
+                content.innerHTML = html;
+            } catch(e) {
+                content.innerHTML = `<div class="card"><div class="card-header">DateSheets</div><div style="text-align:center;padding:30px;color:#64748b">No exam data available.</div></div>`;
+            }
+        }
+
+        // ============ NOTICE BOARD ============
+        async function loadMessages() {
+            const content = document.getElementById('mainContent');
+            try {
+                const messages = await fetchWithAuth('/api/parent-auth/messages');
+                if (!messages) return;
+
+                let html = `<div class="card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        School Notice Board
+                    </div>`;
+
+                if (!messages || messages.length === 0) {
+                    html += '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No announcements at this time.</div>';
+                } else {
+                    messages.forEach(m => {
+                        const date = new Date(m.createdAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+                        html += `
+                            <div style="padding:18px;border:1px solid #e2e8f0;border-radius:14px;margin-bottom:14px;transition:all .2s" onmouseover="this.style.borderColor='#c7d2fe';this.style.background='#faf5ff'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#fff'">
+                                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+                                    <div style="font-weight:700;color:#0F172A;font-size:15px">${m.heading || 'Announcement'}</div>
+                                    <div style="font-size:11px;color:#94a3b8;font-weight:600;flex-shrink:0;margin-left:12px">${date}</div>
+                                </div>
+                                <div style="font-size:14px;color:#475569;line-height:1.6">${m.message || ''}</div>
+                                <div style="margin-top:8px;font-size:11px;color:#94a3b8;font-weight:600">To: ${m.sendTo || 'All'}</div>
+                            </div>`;
+                    });
+                }
+                html += `</div>`;
+                content.innerHTML = html;
+            } catch(e) {
+                content.innerHTML = `<div class="card"><div class="card-header">Notice Board</div><div style="text-align:center;padding:30px;color:#64748b">No announcements available.</div></div>`;
+            }
+        }
+
+        // ============ HOMEWORK ============
+        async function loadHomework() {
+            const content = document.getElementById('mainContent');
+            try {
+                const homeworks = await fetchWithAuth('/api/homework/parent');
+                if (!homeworks) return;
+
+                let html = `<div class="card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 6.253v13M12 6.253C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253M12 6.253C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        Homework
+                    </div>`;
+
+                if (homeworks.length === 0) {
+                    html += '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No homework assigned yet.</div>';
+                } else {
+                    homeworks.forEach(hw => {
+                        const submitted = !!hw.submission;
+                        const status = hw.submission?.status || 'Pending';
+                        const teacherName = hw.teacherId?.name || 'Teacher';
+                        html += `
+                            <div style="border:1px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:14px">
+                                <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start">
+                                    <div>
+                                        <div style="font-size:16px;font-weight:800;color:#0F172A">${escapeHTML(hw.title)}</div>
+                                        <div style="font-size:12px;color:#64748b;font-weight:700;margin:5px 0">${escapeHTML(hw.subject)} | ${escapeHTML(teacherName)} | Due ${hw.dueDate ? new Date(hw.dueDate).toLocaleDateString() : '-'}</div>
+                                        <div style="font-size:14px;color:#475569;line-height:1.6">${escapeHTML(hw.description)}</div>
+                                    </div>
+                                    <span class="status-badge status-${status.toLowerCase()}">${status}</span>
+                                </div>
+                                ${submitted ? `
+                                    <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-top:14px">
+                                        <div style="font-size:12px;font-weight:800;color:#64748b;text-transform:uppercase">Submitted Answer</div>
+                                        <div style="margin-top:6px;color:#334155">${escapeHTML(hw.submission.content)}</div>
+                                        ${hw.submission.grade ? `<div style="margin-top:8px;font-weight:700;color:#059669">Grade: ${escapeHTML(hw.submission.grade)}</div>` : ''}
+                                        ${hw.submission.feedback ? `<div style="margin-top:4px;color:#64748b">Feedback: ${escapeHTML(hw.submission.feedback)}</div>` : ''}
+                                    </div>
+                                ` : ''}
+                                <button class="btn ${submitted ? 'btn-outline' : 'btn-primary'}" style="margin-top:14px" onclick="openHomeworkSubmit('${hw._id}', '${escapeHTML(hw.title)}', '${escapeHTML(hw.submission?.content || '')}')">${submitted ? 'Update Submission' : 'Submit Homework'}</button>
+                            </div>`;
+                    });
+                }
+                html += `</div>`;
+                content.innerHTML = html;
+            } catch (e) {
+                content.innerHTML = `<div class="card"><div class="card-header">Homework</div><div style="text-align:center;padding:30px;color:#64748b">Homework could not be loaded.</div></div>`;
+            }
+        }
+
+        function openHomeworkSubmit(homeworkId, title, existingContent) {
+            const content = document.getElementById('mainContent');
+            content.innerHTML = `
+                <button class="btn btn-outline" onclick="loadHomework()" style="margin-bottom:16px">Back to Homework</button>
+                <div class="card">
+                    <div class="card-header">Submit Homework - ${escapeHTML(title)}</div>
+                    <form onsubmit="submitHomeworkAnswer(event, '${homeworkId}')">
+                        <div class="form-group">
+                            <label>Your Answer *</label>
+                            <textarea id="homeworkAnswer" required style="min-height:180px" placeholder="Write your answer here">${escapeHTML(existingContent)}</textarea>
+                        </div>
+                        <button class="btn btn-primary" id="homeworkAnswerBtn">Submit Answer</button>
+                    </form>
+                </div>`;
+        }
+
+        async function submitHomeworkAnswer(event, homeworkId) {
+            event.preventDefault();
+            const btn = document.getElementById('homeworkAnswerBtn');
+            const content = document.getElementById('homeworkAnswer').value.trim();
+            if (!content) {
+                showToast('Please enter your answer', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+            const result = await fetchWithAuth('/api/homework/parent/submit', {
+                method: 'POST',
+                body: JSON.stringify({ homeworkId, content })
+            });
+            btn.disabled = false;
+            btn.textContent = 'Submit Answer';
+
+            if (result && result._id) {
+                showToast('Homework submitted.');
+                loadHomework();
+            } else {
+                showToast(result?.message || 'Failed to submit homework', 'error');
+            }
+        }
+
+        // ============ REPORT CARD ============
+        async function loadReportCard() {
+            const content = document.getElementById('mainContent');
+            try {
+                const data = await fetchWithAuth('/api/results/parent');
+                if (!data) return;
+                const results = data.results || [];
+                const totalMarks = results.reduce((sum, r) => sum + (r.maxMarks || 0), 0);
+                const obtained = results.reduce((sum, r) => sum + (r.marksObtained || 0), 0);
+                const percentage = totalMarks > 0 ? Math.round((obtained / totalMarks) * 100) : 0;
+
+                content.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-value" style="color:#4338CA">${results.length}</div><div class="stat-label">Subjects Recorded</div></div>
+                        <div class="stat-card"><div class="stat-value" style="color:#059669">${obtained}/${totalMarks}</div><div class="stat-label">Marks</div></div>
+                        <div class="stat-card"><div class="stat-value" style="color:#dc2626">${percentage}%</div><div class="stat-label">Overall</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 12l2 2 4-4"></path><path d="M7 3h10a2 2 0 012 2v14l-4-2-3 2-3-2-4 2V5a2 2 0 012-2z"></path></svg>
+                            Report Card
+                        </div>
+                        ${results.length === 0 ? '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No marks published yet.</div>' : `
+                        <table>
+                            <thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Marks</th><th>Grade</th><th>Remarks</th></tr></thead>
+                            <tbody>
+                                ${results.map(r => `<tr>
+                                    <td><strong>${escapeHTML(r.examId?.name || 'Exam')}</strong></td>
+                                    <td>${escapeHTML(r.subject || '-')}</td>
+                                    <td>${r.examId?.examDate ? new Date(r.examId.examDate).toLocaleDateString() : '-'}</td>
+                                    <td>${r.marksObtained}/${r.maxMarks}</td>
+                                    <td><span class="status-badge" style="background:#eef2ff;color:#4338CA">${escapeHTML(r.grade || '-')}</span></td>
+                                    <td>${escapeHTML(r.remarks || '-')}</td>
+                                </tr>`).join('')}
+                            </tbody>
+                        </table>`}
+                    </div>`;
+            } catch (e) {
+                content.innerHTML = `<div class="card"><div class="card-header">Report Card</div><div style="text-align:center;padding:30px;color:#64748b">Report card could not be loaded.</div></div>`;
+            }
+        }
+
+        // ============ TIMETABLE ============
+        async function loadTimetable() {
+            const content = document.getElementById('mainContent');
+            try {
+                const timetable = await fetchWithAuth(`/api/timetable?className=${encodeURIComponent(studentData.className)}&section=${encodeURIComponent(studentData.section || 'A')}`);
+                if (!timetable) return;
+                const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                const sorted = [...timetable].sort((a, b) => dayOrder.indexOf(a.dayOfWeek) - dayOrder.indexOf(b.dayOfWeek));
+
+                let html = `<div class="card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        Timetable - Class ${escapeHTML(studentData.className)} ${escapeHTML(studentData.section || 'A')}
+                    </div>`;
+
+                if (sorted.length === 0) {
+                    html += '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No timetable published yet.</div>';
+                } else {
+                    sorted.forEach(day => {
+                        html += `<div style="margin-bottom:22px">
+                            <div style="font-weight:800;color:#0F172A;margin-bottom:10px">${escapeHTML(day.dayOfWeek)}</div>
+                            <table>
+                                <thead><tr><th>Period</th><th>Time</th><th>Subject</th><th>Teacher</th></tr></thead>
+                                <tbody>
+                                    ${(day.periods || []).sort((a, b) => a.periodNumber - b.periodNumber).map(p => `<tr>
+                                        <td>${p.periodNumber}</td>
+                                        <td>${escapeHTML(p.startTime)} - ${escapeHTML(p.endTime)}</td>
+                                        <td><strong>${escapeHTML(p.subject)}</strong></td>
+                                        <td>${escapeHTML(p.teacherId?.name || '-')}</td>
+                                    </tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>`;
+                    });
+                }
+                html += `</div>`;
+                content.innerHTML = html;
+            } catch (e) {
+                content.innerHTML = `<div class="card"><div class="card-header">Timetable</div><div style="text-align:center;padding:30px;color:#64748b">Timetable could not be loaded.</div></div>`;
+            }
+        }
+
+        // ============ SETTINGS ============
+        function loadSettings() {
+            const content = document.getElementById('mainContent');
+            content.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        Account Settings
+                    </div>
+
+                    <!-- Change Password -->
+                    <div style="margin-bottom:28px;">
+                        <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin-bottom:16px;">Change Password</h3>
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" id="currentPassword" placeholder="Enter current password">
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" id="newPassword" placeholder="Enter new password">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        </div>
+                        <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+                    </div>
+
+                    <hr style="border:none;border-top:1px solid #f1f5f9;margin:24px 0;">
+
+                    <!-- Change Email -->
+                    <div>
+                        <h3 style="font-size:15px;font-weight:700;color:#0F172A;margin-bottom:16px;">Update Email</h3>
+                        <div class="form-group">
+                            <label>New Email Address</label>
+                            <input type="email" id="newEmail" placeholder="Enter new email address">
+                        </div>
+                        <button class="btn btn-primary" onclick="changeEmail()">Update Email</button>
+                    </div>
+                </div>`;
+        }
+
+        async function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!currentPassword || !newPassword) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                showToast('New passwords do not match', 'error');
+                return;
+            }
+            if (newPassword.length < 4) {
+                showToast('Password must be at least 4 characters', 'error');
+                return;
+            }
+
+            const result = await fetchWithAuth('/api/parent-auth/change-password', {
+                method: 'PUT',
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+
+            if (result && result.message === 'Password updated successfully') {
+                showToast('Password updated successfully!');
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            } else {
+                showToast(result?.message || 'Failed to update password', 'error');
+            }
+        }
+
+        async function changeEmail() {
+            const newEmail = document.getElementById('newEmail').value;
+            if (!newEmail) {
+                showToast('Please enter a new email', 'error');
+                return;
+            }
+
+            const result = await fetchWithAuth('/api/parent-auth/change-email', {
+                method: 'PUT',
+                body: JSON.stringify({ newEmail })
+            });
+
+            if (result && result.email) {
+                showToast(result.message || 'Email updated successfully!');
+                document.getElementById('newEmail').value = '';
+            } else {
+                showToast(result?.message || 'Failed to update email', 'error');
+            }
         }
 
         // Load default view
         loadView('dashboard');
     </script>
+<script src="/js/pwa.js"></script>
 </body>
 </html>

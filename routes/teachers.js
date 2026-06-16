@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Teacher = require('../models/Teacher');
 const School = require('../models/School');
+const { sendVerificationEmail } = require('../utils/emailService');
 
 function schoolAuth(req, res, next) {
     try {
@@ -15,15 +16,22 @@ function schoolAuth(req, res, next) {
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_admin_secret_key_2024');
 
-        if (decoded.type !== 'school') {
-            return res.status(401).json({ message: 'Invalid token type' });
+        if (decoded.type === 'school') {
+            req.schoolId = decoded.schoolId;
+            next();
+        } else if (decoded.type === 'teacher' && decoded.role === 'Principal') {
+            req.schoolId = decoded.schoolId;
+            next();
+        } else {
+            return res.status(403).json({ message: 'Access denied' });
         }
-
-        req.schoolId = decoded.schoolId;
-        next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid token' });
     }
+}
+
+function getBaseUrl(req) {
+    return process.env.APP_BASE_URL || `${req.protocol}://${req.get('host')}`;
 }
 
 router.get('/', schoolAuth, async (req, res) => {
@@ -64,7 +72,7 @@ router.get('/:id', schoolAuth, async (req, res) => {
 
 router.post('/', schoolAuth, async (req, res) => {
     try {
-        const { name, email, mobileNo, className, classAssignments, subject, students, status, salary, address, photo, password } = req.body;
+        const { name, email, mobileNo, className, classAssignments, subject, students, status, salary, address, photo, password, role, isClassTeacher, classTeacherFor } = req.body;
 
         if (!name) {
             return res.status(400).json({ message: 'Teacher name is required' });
@@ -82,7 +90,11 @@ router.post('/', schoolAuth, async (req, res) => {
             status: status || 'Active',
             salary: salary || 0,
             address,
-            photo
+            photo,
+            role: role || 'Teacher',
+            isClassTeacher: isClassTeacher || false,
+            classTeacherFor: classTeacherFor || null,
+            isEmailVerified: !email
         };
 
         // Hash password if provided
@@ -92,9 +104,22 @@ router.post('/', schoolAuth, async (req, res) => {
 
         const teacher = await Teacher.create(teacherData);
 
+        let verification = null;
+        if (teacher.email) {
+            verification = await sendVerificationEmail(teacher, 'teacher', { baseUrl: getBaseUrl(req) });
+        }
+
         await School.findByIdAndUpdate(req.schoolId, { $inc: { teachers: 1 } });
 
-        res.status(201).json(teacher);
+        res.status(201).json({
+            teacher,
+            verification: verification ? {
+                email: verification.email,
+                linkGenerated: true
+            } : {
+                linkGenerated: false
+            }
+        });
     } catch (error) {
         console.error('Create teacher error:', error);
         res.status(500).json({ message: 'Server error' });
@@ -144,9 +169,18 @@ router.put('/:id/mark-leave', schoolAuth, async (req, res) => {
 
 router.put('/:id', schoolAuth, async (req, res) => {
     try {
-        const { name, email, password, mobileNo, className, classAssignments, subject, students, status, salary, address, photo } = req.body;
+        const { name, email, password, mobileNo, className, classAssignments, subject, students, status, salary, address, photo, role, isClassTeacher, classTeacherFor } = req.body;
 
-        const updateData = { name, email, mobileNo, className, classAssignments: classAssignments || [], subject, students, status, salary, address, photo };
+        const existingTeacher = await Teacher.findOne({ _id: req.params.id, schoolId: req.schoolId });
+        if (!existingTeacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+
+        const updateData = { name, email, mobileNo, className, classAssignments: classAssignments || [], subject, students, status, salary, address, photo, role, isClassTeacher, classTeacherFor };
+        const emailChanged = email && email !== existingTeacher.email;
+        if (emailChanged) {
+            updateData.isEmailVerified = false;
+        }
 
         // Hash password if provided
         if (password) {
@@ -159,11 +193,20 @@ router.put('/:id', schoolAuth, async (req, res) => {
             { new: true, runValidators: true }
         );
 
-        if (!teacher) {
-            return res.status(404).json({ message: 'Teacher not found' });
+        let verification = null;
+        if (emailChanged) {
+            verification = await sendVerificationEmail(teacher, 'teacher', { baseUrl: getBaseUrl(req) });
         }
 
-        res.json(teacher);
+        res.json({
+            teacher,
+            verification: verification ? {
+                email: verification.email,
+                linkGenerated: true
+            } : {
+                linkGenerated: false
+            }
+        });
     } catch (error) {
         console.error('Update teacher error:', error);
         res.status(500).json({ message: 'Server error' });

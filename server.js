@@ -81,6 +81,7 @@ app.get('/terms', (req, res) => {
 });
 
 app.use('/api/school-auth', require('./routes/school-auth'));
+app.use('/api/school-vans', require('./routes/school-vans'));
 app.use('/api/teachers', require('./routes/teachers'));
 app.use('/api/students', require('./routes/students'));
 app.use('/api/school-messages', require('./routes/school-messages'));
@@ -92,6 +93,14 @@ app.use('/api/teacher-auth', require('./routes/teacher-auth'));
 app.use('/api/parent-auth', require('./routes/parent-auth'));
 app.use('/api/teacher', require('./routes/teacher'));
 app.use('/api/office-staff', require('./routes/office-staff'));
+app.use('/api/school-fees', require('./routes/school-fees'));
+app.use('/api/parent-fees', require('./routes/parent-fees'));
+app.use('/api/leaves', require('./routes/leaves'));
+app.use('/api/chat', require('./routes/chat'));
+app.use('/api/homework', require('./routes/homework'));
+app.use('/api/results', require('./routes/results'));
+app.use('/api/timetable', require('./routes/timetable'));
+app.use('/api/email-verification', require('./routes/email-verification'));
 
 app.get('/support', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'support.html'));

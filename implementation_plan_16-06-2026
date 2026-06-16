@@ -1,0 +1,465 @@
+# ATKOOL V5 — Comprehensive Implementation Plan & LLM Handoff Document
+
+> **Purpose:** This document is a complete handoff guide for the next LLM or developer taking over the ATKOOL V3 project. It explains the full codebase, what is working, what is broken, and what still needs to be built.
+
+---
+
+## 1. PROJECT OVERVIEW
+
+**ATKOOL** is a multi-school SaaS ERP platform with 4 user portals:
+- **Super Admin** — Platform owner who manages schools, subscriptions, payments
+- **School Admin** — Individual school administrator managing teachers, students, fees, events
+- **Teacher** — Classroom teacher managing attendance, students, chatting with parents
+- **Parent** — Parent viewing child's attendance, fees, exams, chatting with teacher
+
+**Tech Stack:** Node.js + Express.js + MongoDB (Mongoose) + vanilla HTML/CSS/JS frontend  
+**Project Root:** `d:\Internship\Atkool as Agents folder\atkool-website\`  
+**Run Command:** `npm run dev` (runs `node server.js` on port 3000)
+
+---
+
+## 2. HOW THE CODE IS ORGANIZED
+
+### Entry Point: [server.js](file:///d:/Internship/Atkool%20as%20Agents%20folder/atkool-website/server.js)
+- Loads Express, connects to MongoDB via [config/db.js](file:///d:/Internship/Atkool%20as%20Agents%20folder/atkool-website/config/db.js)
+- Mounts 26 API route files under `/api/*`
+- Serves static files from `public/` directory
+- MongoDB connection string is in [env.txt](file:///d:/Internship/Atkool%20as%20Agents%20folder/atkool-website/env.txt) (NOT `.env`)
+- `db.js` reads `env.txt` manually with `fs.readFileSync` — this is intentional
+
+### Database: 20 Mongoose Models in `models/`
+| Model | File | Purpose |
+|-------|------|---------|
+| Admin | `Admin.js` | Super admin login credentials |
+| Attendance | `Attendance.js` | Daily student present/absent records |
+| **ChatMessage** | `ChatMessage.js` | Parent ↔ Teacher chat messages |
+| Event | `Event.js` | School events (festivals, meetings) |
+| Exam | `Exam.js` | Exam datesheets per class |
+| **FeePayment** | `FeePayment.js` | Student fee bills with paid/unpaid status |
+| **FeeStructure** | `FeeStructure.js` | Admin-configured fee categories |
+| LeaveRequest | `LeaveRequest.js` | Teacher leave applications |
+| Message | `Message.js` | Platform-level broadcast messages |
+| OfficeStaff | `OfficeStaff.js` | Non-teaching staff records |
+| Payment | `Payment.js` | Platform subscription payments (SaaS) |
+| Plan | `Plan.js` | SaaS subscription plans |
+| School | `School.js` | School profiles |
+| SchoolMessage | `SchoolMessage.js` | School-level announcements/notices |
+| SchoolVan | `SchoolVan.js` | Transport vehicle records |
+| **Student** | `Student.js` | Student + parent credentials |
+| Subscription | `Subscription.js` | School subscription tracking |
+| SupportTicket | `SupportTicket.js` | School → Super Admin tickets |
+| **Teacher** | `Teacher.js` | Teacher profiles + class assignments |
+| User | `User.js` | Super admin user management |
+
+### API Routes: 26 Route Files in `routes/`
+| Route File | Mount Path | Portal |
+|-----------|-----------|--------|
+| `auth.js` | `/api/auth` | Super Admin login |
+| `dashboard.js` | `/api/dashboard` | Super Admin stats |
+| `schools.js` | `/api/schools` | Super Admin CRUD schools |
+| `users.js` | `/api/users` | Super Admin user management |
+| `plans.js` | `/api/plans` | SaaS plan management |
+| `payments.js` | `/api/payments` | SaaS payment records |
+| `overview.js` | `/api/overview` | Platform overview stats |
+| `messages.js` | `/api/messages` | Platform broadcast messages |
+| `subscriptions.js` | `/api/subscriptions` | Subscription management |
+| `terms.js` | `/api/terms` | Terms & conditions |
+| `support.js` | `/api/support` | Support ticket system |
+| `school-auth.js` | `/api/school-auth` | School Admin login + dashboard |
+| `teachers.js` | `/api/teachers` | School Admin → teacher CRUD |
+| `students.js` | `/api/students` | School Admin → student CRUD |
+| `school-vans.js` | `/api/school-vans` | Transport management |
+| `school-messages.js` | `/api/school-messages` | School announcements |
+| `school-fees.js` | `/api/school-fees` | Fee structure + payment collection |
+| `events.js` | `/api/events` | Event CRUD |
+| `exams.js` | `/api/exams` | Exam CRUD |
+| `office-staff.js` | `/api/office-staff` | Office staff management |
+| `leaves.js` | `/api/leaves` | Leave request system |
+| `teacher-auth.js` | `/api/teacher-auth` | Teacher login |
+| `teacher.js` | `/api/teacher` | Teacher dashboard APIs |
+| `parent-auth.js` | `/api/parent-auth` | Parent login + profile + attendance + exams + messages |
+| `parent-fees.js` | `/api/parent-fees` | Parent fee viewing + payment |
+| **`chat.js`** | `/api/chat` | ATKOOL CONNECT chat system |
+
+### Frontend Pages in `public/`
+
+**Super Admin Pages:**
+| File | Purpose |
+|------|---------|
+| `index.html` | Super Admin login |
+| `dashboard.html` | Super Admin dashboard |
+| `schools.html` | School management |
+| `add-school.html` | Add new school form |
+| `users.html` | User management |
+| `payments.html` | Payment history |
+| `plans.html` | SaaS plan management |
+| `overview.html` | Platform analytics |
+| `send-message.html` | Broadcast messaging |
+| `support.html` | Support tickets |
+| `subscription-list.html` | Subscription tracking |
+| `office-staff.html` | Office staff management |
+| `terms.html` | Terms & conditions |
+
+**School Admin Pages** (in `public/school-admin/`):
+| File | Purpose |
+|------|---------|
+| `index.html` | School Admin login |
+| `dashboard.html` | School dashboard (42KB — all-in-one SPA) |
+| `teachers.html` | Teacher management (75KB — huge inline page) |
+| `students.html` | Student directory (43KB) |
+| `pending-students.html` | Pending approval queue |
+| `fees.html` | Fee configuration + payment collection |
+| `vans.html` | Transport management |
+| `events.html` | Event management |
+| `exams.html` | Exam scheduling |
+| `send-message.html` | School announcements |
+| `overview.html` | School analytics |
+| `plans.html` | Subscription plan view |
+| `support.html` | Support ticket submission |
+
+**Teacher Portal:**
+| File | Purpose |
+|------|---------|
+| `teacher-login.html` | Teacher login page |
+| `teacher-dashboard.html` | Teacher SPA shell (sidebar + content area) |
+| `js/teacher-dashboard.js` | **46KB** — All teacher logic (10 views as functions) |
+
+**Parent Portal:**
+| File | Purpose |
+|------|---------|
+| `parent-login.html` | Parent login page |
+| `parent-dashboard.html` | **46KB** — Complete parent SPA (all views inline in `<script>`) |
+
+---
+
+## 3. AUTHENTICATION SYSTEM
+
+### How It Works
+All portals use **JWT tokens** with a `type` field to distinguish roles:
+```
+Super Admin:  { userId, type: 'admin' }
+School Admin: { schoolId, type: 'school' }
+Teacher:      { teacherId, schoolId, type: 'teacher' }
+Parent:       { studentId, schoolId, username, type: 'parent' }
+```
+
+### How Parent Login Works (IMPORTANT)
+1. Teacher generates parent credentials via `POST /api/teacher/generate-parent-login` with `{ studentId }`
+2. This creates a random `parentUsername` (e.g., "dilip3849") and `parentPassword` (e.g., "66W2hFeW") stored in the `Student` document
+3. Parent logs in at `/parent-login.html` using these credentials
+4. Login calls `POST /api/parent-auth/login` which finds Student by `parentUsername` and validates plain-text password
+5. Token encodes `studentId` + `schoolId` — the parent IS the student in data terms
+
+### Known Credentials
+| Portal | Login | Password |
+|--------|-------|----------|
+| Super Admin | admin | admin123 |
+| Teacher | manu@gmail.com | teacher123 |
+| Parent | dilip3849 | 66W2hFeW |
+
+---
+
+## 4. WHAT IS FULLY WORKING (✅ DONE)
+
+### Super Admin Portal — ✅ 100% Complete
+All CRUD operations, dashboard stats, school management, plans, payments, users, support tickets, subscriptions, overview, broadcast messages.
+
+### School Admin Portal — ✅ 95% Complete
+- ✅ Login + dashboard with stats
+- ✅ Teacher management (add, edit, assign classes, set as class teacher)
+- ✅ Student directory with search, filter, approval workflow
+- ✅ Pending student approval queue
+- ✅ Fee structure configuration + manual payment collection
+- ✅ Transport (vans) management
+- ✅ Event management
+- ✅ Exam scheduling
+- ✅ School announcements
+- ✅ Support ticket submission
+- ✅ Subscription plan viewing
+- ✅ FEES link added to all sidebar navigation
+
+### Teacher Portal — ✅ 95% Complete
+- ✅ Login with device-lock support
+- ✅ Dashboard overview (stats cards, attendance summary, quick actions)
+- ✅ **My Classes** — Shows assigned classes with student counts, click to see roster
+- ✅ **My Students** — Full student list with parent login generation
+- ✅ **Take Attendance** — Interactive P/A buttons with live count, submit
+- ✅ **Attendance History** — Date picker with historical records
+- ✅ **ATKOOL CONNECT Chat** — Conversation list, message bubbles, 5-sec polling, unread badges
+- ✅ **Add Student** — Form to register new students (goes to pending)
+- ✅ **Student Requests** — View pending/approved/rejected registrations
+- ✅ **School Events** — Read-only event list
+- ✅ **Upcoming Exams** — Read-only exam table
+
+### Parent Portal — ✅ 90% Complete (with bugs)
+- ✅ Login + student profile display
+- ✅ Dashboard overview with quick action cards
+- ✅ **Attendance History** — Stats (percentage, present, absent) + record table
+- ✅ **Chat with Teacher** — Full chat UI with polling + unread badges
+- ✅ **Fees & Payments** — Stats grid (total, paid, pending) + fee ledger table
+- ✅ **DateSheets** — Exam schedule filtered by student's class
+- ✅ **Notice Board** — School announcements display
+- ✅ **Settings** — Change password + change email forms
+
+### Chat System (ATKOOL CONNECT) — ✅ Backend Complete
+- ✅ `ChatMessage` model with compound indexes
+- ✅ 8 API endpoints in `routes/chat.js` (teacher + parent sides)
+- ✅ Teacher can see all students as conversations, send/receive messages
+- ✅ Parent auto-finds their class teacher via 3-step fallback
+- ✅ Read receipts, unread counts, message timestamps
+- ✅ Sidebar badge counts refresh every 30 seconds
+
+### Fee System — ✅ Backend Complete
+- ✅ School Admin can create fee structures (`POST /api/school-fees/structures`)
+- ✅ Auto-allocates fees to all matching students
+- ✅ School Admin can collect manual payments (`POST /api/school-fees/payments/:id/collect`)
+- ✅ Parent can view their fee ledger (`GET /api/parent-fees`)
+- ✅ Parent can simulate online payment (`POST /api/parent-fees/:paymentId/pay`)
+
+### Leave System — ✅ Backend Complete
+- ✅ Teacher can check leave balances (Casual: 12, Sick: 12, Earned: 15)
+- ✅ Teacher can submit leave requests
+- ✅ School Admin can approve/reject leaves
+- ✅ Auto-updates teacher status to "On Leave" on approval
+
+---
+
+## 5. KNOWN BUGS (🐛 MUST FIX)
+
+### Bug 1: Parent Chat Stuck on "Loading chat..."
+**Symptom:** Parent dashboard shows "Loading chat..." forever when clicking "Chat with Teacher"  
+**Root Cause:** The `/api/chat/parent/conversations` endpoint uses a 3-step teacher resolution:
+1. Check `student.teacherId` — often `null` because teachers don't always get assigned as `teacherId` on the student record
+2. Find teacher with `classTeacherFor` matching student's class — requires `isClassTeacher: true`
+3. Find any teacher with `classAssignments` matching — this should work but the student's `section` field or teacher's `classAssignments` might not match exactly
+
+**Fix Location:** [routes/chat.js](file:///d:/Internship/Atkool%20as%20Agents%20folder/atkool-website/routes/chat.js) lines 220-297  
+**Fix Strategy:**
+1. Add `try/catch` around the entire `loadParentChat()` function in [parent-dashboard.html](file:///d:/Internship/Atkool%20as%20Agents%20folder/atkool-website/public/parent-dashboard.html) (line 351) to show an error message instead of hanging
+2. In the backend, relax the section matching — try without section if exact match fails
+3. When a teacher adds a student, auto-set `student.teacherId` to that teacher's ID
+
+### Bug 2: package.json has leftover `verify` script
+**Location:** [package.json](file:///d:/Internship/Atkool%20as%20Agents%20folder/atkool-website/package.json) line 9  
+**Fix:** Remove the `"verify"` script entry — it was a debugging artifact
+
+---
+
+## 6. FEATURES THAT STILL NEED TO BE BUILT (📋 TODO)
+
+### Priority 1: CRITICAL
+
+#### 1.1 Fix Parent Chat Teacher Resolution
+**Files to modify:**
+- `routes/chat.js` — Relax section matching, add a 4th fallback (any teacher in same school)
+- `routes/teacher.js` — When teacher adds a student via `POST /api/teacher/students`, set `student.teacherId = req.teacherId`
+- `parent-dashboard.html` — Add error handling in `loadParentChat()` function (line 351)
+
+#### 1.2 Email Verification System (Zoho Mail)
+**What's needed:** When a new parent or teacher account is created, send a verification email  
+**Integration:** User mentioned Zoho Mail SMTP — they will provide credentials  
+**Files to create:**
+- `utils/emailService.js` — Nodemailer transport configured for Zoho SMTP
+- `models/EmailVerification.js` — Schema for verification tokens
+
+**Files to modify:**
+- `routes/teacher.js` — After `generate-parent-login`, trigger verification email
+- `routes/school-auth.js` or `routes/teachers.js` — After teacher creation, trigger email
+- `parent-login.html` — Add "Verify Email" step before first login
+
+**Note:** `nodemailer` is already installed (in `package.json` as `"nodemailer": "^8.0.10"`)
+
+#### 1.3 Leave Management UI for Teacher Portal
+**Backend:** ✅ Already done in `routes/leaves.js` with full CRUD  
+**Missing:** No UI in the teacher dashboard  
+**Files to modify:**
+- `js/teacher-dashboard.js` — Add `{ id: 'leaves', label: 'Leave Management' }` to `menuItems` array (line 30). Create `loadLeaves()` function showing:
+  - Leave balance cards (Casual/Sick/Earned remaining out of allocated)
+  - Leave request form (type dropdown, date range, reason)
+  - History table of past requests with status badges
+
+#### 1.4 Leave Management UI for School Admin
+**Backend:** ✅ Already done in `routes/leaves.js` (`/admin/list` and `/admin/review/:id`)  
+**Missing:** No UI in school admin panel  
+**Files to modify:** Create a new page `public/school-admin/leaves.html` or add a section to `dashboard.html` that:
+  - Lists all leave requests with teacher name, dates, type, status
+  - Has Approve/Reject buttons calling `POST /api/leaves/admin/review/:id`
+
+---
+
+### Priority 2: HIGH
+
+#### 2.1 Payment Gateway Integration (Razorpay/Stripe)
+**Current state:** Parent payment is simulated (`routes/parent-fees.js` line 43-73 — just flips status to "Paid")  
+**What's needed:** Replace mock with Razorpay checkout flow  
+**Files to modify:**
+- `routes/parent-fees.js` — Replace `/:paymentId/pay` with Razorpay order creation + verification
+- `parent-dashboard.html` — Add Razorpay checkout.js script, create payment button that opens Razorpay modal
+
+#### 2.2 Homework Management Module
+**Per SRS requirements — not yet started at all**  
+**Models to create:**
+- `models/Homework.js` — `{ schoolId, teacherId, className, section, subject, title, description, dueDate, attachments[], status }`
+- `models/HomeworkSubmission.js` — `{ homeworkId, studentId, submittedAt, content, grade, feedback }`
+
+**Routes to create:**
+- `routes/homework.js` — Teacher CRUD + student submissions
+  
+**UI to add:**
+- Teacher dashboard: "Homework" sidebar item → create/view/grade assignments
+- Parent dashboard: "Homework" sidebar item → view assignments, submit responses
+
+#### 2.3 Report Card / Result Management
+**Per SRS — not started**  
+**Models to create:**
+- `models/Result.js` — `{ studentId, examId, subject, marksObtained, maxMarks, grade, remarks }`
+
+**Routes to create:**
+- `routes/results.js` — School Admin/Teacher enters marks, Parent views
+
+**UI to add:**
+- School Admin: marks entry grid per exam per class
+- Parent dashboard: "Report Card" tab showing all exam results
+
+#### 2.4 Notification System (Push/In-App)
+**Current state:** Only polling-based chat badges exist  
+**What's needed:**
+- In-app notification bell on all portals
+- Track events: new message, fee due, attendance marked, leave approved
+- Optional: Firebase Cloud Messaging for push notifications
+
+---
+
+### Priority 3: MEDIUM
+
+#### 3.1 Attendance Reports (PDF Export)
+**What's needed:** Monthly attendance summary as downloadable PDF  
+**Dependencies:** `puppeteer` is already installed  
+**Implementation:** Create a route that generates HTML attendance table → render with Puppeteer → return PDF buffer
+
+#### 3.2 Transport Tracking Enhancement
+**Current state:** Basic van CRUD exists  
+**Missing:** Student-van assignment workflow, pickup point management, route optimization
+
+#### 3.3 Timetable / Class Schedule Module
+**Per SRS — not started**  
+**Needs:** Period-wise timetable for each class, teacher availability mapping
+
+#### 3.4 Library Management
+**Per SRS — not started**  
+**Needs:** Book catalog, issue/return tracking, fine management
+
+#### 3.5 PWA Support
+**What's needed:** Add `manifest.json` + service worker for installable mobile web app
+
+---
+
+### Priority 4: LOW (Future)
+
+#### 4.1 Android App Wrapper
+Use React Native or Flutter to wrap the web app for Google Play Store deployment
+
+#### 4.2 Multi-Language Support (i18n)
+Support Hindi, Tamil, Telugu, etc. for regional schools
+
+#### 4.3 Advanced Analytics Dashboard
+Charts and graphs for attendance trends, fee collection rates, student performance
+
+#### 4.4 Biometric/RFID Attendance Integration
+API endpoints for hardware device integration
+
+---
+
+## 7. IMPORTANT PATTERNS FOR THE NEXT LLM
+
+### How Single-Page Apps Work in This Project
+The Teacher and Parent dashboards are **JavaScript SPAs** — one HTML file with a `<div id="mainContent">` that gets dynamically replaced by JavaScript functions:
+
+```javascript
+// Sidebar click → loadView('chat') → calls loadChat() → replaces mainContent innerHTML
+function loadView(view, el) {
+    document.querySelectorAll('.menu-item').forEach(e => e.classList.remove('active'));
+    if (el) el.classList.add('active');
+    const c = document.getElementById('mainContent');
+    c.innerHTML = '<div class="loader">Loading...</div>';
+    const views = { dashboard: loadDashboard, chat: loadChat, ... };
+    (views[view] || loadDashboard)();
+}
+```
+
+### How Auth Middleware Works
+Every route file has its own copy of the auth middleware (not centralized). Example:
+```javascript
+function teacherAuth(req, res, next) {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_admin_secret_key_2024');
+    if (decoded.type !== 'teacher') return res.status(401).json({...});
+    req.teacherId = decoded.teacherId;
+    req.schoolId = decoded.schoolId;
+    next();
+}
+```
+
+### How Chat Teacher Resolution Works (3-step fallback)
+In `routes/chat.js` (parent side), finding the teacher to chat with:
+1. `student.teacherId` → direct reference
+2. `Teacher.findOne({ isClassTeacher: true, classTeacherFor.className: student.className })`
+3. `Teacher.findOne({ classAssignments: { $elemMatch: { className, section } } })`
+
+### CSS Pattern
+All pages use **inline `<style>` blocks** in the HTML `<head>`. No external CSS framework. Design tokens:
+- Primary: `#4338CA` (indigo)
+- Success: `#10b981` / `#28A745`
+- Danger: `#ef4444` / `#DC3545`
+- Background: `#F1F5F9`
+- Sidebar: `#0F172A` → `#1e293b` gradient
+- Font: Inter from Google Fonts
+- Border radius: `12px-16px` for cards, `20px` for badges
+
+### Database Connection
+MongoDB is hosted externally at `187.127.153.92:27017`. The connection string is in `env.txt`:
+```
+MONGODB_URI=mongodb://atkoolAdmin:Atkool_db@187.127.153.92:27017/Atkool?authSource=admin
+```
+
+### Running Terminal Commands
+In the sandboxed environment, `node` and `npm` are NOT on PATH. The user's terminal has them available via their IDE terminal. To run node scripts, you may need to use `cmd /c` prefix or find the node executable at `C:\Program Files\nodejs\node.exe`.
+
+---
+
+## 8. FILE SIZE REFERENCE (for context on complexity)
+
+| File | Size | Complexity |
+|------|------|-----------|
+| `public/school-admin/teachers.html` | 75KB | Highest — inline SPA |
+| `public/js/teacher-dashboard.js` | 47KB | 704 lines, 10 view functions |
+| `public/parent-dashboard.html` | 46KB | 710 lines, 7 view functions |
+| `public/school-admin/students.html` | 43KB | Full student CRUD |
+| `public/school-admin/dashboard.html` | 43KB | School admin SPA |
+| `routes/teacher.js` | 19KB | 527 lines, 8+ endpoints |
+| `routes/chat.js` | 14KB | 384 lines, 8 endpoints |
+| `routes/school-auth.js` | 11KB | School login + dashboard |
+| `routes/students.js` | 10KB | Student CRUD |
+
+---
+
+## 9. SUMMARY FOR NEXT LLM
+
+> **What to do first:**
+> 1. Fix the parent chat "Loading chat..." bug (relaxing teacher resolution in `routes/chat.js`)
+> 2. Add `try/catch` error handling in `parent-dashboard.html` `loadParentChat()` function
+> 3. Add Leave Management UI to teacher dashboard
+> 4. Build Homework module (model + routes + UI)
+> 5. Integrate Zoho Mail for email verification (credentials TBD from user)
+> 6. Replace mock payment with Razorpay
+
+> **What NOT to break:**
+> - The chat system works end-to-end when teacher is properly assigned
+> - Attendance system is fully functional
+> - Fee backend is complete and working
+> - All School Admin features are production-ready
+> - Super Admin portal is complete
+
+---
+
+*Document Version: V5 | Created: June 16, 2026 | Project: ATKOOL V3*

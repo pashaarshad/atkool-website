@@ -392,7 +392,15 @@ async function viewSchool(id) {
             '</div>' +
             '<div class="view-detail-row">' +
             '<span class="view-detail-label">Password:</span>' +
-            '<span class="view-detail-value">' + (school.password || 'N/A') + '</span>' +
+            '<span class="view-detail-value" style="display: flex; align-items: center; gap: 8px;">' +
+            '<span id="viewSchoolPassword" data-password="' + (school.password || 'N/A') + '" style="font-family: monospace;">••••••••</span>' +
+            '<button onclick="toggleViewPassword()" style="background: none; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; outline: none;" title="Toggle Password Visibility">' +
+            '<svg id="passwordEyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>' +
+            '<line x1="1" y1="1" x2="23" y2="23"></line>' +
+            '</svg>' +
+            '</button>' +
+            '</span>' +
             '</div>' +
             '<div class="view-detail-row">' +
             '<span class="view-detail-label">Teachers:</span>' +
@@ -430,6 +438,25 @@ async function viewSchool(id) {
     }
 }
 
+function toggleViewPassword() {
+    var pwdSpan = document.getElementById('viewSchoolPassword');
+    var eyeIcon = document.getElementById('passwordEyeIcon');
+    if (!pwdSpan || !eyeIcon) return;
+    
+    var isMasked = pwdSpan.textContent === '••••••••';
+    var actualPassword = pwdSpan.getAttribute('data-password') || 'N/A';
+    
+    if (isMasked) {
+        pwdSpan.textContent = actualPassword;
+        // Show open eye icon
+        eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    } else {
+        pwdSpan.textContent = '••••••••';
+        // Show slashed eye icon
+        eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+    }
+}
+
 async function editSchool(id) {
     var token = localStorage.getItem('adminToken');
 
@@ -449,30 +476,79 @@ async function editSchool(id) {
 }
 
 async function deleteSchool(id) {
-    var confirmDelete = confirm('Are you sure you want to delete this school?');
-    if (!confirmDelete) {
+    var token = localStorage.getItem('adminToken');
+    try {
+        var res = await fetch('/api/schools/' + id, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) {
+            showToast('Error fetching school details', 'error');
+            return;
+        }
+        var school = await res.json();
+        
+        document.getElementById('deleteSchoolId').value = id;
+        document.getElementById('deleteSchoolName').textContent = school.name;
+        document.getElementById('deleteOtpInput').value = '';
+        
+        showToast('Sending OTP to Super Admin...', 'info');
+        
+        var otpRes = await fetch('/api/schools/' + id + '/request-delete-otp', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        
+        var otpData = await otpRes.json();
+        if (otpRes.ok) {
+            document.getElementById('deleteOtpModal').classList.add('show');
+            showToast('OTP sent successfully!', 'success');
+        } else {
+            showToast(otpData.message || 'Failed to send OTP', 'error');
+        }
+    } catch (err) {
+        console.error('Delete school error:', err);
+        showToast('Error initiating deletion process', 'error');
+    }
+}
+
+function closeDeleteOtpModal() {
+    document.getElementById('deleteOtpModal').classList.remove('show');
+    document.getElementById('deleteSchoolId').value = '';
+    document.getElementById('deleteSchoolName').textContent = '';
+    document.getElementById('deleteOtpInput').value = '';
+}
+
+async function confirmDeleteSchool() {
+    var id = document.getElementById('deleteSchoolId').value;
+    var otp = document.getElementById('deleteOtpInput').value.trim();
+    var token = localStorage.getItem('adminToken');
+    
+    if (!otp || otp.length !== 6) {
+        showToast('Please enter a valid 6-digit OTP', 'error');
         return;
     }
-
-    var token = localStorage.getItem('adminToken');
-
+    
     try {
         var response = await fetch('/api/schools/' + id, {
             method: 'DELETE',
             headers: {
-                'Authorization': 'Bearer ' + token
-            }
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ otp: otp })
         });
-
+        
+        var data = await response.json();
+        
         if (response.ok) {
+            closeDeleteOtpModal();
             loadSchools();
             showToast('School deleted successfully!', 'success');
         } else {
-            var data = await response.json();
             showToast(data.message || 'Error deleting school', 'error');
         }
     } catch (error) {
-        console.error('Delete school error:', error);
+        console.error('Confirm delete error:', error);
         showToast('Error deleting school', 'error');
     }
 }

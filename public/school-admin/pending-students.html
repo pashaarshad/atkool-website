@@ -141,6 +141,7 @@
         .toast.error { background:linear-gradient(135deg,#ef4444,#dc2626); }
         @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
     </style>
+    <link rel="stylesheet" href="../css/school-admin-layout.css">
 </head>
 
 <body>
@@ -174,9 +175,12 @@
     <div class="school-main">
         <div class="school-sidebar">
             <a href="dashboard.html" class="school-sidebar-item">HOME</a>
-            <a href="teachers.html" class="school-sidebar-item">TEACHER</a>
+            <a href="teachers.html" class="school-sidebar-item">STAFF</a>
             <a href="students.html" class="school-sidebar-item">STUDENTS</a>
+            <a href="vans.html" class="school-sidebar-item">SCHOOL VAN</a>
             <a href="pending-students.html" class="school-sidebar-item active">PENDING</a>
+            <a href="fees.html" class="school-sidebar-item">FEES</a>
+            <a href="leaves.html" class="school-sidebar-item">LEAVES</a>
             <a href="overview.html" class="school-sidebar-item">OVERVIEW</a>
             <a href="plans.html" class="school-sidebar-item">PLANS</a>
             <a href="support.html" class="school-sidebar-item">SUPPORT</a>
@@ -184,6 +188,7 @@
             <a href="events.html" class="school-sidebar-item">EVENTS</a>
             <a href="exams.html" class="school-sidebar-item">EXAMS</a>
             <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
+        </div>
         </div>
 
         <div class="school-content">

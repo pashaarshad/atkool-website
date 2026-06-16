@@ -6,6 +6,10 @@ const Teacher = require('../models/Teacher');
 const School = require('../models/School');
 const Subscription = require('../models/Subscription');
 
+function shouldEnforceEmailVerification() {
+    return String(process.env.ENFORCE_EMAIL_VERIFICATION || '').toLowerCase() === 'true';
+}
+
 // Teacher Login
 router.post('/login', async (req, res) => {
     try {
@@ -30,6 +34,14 @@ router.post('/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, teacher.password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid password' });
+        }
+
+        if (teacher.email && !teacher.isEmailVerified && shouldEnforceEmailVerification()) {
+            return res.status(403).json({
+                message: 'Please verify your email before logging in.',
+                verificationRequired: true,
+                email: teacher.email
+            });
         }
 
         // Block login if teacher is on leave
@@ -75,7 +87,7 @@ router.post('/login', async (req, res) => {
         const school = await School.findById(teacher.schoolId);
 
         const token = jwt.sign(
-            { teacherId: teacher._id, schoolId: teacher.schoolId, email: teacher.email, type: 'teacher' },
+            { teacherId: teacher._id, schoolId: teacher.schoolId, email: teacher.email, type: 'teacher', role: teacher.role || 'Teacher' },
             process.env.JWT_SECRET || 'super_admin_secret_key_2024',
             { expiresIn: '24h' }
         );
@@ -86,10 +98,12 @@ router.post('/login', async (req, res) => {
                 id: teacher._id,
                 name: teacher.name,
                 email: teacher.email,
+                role: teacher.role || 'Teacher',
                 mobileNo: teacher.mobileNo,
                 className: teacher.className,
                 classAssignments: teacher.classAssignments || [],
-                subject: teacher.subject
+                subject: teacher.subject,
+                isEmailVerified: !!teacher.isEmailVerified
             },
             school: school ? {
                 id: school._id,
@@ -131,11 +145,13 @@ router.get('/me', async (req, res) => {
             id: teacher._id,
             name: teacher.name,
             email: teacher.email,
+            role: teacher.role || 'Teacher',
             mobileNo: teacher.mobileNo,
             className: teacher.className,
             classAssignments: teacher.classAssignments || [],
             subject: teacher.subject,
             status: teacher.status,
+            isEmailVerified: !!teacher.isEmailVerified,
             school: school ? {
                 id: school._id,
                 name: school.name,
