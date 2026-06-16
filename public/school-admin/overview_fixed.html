@@ -113,6 +113,14 @@
         @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
     </style>
     <link rel="stylesheet" href="../css/school-admin-layout.css">
+
+<style>
+.class-chart{display:flex;flex-direction:column;gap:16px}
+.class-item{background:#f8fafc;border-radius:14px;padding:16px;border:1px solid #e2e8f0}
+.progress-container{height:12px;background:#e2e8f0;border-radius:10px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,#4338ca,#6366f1)}
+</style>
+
 </head>
 
 <body>
@@ -170,7 +178,7 @@
             </div>
 
             <div class="chart-card" style="margin-top:20px;">
-                <div class="chart-title">Students per Class</div>
+                <div class="chart-title">📊 Students per Class</div>
                 <div class="bar-chart" id="classChart">
                     <div style="text-align:center;padding:40px;color:#666;">Loading chart data...</div>
                 </div>
