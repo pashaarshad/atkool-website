@@ -3,6 +3,15 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const Student = require('../models/Student');
 const School = require('../models/School');
+const { sendVerificationEmail } = require('../utils/emailService');
+
+function shouldEnforceEmailVerification() {
+    return String(process.env.ENFORCE_EMAIL_VERIFICATION || '').toLowerCase() === 'true';
+}
+
+function getBaseUrl(req) {
+    return process.env.APP_BASE_URL || `${req.protocol}://${req.get('host')}`;
+}
 
 // Parent Login (using student's parentUsername and parentPassword)
 router.post('/login', async (req, res) => {
@@ -29,6 +38,15 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
+        if (student.email && !student.isEmailVerified && shouldEnforceEmailVerification()) {
+            return res.status(403).json({
+                message: 'Please verify your email before logging in.',
+                verificationRequired: true,
+                email: student.email,
+                username: student.parentUsername
+            });
+        }
+
         // Get school info
         const school = await School.findById(student.schoolId);
 
@@ -47,7 +65,9 @@ router.post('/login', async (req, res) => {
                 className: student.className,
                 section: student.section,
                 parentName: student.parentName,
-                status: student.status || 'Active'
+                status: student.status || 'Active',
+                email: student.email || '',
+                isEmailVerified: !!student.isEmailVerified
             },
             school: school ? {
                 id: school._id,
@@ -94,6 +114,7 @@ router.get('/me', async (req, res) => {
             parentName: student.parentName,
             parentMobile: student.parentMobile,
             status: student.status,
+            isEmailVerified: !!student.isEmailVerified,
             teacher: student.teacherId ? {
                 id: student.teacherId._id,
                 name: student.teacherId.name
@@ -225,9 +246,21 @@ router.put('/change-email', parentAuth, async (req, res) => {
         }
 
         student.email = newEmail;
+        student.isEmailVerified = false;
         await student.save();
 
-        res.json({ message: 'Email updated successfully', email: newEmail });
+        const verification = await sendVerificationEmail(student, 'parent', { baseUrl: getBaseUrl(req) });
+
+        res.json({
+            message: 'Email updated successfully. Please verify the new email address.',
+            email: newEmail,
+            verification: verification ? {
+                email: verification.email,
+                linkGenerated: true
+            } : {
+                linkGenerated: false
+            }
+        });
     } catch (error) {
         console.error('Change parent email error:', error);
         res.status(500).json({ message: 'Server error' });

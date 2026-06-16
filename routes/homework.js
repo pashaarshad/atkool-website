@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const Homework = require('../models/Homework');
 const HomeworkSubmission = require('../models/HomeworkSubmission');
 const Student = require('../models/Student');
+const Teacher = require('../models/Teacher');
 
 // ============ AUTH MIDDLEWARES ============
 function teacherAuth(req, res, next) {
@@ -44,6 +45,23 @@ function parentAuth(req, res, next) {
     }
 }
 
+async function teacherCanAccessClass(teacherId, className, section) {
+    const teacher = await Teacher.findById(teacherId).lean();
+    if (!teacher) {
+        return false;
+    }
+
+    const normalizedSection = section || 'A';
+    const assignments = Array.isArray(teacher.classAssignments) ? teacher.classAssignments : [];
+    const inAssignments = assignments.some(item => item.className === className && (item.section || 'A') === normalizedSection);
+    const isClassTeacher = teacher.isClassTeacher &&
+        teacher.classTeacherFor &&
+        teacher.classTeacherFor.className === className &&
+        (teacher.classTeacherFor.section || 'A') === normalizedSection;
+
+    return inAssignments || isClassTeacher;
+}
+
 // ============ TEACHER ENDPOINTS ============
 
 // Get homeworks assigned by the teacher
@@ -81,6 +99,11 @@ router.post('/teacher', teacherAuth, async (req, res) => {
             return res.status(400).json({ message: 'Required fields are missing' });
         }
 
+        const canAccess = await teacherCanAccessClass(req.teacherId, className, section);
+        if (!canAccess) {
+            return res.status(403).json({ message: 'You are not assigned to this class/section' });
+        }
+
         const newHomework = await Homework.create({
             schoolId: req.schoolId,
             teacherId: req.teacherId,
@@ -100,10 +123,56 @@ router.post('/teacher', teacherAuth, async (req, res) => {
     }
 });
 
+router.put('/teacher/:id', teacherAuth, async (req, res) => {
+    try {
+        const { className, section, subject, title, description, dueDate, attachments } = req.body;
+        const homework = await Homework.findOne({ _id: req.params.id, schoolId: req.schoolId, teacherId: req.teacherId });
+        if (!homework) {
+            return res.status(404).json({ message: 'Homework not found' });
+        }
+
+        const targetClass = className || homework.className;
+        const targetSection = section || homework.section || 'A';
+        const canAccess = await teacherCanAccessClass(req.teacherId, targetClass, targetSection);
+        if (!canAccess) {
+            return res.status(403).json({ message: 'You are not assigned to this class/section' });
+        }
+
+        homework.className = targetClass;
+        homework.section = targetSection;
+        homework.subject = subject || homework.subject;
+        homework.title = title || homework.title;
+        homework.description = description || homework.description;
+        homework.dueDate = dueDate ? new Date(dueDate) : homework.dueDate;
+        homework.attachments = Array.isArray(attachments) ? attachments : (homework.attachments || []);
+        await homework.save();
+
+        res.json(homework);
+    } catch (error) {
+        console.error('Teacher update homework error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.delete('/teacher/:id', teacherAuth, async (req, res) => {
+    try {
+        const homework = await Homework.findOneAndDelete({ _id: req.params.id, schoolId: req.schoolId, teacherId: req.teacherId });
+        if (!homework) {
+            return res.status(404).json({ message: 'Homework not found' });
+        }
+
+        await HomeworkSubmission.deleteMany({ homeworkId: homework._id });
+        res.json({ message: 'Homework deleted successfully' });
+    } catch (error) {
+        console.error('Teacher delete homework error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Get submissions for a specific homework
 router.get('/teacher/:id/submissions', teacherAuth, async (req, res) => {
     try {
-        const homework = await Homework.findOne({ _id: req.params.id, schoolId: req.schoolId });
+        const homework = await Homework.findOne({ _id: req.params.id, schoolId: req.schoolId, teacherId: req.teacherId });
         if (!homework) {
             return res.status(404).json({ message: 'Homework not found' });
         }
@@ -127,7 +196,11 @@ router.post('/teacher/grade/:submissionId', teacherAuth, async (req, res) => {
         const submission = await HomeworkSubmission.findById(req.params.submissionId)
             .populate('homeworkId');
 
-        if (!submission || submission.homeworkId.schoolId.toString() !== req.schoolId.toString()) {
+        if (!submission || !submission.homeworkId || submission.homeworkId.schoolId.toString() !== req.schoolId.toString()) {
+            return res.status(404).json({ message: 'Submission not found' });
+        }
+
+        if (submission.homeworkId.teacherId.toString() !== req.teacherId.toString()) {
             return res.status(404).json({ message: 'Submission not found' });
         }
 

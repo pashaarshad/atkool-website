@@ -52,7 +52,53 @@ function parentAuth(req, res, next) {
     }
 }
 
+async function teacherCanAccessExam(teacherId, exam) {
+    const teacher = await Teacher.findById(teacherId).lean();
+    if (!teacher) {
+        return false;
+    }
+
+    const assignments = Array.isArray(teacher.classAssignments) ? teacher.classAssignments : [];
+    const inAssignments = assignments.some(c => c.className === exam.className);
+    const isClassTeacher = teacher.isClassTeacher &&
+        teacher.classTeacherFor &&
+        teacher.classTeacherFor.className === exam.className;
+
+    return inAssignments || isClassTeacher;
+}
+
 // ============ STAFF/ADMIN ENDPOINTS ============
+
+router.get('/exams', staffOrAdminAuth, async (req, res) => {
+    try {
+        const query = { schoolId: req.schoolId };
+        if (!req.isAdmin) {
+            const teacher = await Teacher.findById(req.teacherId).lean();
+            if (!teacher) {
+                return res.status(404).json({ message: 'Teacher not found' });
+            }
+
+            const classNames = new Set();
+            (teacher.classAssignments || []).forEach(c => {
+                if (c.className) classNames.add(c.className);
+            });
+            if (teacher.isClassTeacher && teacher.classTeacherFor && teacher.classTeacherFor.className) {
+                classNames.add(teacher.classTeacherFor.className);
+            }
+
+            if (classNames.size === 0) {
+                return res.json([]);
+            }
+            query.className = { $in: Array.from(classNames) };
+        }
+
+        const exams = await Exam.find(query).sort({ examDate: -1, createdAt: -1 });
+        res.json(exams);
+    } catch (error) {
+        console.error('Get results exams error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 // Get all results for a specific exam
 router.get('/exam/:examId', staffOrAdminAuth, async (req, res) => {
@@ -64,9 +110,7 @@ router.get('/exam/:examId', staffOrAdminAuth, async (req, res) => {
 
         // Optional: If teacher, verify they teach this class
         if (!req.isAdmin) {
-            const teacher = await Teacher.findById(req.teacherId);
-            const isAssigned = teacher.classAssignments.some(c => c.className === exam.className) || 
-                               (teacher.isClassTeacher && teacher.classTeacherFor && teacher.classTeacherFor.className === exam.className);
+            const isAssigned = await teacherCanAccessExam(req.teacherId, exam);
             if (!isAssigned) {
                 return res.status(403).json({ message: 'Access denied to this class exam' });
             }
@@ -122,16 +166,28 @@ router.post('/bulk', staffOrAdminAuth, async (req, res) => {
             return res.status(404).json({ message: 'Exam not found' });
         }
 
+        if (!req.isAdmin) {
+            const isAssigned = await teacherCanAccessExam(req.teacherId, exam);
+            if (!isAssigned) {
+                return res.status(403).json({ message: 'Access denied to this class exam' });
+            }
+        }
+
         const operations = results.map(r => {
             return {
                 updateOne: {
                     filter: { studentId: r.studentId, examId: examId, subject: exam.subject },
                     update: {
-                        schoolId: req.schoolId,
-                        marksObtained: r.marksObtained,
-                        maxMarks: r.maxMarks || exam.totalMarks || 100,
-                        grade: r.grade || '',
-                        remarks: r.remarks || ''
+                        $set: {
+                            schoolId: req.schoolId,
+                            studentId: r.studentId,
+                            examId,
+                            subject: exam.subject,
+                            marksObtained: Number(r.marksObtained) || 0,
+                            maxMarks: Number(r.maxMarks) || exam.totalMarks || 100,
+                            grade: r.grade || '',
+                            remarks: r.remarks || ''
+                        }
                     },
                     upsert: true
                 }

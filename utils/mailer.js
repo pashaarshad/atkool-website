@@ -13,7 +13,7 @@ async function sendDeleteOTP(schoolName, schoolId) {
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
 
     // Ensure we write to an easy to find file in the workspace
-    const debugFilePath = path.join(__dirname, '..', '..', 'otp-debug.txt');
+    const debugFilePath = path.join(__dirname, '..', 'otp-debug.txt');
     const logMessage = `[${new Date().toISOString()}] School Delete OTP generated:
 School Name: ${schoolName}
 School ID: ${schoolId}

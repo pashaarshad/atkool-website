@@ -5,6 +5,7 @@ const Student = require('../models/Student');
 const Teacher = require('../models/Teacher');
 const School = require('../models/School');
 const Attendance = require('../models/Attendance');
+const { sendVerificationEmail } = require('../utils/emailService');
 
 // Teacher authentication middleware
 function teacherAuth(req, res, next) {
@@ -27,6 +28,10 @@ function teacherAuth(req, res, next) {
     } catch (error) {
         return res.status(401).json({ message: 'Invalid token' });
     }
+}
+
+function getBaseUrl(req) {
+    return process.env.APP_BASE_URL || `${req.protocol}://${req.get('host')}`;
 }
 
 // Get students for teacher (limited to assigned classes/sections)
@@ -181,10 +186,21 @@ router.post('/generate-parent-login', teacherAuth, async (req, res) => {
 
         // Check if already has login
         if (student.parentUsername && student.parentPassword) {
+            let verification = null;
+            if (student.email && !student.isEmailVerified) {
+                verification = await sendVerificationEmail(student, 'parent', { baseUrl: getBaseUrl(req) });
+            }
+
             return res.json({
                 parentUsername: student.parentUsername,
                 parentPassword: student.parentPassword,
-                existing: true
+                existing: true,
+                verification: verification ? {
+                    email: verification.email,
+                    linkGenerated: true
+                } : {
+                    linkGenerated: false
+                }
             });
         }
 
@@ -203,12 +219,25 @@ router.post('/generate-parent-login', teacherAuth, async (req, res) => {
         // Update student with login credentials
         student.parentUsername = parentUsername;
         student.parentPassword = parentPassword;
+        if (student.email) {
+            student.isEmailVerified = false;
+        }
         await student.save();
+
+        const verification = student.email
+            ? await sendVerificationEmail(student, 'parent', { baseUrl: getBaseUrl(req) })
+            : null;
 
         res.json({
             parentUsername,
             parentPassword,
-            existing: false
+            existing: false,
+            verification: verification ? {
+                email: verification.email,
+                linkGenerated: true
+            } : {
+                linkGenerated: false
+            }
         });
     } catch (error) {
         console.error('Generate parent login error:', error);
