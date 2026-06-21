@@ -204,17 +204,11 @@ router.post('/generate-parent-login', teacherAuth, async (req, res) => {
             });
         }
 
-        // Generate username based on student name
-        const baseName = student.name.toLowerCase().replace(/\s+/g, '');
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        const parentUsername = `${baseName}${randomNum}`;
+        // Use email or mobileNo as the parentUsername
+        const parentUsername = student.email || student.parentMobile || student.mobileNo || student.name.toLowerCase().replace(/\s+/g, '');
 
-        // Generate random password
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-        let parentPassword = '';
-        for (let i = 0; i < 8; i++) {
-            parentPassword += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
+        // Default password as Test@123
+        const parentPassword = 'Test@123';
 
         // Update student with login credentials
         student.parentUsername = parentUsername;

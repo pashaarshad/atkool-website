@@ -305,14 +305,18 @@
                 <label>Student Name *</label>
                 <input type="text" id="addStudentName" placeholder="Enter student name">
             </div>
+            <div class="form-group">
+                <label>Gmail ID *</label>
+                <input type="email" id="addStudentEmail" placeholder="Enter Gmail ID (e.g. parent@gmail.com)">
+            </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Student ID *</label>
                     <input type="text" id="addStudentId" placeholder="Enter Student ID">
                 </div>
                 <div class="form-group">
-                    <label>Mobile No</label>
-                    <input type="text" id="addMobileNo" placeholder="Student mobile">
+                    <label>Mobile No *</label>
+                    <input type="text" id="addMobileNo" placeholder="Enter 10-digit mobile number" maxlength="10">
                 </div>
             </div>
             <div class="form-row">
@@ -321,8 +325,8 @@
                     <input type="text" id="addParentName" placeholder="Parent name">
                 </div>
                 <div class="form-group">
-                    <label>Parent Mobile</label>
-                    <input type="text" id="addParentMobile" placeholder="Parent mobile">
+                    <label>Parent Mobile *</label>
+                    <input type="text" id="addParentMobile" placeholder="Parent mobile (10 digits)" maxlength="10">
                 </div>
             </div>
             <div class="form-group">
@@ -648,6 +652,7 @@
             document.getElementById('addClassSelect').innerHTML = '<option value="">-- Select Class --</option>';
             document.getElementById('addSectionSelect').innerHTML = '<option value="">-- Select Section --</option>';
             document.getElementById('addStudentName').value = '';
+            document.getElementById('addStudentEmail').value = '';
             document.getElementById('addStudentId').value = '';
             document.getElementById('addMobileNo').value = '';
             document.getElementById('addParentName').value = '';
@@ -743,9 +748,27 @@
             var section = document.getElementById('addSectionSelect').value;
             var name = document.getElementById('addStudentName').value.trim();
             var studentId = document.getElementById('addStudentId').value.trim();
+            var email = document.getElementById('addStudentEmail').value.trim();
+            var mobileNo = document.getElementById('addMobileNo').value.trim();
+            var parentMobile = document.getElementById('addParentMobile').value.trim();
 
             if (!teacherId || !className || !section || !name || !studentId) {
                 showToast('Teacher, class, section, student name and student ID are required', 'error');
+                return;
+            }
+
+            if (!email || !parentMobile || !mobileNo) {
+                showToast('Gmail ID, mobile number, and parent mobile number are required', 'error');
+                return;
+            }
+
+            if (!/^\d{10}$/.test(mobileNo) || !/^\d{10}$/.test(parentMobile)) {
+                showToast('Mobile number and Parent mobile number must be exactly 10 digits', 'error');
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showToast('Please enter a valid Gmail ID / email address', 'error');
                 return;
             }
 
@@ -765,9 +788,10 @@
                         teacherId: teacherId,
                         studentId: studentId,
                         rollNo: studentId, // compatibility
-                        mobileNo: document.getElementById('addMobileNo').value.trim(),
+                        email: email,
+                        mobileNo: mobileNo,
                         parentName: document.getElementById('addParentName').value.trim(),
-                        parentMobile: document.getElementById('addParentMobile').value.trim(),
+                        parentMobile: parentMobile,
                         guardianMobile: document.getElementById('addGuardianMobile').value.trim(),
                         vanId: document.getElementById('addVanSelect').value || null,
                         pickupPoint: document.getElementById('addPickupPoint').value.trim(),
