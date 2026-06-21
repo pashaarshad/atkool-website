@@ -29,10 +29,12 @@ const studentSchema = new mongoose.Schema({
         default: 'A'
     },
     email: {
-        type: String
+        type: String,
+        sparse: true
     },
     mobileNo: {
-        type: String
+        type: String,
+        sparse: true
     },
     parentName: {
         type: String
@@ -86,5 +88,8 @@ const studentSchema = new mongoose.Schema({
 studentSchema.index({ schoolId: 1 });
 studentSchema.index({ className: 1 });
 studentSchema.index({ teacherId: 1 });
+studentSchema.index({ email: 1 }, { unique: true, sparse: true });
+studentSchema.index({ mobileNo: 1 }, { unique: true, sparse: true });
+studentSchema.index({ parentMobile: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Student', studentSchema);

@@ -48,8 +48,9 @@
 
             <form class="school-login-form" id="loginForm">
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="Enter school email" required>
+                    <label for="loginId">Email or Phone Number</label>
+                    <input type="text" id="loginId" placeholder="Enter email or 10-digit phone number" required>
+                    <small style="display:block;margin-top:4px;color:#94a3b8;font-size:11px;">Use your registered Gmail ID or 10-digit mobile number</small>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
@@ -94,8 +95,24 @@
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            var email = document.getElementById('email').value;
+            var loginId = document.getElementById('loginId').value.trim();
             var password = document.getElementById('password').value;
+
+            // Detect if phone number (10 digits) or email
+            var isPhone = /^\d{10}$/.test(loginId);
+            var isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginId);
+
+            if (!isPhone && !isEmail) {
+                showToast('Please enter a valid email or 10-digit phone number', 'error');
+                return;
+            }
+
+            var body = { password: password };
+            if (isPhone) {
+                body.mobileNo = loginId;
+            } else {
+                body.email = loginId;
+            }
 
             try {
                 var response = await fetch('/api/school-auth/login', {
@@ -103,7 +120,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify(body)
                 });
 
                 var data = await response.json();

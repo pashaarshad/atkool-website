@@ -78,6 +78,28 @@ router.post('/', schoolAuth, async (req, res) => {
             return res.status(400).json({ message: 'Teacher name is required' });
         }
 
+        if (!email || !mobileNo) {
+            return res.status(400).json({ message: 'Gmail ID and phone number are mandatory' });
+        }
+
+        if (!/^\d{10}$/.test(mobileNo)) {
+            return res.status(400).json({ message: 'Mobile number must be exactly 10 digits' });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: 'Invalid Gmail/email format' });
+        }
+
+        const existingEmail = await Teacher.findOne({ email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'A teacher with this email already exists' });
+        }
+
+        const existingMobile = await Teacher.findOne({ mobileNo });
+        if (existingMobile) {
+            return res.status(400).json({ message: 'A teacher with this phone number already exists' });
+        }
+
         const teacherData = {
             schoolId: req.schoolId,
             name,
@@ -174,6 +196,28 @@ router.put('/:id', schoolAuth, async (req, res) => {
         const existingTeacher = await Teacher.findOne({ _id: req.params.id, schoolId: req.schoolId });
         if (!existingTeacher) {
             return res.status(404).json({ message: 'Teacher not found' });
+        }
+
+        if (!email || !mobileNo) {
+            return res.status(400).json({ message: 'Gmail ID and phone number are mandatory' });
+        }
+
+        if (!/^\d{10}$/.test(mobileNo)) {
+            return res.status(400).json({ message: 'Mobile number must be exactly 10 digits' });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: 'Invalid Gmail/email format' });
+        }
+
+        const existingEmail = await Teacher.findOne({ email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }, _id: { $ne: req.params.id } });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'A teacher with this email already exists' });
+        }
+
+        const existingMobile = await Teacher.findOne({ mobileNo, _id: { $ne: req.params.id } });
+        if (existingMobile) {
+            return res.status(400).json({ message: 'A teacher with this phone number already exists' });
         }
 
         const updateData = { name, email, mobileNo, className, classAssignments: classAssignments || [], subject, students, status, salary, address, photo, role, isClassTeacher, classTeacherFor };

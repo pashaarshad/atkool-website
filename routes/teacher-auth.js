@@ -13,18 +13,23 @@ function shouldEnforceEmailVerification() {
 // Teacher Login
 router.post('/login', async (req, res) => {
     try {
-        const { email, password, deviceId, deviceName } = req.body;
+        const { email, mobileNo, password, deviceId, deviceName } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
+        if ((!email && !mobileNo) || !password) {
+            return res.status(400).json({ message: 'Email or phone number and password are required' });
         }
 
-        const teacher = await Teacher.findOne({
-            email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }
-        });
+        let query = {};
+        if (email) {
+            query.email = { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') };
+        } else if (mobileNo) {
+            query.mobileNo = mobileNo;
+        }
+
+        const teacher = await Teacher.findOne(query);
 
         if (!teacher) {
-            return res.status(401).json({ message: 'No teacher found with this email' });
+            return res.status(401).json({ message: email ? 'No teacher found with this email' : 'No teacher found with this phone number' });
         }
 
         if (!teacher.password || teacher.password === '') {

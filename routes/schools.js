@@ -61,9 +61,30 @@ router.post('/', auth, async (req, res) => {
     try {
         const { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo, schoolImages } = req.body;
 
-
         if (!name || !city) {
             return res.status(400).json({ message: 'Name and city are required' });
+        }
+
+        if (!email || !mobileNo) {
+            return res.status(400).json({ message: 'Gmail ID and phone number are mandatory' });
+        }
+
+        if (!/^\d{10}$/.test(mobileNo)) {
+            return res.status(400).json({ message: 'Mobile number must be exactly 10 digits' });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: 'Invalid Gmail/email format' });
+        }
+
+        const existingEmail = await School.findOne({ email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'A school with this email already exists' });
+        }
+
+        const existingMobile = await School.findOne({ mobileNo });
+        if (existingMobile) {
+            return res.status(400).json({ message: 'A school with this phone number already exists' });
         }
 
         const school = await School.create({
@@ -84,7 +105,6 @@ router.post('/', auth, async (req, res) => {
             password,
             logo,
             schoolImages
-
         });
 
         res.status(201).json(school);
@@ -98,11 +118,31 @@ router.put('/:id', auth, async (req, res) => {
     try {
         const { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo, schoolImages } = req.body;
 
+        if (!email || !mobileNo) {
+            return res.status(400).json({ message: 'Gmail ID and phone number are mandatory' });
+        }
+
+        if (!/^\d{10}$/.test(mobileNo)) {
+            return res.status(400).json({ message: 'Mobile number must be exactly 10 digits' });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: 'Invalid Gmail/email format' });
+        }
+
+        const existingEmail = await School.findOne({ email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }, _id: { $ne: req.params.id } });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'A school with this email already exists' });
+        }
+
+        const existingMobile = await School.findOne({ mobileNo, _id: { $ne: req.params.id } });
+        if (existingMobile) {
+            return res.status(400).json({ message: 'A school with this phone number already exists' });
+        }
 
         const school = await School.findByIdAndUpdate(
             req.params.id,
             { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo, schoolImages },
-
             { new: true, runValidators: true }
         );
 

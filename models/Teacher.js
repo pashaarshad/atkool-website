@@ -11,13 +11,15 @@ const teacherSchema = new mongoose.Schema({
         required: true
     },
     email: {
-        type: String
+        type: String,
+        sparse: true
     },
     password: {
         type: String
     },
     mobileNo: {
-        type: String
+        type: String,
+        sparse: true
     },
     role: {
         type: String,
@@ -93,5 +95,7 @@ const teacherSchema = new mongoose.Schema({
 });
 
 teacherSchema.index({ schoolId: 1 });
+teacherSchema.index({ email: 1 }, { unique: true, sparse: true });
+teacherSchema.index({ mobileNo: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Teacher', teacherSchema);

@@ -43,8 +43,9 @@
 
         <form id="loginForm">
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" placeholder="Enter your email" required>
+                <label for="loginId">Email or Phone Number</label>
+                <input type="text" id="loginId" placeholder="Enter your email or 10-digit phone number" required>
+                <small style="display:block;margin-top:4px;color:#94a3b8;font-size:11px;">Use your registered Gmail ID or 10-digit mobile number</small>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
@@ -71,18 +72,34 @@
 
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            const email = document.getElementById('email').value;
+            const loginId = document.getElementById('loginId').value.trim();
             const password = document.getElementById('password').value;
             const btn = document.querySelector('.btn-login');
 
+            // Detect if phone number (10 digits) or email
+            const isPhone = /^\d{10}$/.test(loginId);
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginId);
+
+            if (!isPhone && !isEmail) {
+                showToast('Please enter a valid email or 10-digit phone number', 'error');
+                return;
+            }
+
             btn.innerText = 'Logging in...';
             btn.disabled = true;
+
+            const body = { password };
+            if (isPhone) {
+                body.mobileNo = loginId;
+            } else {
+                body.email = loginId;
+            }
 
             try {
                 const response = await fetch('/api/teacher-auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify(body)
                 });
 
                 const data = await response.json();
@@ -111,11 +128,13 @@
         });
 
         async function requestTeacherVerification() {
-            const email = document.getElementById('email').value;
-            if (!email) {
-                showToast('Enter your email first', 'error');
+            const loginId = document.getElementById('loginId').value.trim();
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginId);
+            if (!isEmail) {
+                showToast('Enter a valid email for verification', 'error');
                 return;
             }
+            const email = loginId;
 
             try {
                 const response = await fetch('/api/email-verification/request', {

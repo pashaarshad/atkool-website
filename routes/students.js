@@ -128,6 +128,28 @@ router.post('/', schoolAuth, async (req, res) => {
             return res.status(400).json({ message: 'Name and class are required' });
         }
 
+        if (!email || !parentMobile) {
+            return res.status(400).json({ message: 'Gmail ID and parent mobile number are mandatory' });
+        }
+
+        if (!/^\d{10}$/.test(parentMobile)) {
+            return res.status(400).json({ message: 'Parent mobile number must be exactly 10 digits' });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: 'Invalid Gmail/email format' });
+        }
+
+        const existingEmail = await Student.findOne({ email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'A student/parent with this email already exists' });
+        }
+
+        const existingMobile = await Student.findOne({ parentMobile });
+        if (existingMobile) {
+            return res.status(400).json({ message: 'A student/parent with this mobile number already exists' });
+        }
+
         const student = await Student.create({
             schoolId: req.schoolId,
             name,
@@ -163,6 +185,28 @@ router.post('/', schoolAuth, async (req, res) => {
 router.put('/:id', schoolAuth, async (req, res) => {
     try {
         const { name, rollNo, studentId, className, section, email, mobileNo, parentName, parentMobile, guardianMobile, vanId, pickupPoint, address, teacherId, status, parentUsername, parentPassword, photo } = req.body;
+
+        if (!email || !parentMobile) {
+            return res.status(400).json({ message: 'Gmail ID and parent mobile number are mandatory' });
+        }
+
+        if (!/^\d{10}$/.test(parentMobile)) {
+            return res.status(400).json({ message: 'Parent mobile number must be exactly 10 digits' });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: 'Invalid Gmail/email format' });
+        }
+
+        const existingEmail = await Student.findOne({ email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }, _id: { $ne: req.params.id } });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'A student/parent with this email already exists' });
+        }
+
+        const existingMobile = await Student.findOne({ parentMobile, _id: { $ne: req.params.id } });
+        if (existingMobile) {
+            return res.status(400).json({ message: 'A student/parent with this mobile number already exists' });
+        }
 
         const updateData = { 
             name, 

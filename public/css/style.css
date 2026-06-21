@@ -290,3 +290,65 @@ body {
 
 /* ===== CLASS BADGE ===== */
 .class-badge { display:inline-block; background:linear-gradient(135deg,#eef2ff,#e0e7ff); color:#4338CA; padding:3px 10px; border-radius:6px; font-size:12px; margin:2px; font-weight:600; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .sidebar { width:200px; }
+    .content { padding:20px; }
+    .stats-row { flex-wrap:wrap; }
+    .stat-card { min-width:calc(50% - 10px); }
+}
+
+@media (max-width: 768px) {
+    .main-container { flex-direction:column; }
+    .sidebar {
+        width:100%; flex-direction:row; flex-wrap:wrap;
+        padding:8px; gap:4px; overflow-x:auto;
+        position:sticky; top:0; z-index:50;
+        box-shadow:0 2px 10px rgba(0,0,0,.15);
+    }
+    .sidebar-item {
+        padding:10px 14px; font-size:12px; white-space:nowrap;
+        flex:0 0 auto;
+    }
+    .sidebar-item.has-submenu .submenu {
+        position:absolute; top:100%; left:0;
+        background:linear-gradient(180deg,#0F172A,#1e293b);
+        border-radius:0 0 12px 12px;
+        padding:8px; margin-top:0; padding-left:0;
+        box-shadow:0 8px 20px rgba(0,0,0,.2);
+        z-index:60; min-width:160px;
+    }
+    .content { padding:16px; }
+    .stats-row { flex-direction:column; gap:12px; }
+    .stat-card { min-width:100%; }
+    .section-card { padding:20px; }
+    .info-box { flex-direction:column; gap:8px; text-align:center; }
+    .charts-row { flex-direction:column; }
+    .chart-card { min-width:100%; }
+    .filter-row { flex-direction:column; }
+    .filter-input { min-width:100%; }
+    .form-row { flex-direction:column; align-items:stretch; }
+    .form-label { width:100%; text-align:left; padding-right:0; margin-bottom:6px; }
+    .data-table { font-size:13px; }
+    .data-table th, .data-table td { padding:10px 12px; }
+    .modal { max-width:95vw; padding:24px; }
+    .setting-row { flex-direction:column; }
+    .setting-box { min-width:100%; }
+    .subscription-form-row { flex-direction:column; align-items:stretch; }
+    .subscription-form-label { width:100%; text-align:left; padding-right:0; margin-bottom:6px; }
+}
+
+@media (max-width: 480px) {
+    .sidebar { padding:6px; gap:3px; }
+    .sidebar-item { padding:8px 10px; font-size:11px; }
+    .content { padding:12px; }
+    .stat-card { padding:20px; }
+    .stat-card .value { font-size:36px; }
+    .page-header { padding:12px 16px; }
+    .page-header h2 { font-size:16px; }
+    .btn { padding:8px 16px; font-size:12px; }
+    .action-bar { padding:10px 12px; }
+    .login-box { padding:30px 24px; }
+    .login-box h1 { font-size:22px; }
+}

@@ -13,21 +13,29 @@ function getBaseUrl(req) {
     return process.env.APP_BASE_URL || `${req.protocol}://${req.get('host')}`;
 }
 
-// Parent Login (using student's parentUsername and parentPassword)
+// Parent Login (using student's parentUsername, email, or phone)
 router.post('/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, email, mobileNo, password } = req.body;
 
-        if (!username || !password) {
-            return res.status(400).json({ message: 'Username and password are required' });
+        if ((!username && !email && !mobileNo) || !password) {
+            return res.status(400).json({ message: 'Username, email, or phone number and password are required' });
         }
 
-        const student = await Student.findOne({
-            parentUsername: { $regex: new RegExp('^' + username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }
-        });
+        let query = {};
+        if (email) {
+            query.email = { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') };
+        } else if (mobileNo) {
+            query.$or = [{ mobileNo: mobileNo }, { parentMobile: mobileNo }];
+        } else if (username) {
+            query.parentUsername = { $regex: new RegExp('^' + username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') };
+        }
+
+        const student = await Student.findOne(query);
 
         if (!student) {
-            return res.status(401).json({ message: 'Invalid username' });
+            const label = email ? 'email' : (mobileNo ? 'phone number' : 'username');
+            return res.status(401).json({ message: 'Invalid ' + label });
         }
 
         if (!student.parentPassword || student.parentPassword === '') {

@@ -7,18 +7,23 @@ const Teacher = require('../models/Teacher');
 
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, mobileNo, password } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
+        if ((!email && !mobileNo) || !password) {
+            return res.status(400).json({ message: 'Email or phone number and password are required' });
         }
 
-        const school = await School.findOne({
-            email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }
-        });
+        let query = {};
+        if (email) {
+            query.email = { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') };
+        } else if (mobileNo) {
+            query.mobileNo = mobileNo;
+        }
+
+        const school = await School.findOne(query);
 
         if (!school) {
-            return res.status(401).json({ message: 'No school found with this email' });
+            return res.status(401).json({ message: email ? 'No school found with this email' : 'No school found with this phone number' });
         }
 
         if (!school.password || school.password === '' || school.password === 'N/A') {
