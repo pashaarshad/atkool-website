@@ -58,12 +58,12 @@
                         <input type="text" class="form-input" id="ownerName">
                     </div>
                     <div class="form-row">
-                        <label class="form-label">Mobile:</label>
-                        <input type="text" class="form-input" id="mobile">
+                        <label class="form-label">Mobile *:</label>
+                        <input type="text" class="form-input" id="mobile" required maxlength="10" pattern="\d{10}">
                     </div>
                     <div class="form-row">
-                        <label class="form-label">Email Id:</label>
-                        <input type="email" class="form-input" id="email">
+                        <label class="form-label">Email Id *:</label>
+                        <input type="email" class="form-input" id="email" required>
                     </div>
                     <div class="form-row">
                         <label class="form-label">Address:</label>
@@ -92,8 +92,8 @@
                         </div>
                     </div>
                     <div class="form-row">
-                        <label class="form-label">Password:</label>
-                        <input type="password" class="form-input" id="password">
+                        <label class="form-label">Password *:</label>
+                        <input type="password" class="form-input" id="password" required>
                     </div>
                     <div class="form-row">
                         <label class="form-label">Logo:</label>

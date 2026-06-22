@@ -118,12 +118,12 @@
                     <input type="text" id="schoolOwner">
                 </div>
                 <div class="form-group">
-                    <label for="schoolMobile">Mobile No</label>
-                    <input type="text" id="schoolMobile">
+                    <label for="schoolMobile">Mobile No *</label>
+                    <input type="text" id="schoolMobile" required maxlength="10" pattern="\d{10}">
                 </div>
                 <div class="form-group">
-                    <label for="schoolEmail">Email</label>
-                    <input type="email" id="schoolEmail">
+                    <label for="schoolEmail">Email *</label>
+                    <input type="email" id="schoolEmail" required>
                 </div>
                 <div class="form-group">
                     <label for="schoolAddress">Address</label>
@@ -146,8 +146,8 @@
                     <input type="text" id="schoolGstNo">
                 </div>
                 <div class="form-group">
-                    <label for="schoolPassword">Password</label>
-                    <input type="password" id="schoolPassword">
+                    <label for="schoolPassword">Password *</label>
+                    <input type="password" id="schoolPassword" required>
                 </div>
                 <div class="form-group">
                     <label for="schoolLogoFile">Logo (Square image for circular display)</label>
