@@ -214,14 +214,50 @@
                 <div id="modalSchoolQrContainer" style="width:90px; height:90px; border-radius:8px; background:#fff; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
                     <span style="font-size:11px; color:#64748b; font-weight:600;">No QR</span>
                 </div>
-                <div>
+                <div style="flex:1; min-width:0;">
                     <div style="font-weight:800; color:#0F172A; font-size:14px; margin-bottom:2px;">Scan & Pay via UPI</div>
-                    <div style="font-size:12px; color:#64748b; line-height:1.4;">Scan this QR code using Google Pay, PhonePe, Paytm, or any UPI app to pay the installment amount.</div>
+                    <div style="font-size:11px; color:#64748b; line-height:1.4; margin-bottom:6px;">Scan this QR code using GPay, PhonePe, Paytm, or click below to launch the apps.</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; gap:8px;">
+                        <span style="font-family:monospace; font-weight:700; color:#1e293b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;" id="modalUpiIdText">Not Configured</span>
+                        <button type="button" onclick="copyModalUpiId()" style="background:#4338CA; color:#fff; border:none; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer; flex-shrink:0;">Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pay via Apps Selection -->
+            <div style="margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:16px;" id="paymentAppSection">
+                <div style="font-size:10px; font-weight:800; color:#475569; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Pay Now Via App</div>
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+                    <button type="button" onclick="startPaymentRedirect('gpay')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border:1px solid #e2e8f0; border-radius:10px; padding:10px 6px; background:#fff; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='#4338CA'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#fff';">
+                        <span style="font-weight:800; font-size:13px; font-family:sans-serif; letter-spacing:-0.5px;"><span style="color:#4285F4;">G</span><span style="color:#EA4335;">P</span><span style="color:#FBBC05;">a</span><span style="color:#34A853;">y</span></span>
+                        <span style="font-size:10px; color:#475569; font-weight:600;">Google Pay</span>
+                    </button>
+                    <button type="button" onclick="startPaymentRedirect('phonepe')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border:1px solid #e2e8f0; border-radius:10px; padding:10px 6px; background:#fff; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='#4338CA'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#fff';">
+                        <span style="color:#5f259f; font-weight:800; font-size:13px; font-family:sans-serif; letter-spacing:-0.5px;">PhonePe</span>
+                        <span style="font-size:10px; color:#475569; font-weight:600;">PhonePe</span>
+                    </button>
+                    <button type="button" onclick="startPaymentRedirect('paytm')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border:1px solid #e2e8f0; border-radius:10px; padding:10px 6px; background:#fff; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='#4338CA'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#fff';">
+                        <span style="color:#00b9f1; font-weight:800; font-size:13px; font-family:sans-serif; letter-spacing:-0.5px;">Paytm</span>
+                        <span style="font-size:10px; color:#475569; font-weight:600;">Paytm</span>
+                    </button>
+                </div>
+                <button type="button" onclick="startCountdownOnly()" style="width:100%; border:1px dashed #4338CA; background:#f5f3ff; color:#4338CA; padding:10px; border-radius:8px; margin-top:8px; cursor:pointer; font-size:11px; font-weight:700; transition:background 0.2s;" onmouseover="this.style.background='#ebe9fe'" onmouseout="this.style.background='#f5f3ff'">I paid already / Scanned QR manually</button>
+            </div>
+
+            <!-- Countdown Waiting Area -->
+            <div id="countdownArea" style="display:none; text-align:center; background:#fffbeb; border:1px solid #fef3c7; border-radius:10px; padding:12px; margin-bottom:16px;">
+                <div style="font-size:12px; font-weight:800; color:#d97706; margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:6px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px; height:14px; animation:spin 2s linear infinite;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Awaiting Payment Completion
+                </div>
+                <div style="font-size:11px; color:#b45309; margin-bottom:8px; line-height:1.4;">Complete transaction in UPI app. Upload screenshot in <strong id="countdownSeconds">20</strong> seconds.</div>
+                <div style="width:100%; height:5px; background:#fde68a; border-radius:3px; overflow:hidden; position:relative;">
+                    <div id="countdownBar" style="width:100%; height:100%; background:#d97706; position:absolute; left:0; top:0; transition:width 1s linear;"></div>
                 </div>
             </div>
 
             <form id="parentPaymentForm" onsubmit="submitPaymentProof(event)">
-                <div class="form-group">
+                <div class="form-group" id="screenshotGroup">
                     <label>Upload Payment Receipt Screenshot *</label>
                     <input type="file" id="receiptScreenshotInput" required accept="image/*" onchange="processReceiptScreenshot(event)" style="border:2px dashed #cbd5e1; padding:20px 10px; text-align:center; cursor:pointer; background:#faf5ff; display:block; width:100%;">
                 </div>
@@ -653,6 +689,7 @@
 
                 const fees = Array.isArray(feesData) ? feesData : [];
                 const upiqrCode = qrData?.upiqrCode || '';
+                const upiId = qrData?.upiId || '';
 
                 // Calculate stats
                 let totalAmount = 0;
@@ -758,7 +795,7 @@
                                 } else if (isPending) {
                                     actionHtml = `<span class="status-badge status-pending" style="background:#fef3c7; color:#d97706;">Pending Verification</span>`;
                                 } else {
-                                    actionHtml = `<button class="btn btn-primary" style="padding:6px 14px; font-size:12px;" onclick="openParentPaymentModal('${f._id}', '${inst._id}', '${inst.label}', ${inst.amount}, '${upiqrCode}')">Pay UPI</button>`;
+                                    actionHtml = `<button class="btn btn-primary" style="padding:6px 14px; font-size:12px;" onclick="openParentPaymentModal('${f._id}', '${inst._id}', '${inst.label}', ${inst.amount}, '${upiqrCode}', '${upiId}')">Pay UPI</button>`;
                                 }
 
                                 instHtml += `
@@ -807,10 +844,18 @@
             }
         }
 
-        function openParentPaymentModal(paymentId, installmentId, label, amount, qrCode) {
+        let activeUpiId = '';
+        let activeInstallmentAmount = 0;
+        let activeInstallmentLabel = '';
+        let countdownIntervalId = null;
+
+        function openParentPaymentModal(paymentId, installmentId, label, amount, qrCode, upiId) {
             activeVerificationPaymentId = paymentId;
             activeVerificationInstallmentId = installmentId;
             activeScreenshotBase64 = '';
+            activeUpiId = upiId || '';
+            activeInstallmentAmount = amount || 0;
+            activeInstallmentLabel = label || '';
 
             // Reset modal form
             document.getElementById('parentPaymentForm').reset();
@@ -819,16 +864,121 @@
             // Set QR code inside modal
             const qrContainer = document.getElementById('modalSchoolQrContainer');
             if (qrCode) {
-                qrContainer.innerHTML = `<img src="${qrCode}" style="width:100%; height:100%; object-fit:contain;" onclick="viewQrFullscreen('${qrCode}')" title="Click to zoom">`;
+                qrContainer.innerHTML = `<img src="${qrCode}" style="width:100%; height:100%; object-fit:contain; cursor:pointer;" onclick="viewQrFullscreen('${qrCode}')" title="Click to zoom">`;
             } else {
                 qrContainer.innerHTML = `<span style="font-size:11px; color:#64748b; font-weight:600; text-align:center;">No QR</span>`;
             }
+
+            // Set UPI ID text
+            const upiTextEl = document.getElementById('modalUpiIdText');
+            if (upiId) {
+                upiTextEl.textContent = upiId;
+            } else {
+                upiTextEl.textContent = 'Not Configured';
+            }
+
+            // Clear any running countdown
+            if (countdownIntervalId) {
+                clearInterval(countdownIntervalId);
+                countdownIntervalId = null;
+            }
+            document.getElementById('countdownArea').style.display = 'none';
+
+            // Disable screenshot input until countdown runs/finishes
+            const screenshotInput = document.getElementById('receiptScreenshotInput');
+            screenshotInput.disabled = true;
+            screenshotInput.style.opacity = '0.5';
+            screenshotInput.style.cursor = 'not-allowed';
+            screenshotInput.required = true;
+
+            // Disable submit button
+            document.getElementById('submitProofBtn').disabled = true;
+            document.getElementById('submitProofBtn').style.opacity = '0.5';
+            document.getElementById('submitProofBtn').style.cursor = 'not-allowed';
 
             document.getElementById('parentPaymentModal').classList.add('show');
         }
 
         function closeParentPaymentModal() {
+            if (countdownIntervalId) {
+                clearInterval(countdownIntervalId);
+                countdownIntervalId = null;
+            }
             document.getElementById('parentPaymentModal').classList.remove('show');
+        }
+
+        function copyModalUpiId() {
+            const upiId = document.getElementById('modalUpiIdText').textContent;
+            if (!upiId || upiId === 'Not Configured') {
+                showToast('No UPI ID configured to copy', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(upiId).then(() => {
+                showToast('UPI ID copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy UPI ID', 'error');
+            });
+        }
+
+        function startPaymentRedirect(app) {
+            if (!activeUpiId || activeUpiId === 'Not Configured') {
+                showToast('School UPI ID is not configured. Please pay manually using QR code.', 'error');
+                return;
+            }
+
+            // Generate standard UPI URL: upi://pay?pa={upiId}&pn=School&am={amount}&cu=INR&tn={feeLabel}
+            const upiUrl = `upi://pay?pa=${activeUpiId}&pn=School&am=${activeInstallmentAmount}&cu=INR&tn=${encodeURIComponent(activeInstallmentLabel)}`;
+            
+            // Redirect parent
+            window.location.href = upiUrl;
+
+            // Start countdown
+            startPaymentCountdown();
+        }
+
+        function startCountdownOnly() {
+            startPaymentCountdown();
+        }
+
+        function startPaymentCountdown() {
+            if (countdownIntervalId) {
+                clearInterval(countdownIntervalId);
+            }
+
+            const countdownArea = document.getElementById('countdownArea');
+            const countdownSeconds = document.getElementById('countdownSeconds');
+            const countdownBar = document.getElementById('countdownBar');
+            
+            countdownArea.style.display = 'block';
+            let secondsLeft = 20;
+            countdownSeconds.textContent = secondsLeft;
+            countdownBar.style.width = '100%';
+
+            countdownIntervalId = setInterval(() => {
+                secondsLeft--;
+                countdownSeconds.textContent = secondsLeft;
+                const percentage = (secondsLeft / 20) * 100;
+                countdownBar.style.width = percentage + '%';
+
+                if (secondsLeft <= 0) {
+                    clearInterval(countdownIntervalId);
+                    countdownIntervalId = null;
+                    countdownArea.style.display = 'none';
+
+                    // Enable screenshot input
+                    const screenshotInput = document.getElementById('receiptScreenshotInput');
+                    screenshotInput.disabled = false;
+                    screenshotInput.style.opacity = '1';
+                    screenshotInput.style.cursor = 'pointer';
+
+                    // Enable submit button
+                    document.getElementById('submitProofBtn').disabled = false;
+                    document.getElementById('submitProofBtn').style.opacity = '1';
+                    document.getElementById('submitProofBtn').style.cursor = 'pointer';
+                    
+                    showToast('Timer finished. You can now upload payment receipt screenshot and submit proof.', 'success');
+                }
+            }, 1000);
         }
 
         async function processReceiptScreenshot(event) {

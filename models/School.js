@@ -64,6 +64,11 @@ const schoolSchema = new mongoose.Schema({
         default: ''
     },
 
+    upiId: {
+        type: String,
+        default: ''
+    },
+
     deleteOtp: {
         code: { type: String },
         expiresAt: { type: Date }

@@ -47,7 +47,10 @@ router.get('/school-qr', parentAuth, async (req, res) => {
         if (!school) {
             return res.status(404).json({ message: 'School not found' });
         }
-        res.json({ upiqrCode: school.upiqrCode || '' });
+        res.json({ 
+            upiqrCode: school.upiqrCode || '',
+            upiId: school.upiId || ''
+        });
     } catch (error) {
         console.error('Get school QR for parent error:', error);
         res.status(500).json({ message: 'Server error' });

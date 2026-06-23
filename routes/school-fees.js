@@ -313,7 +313,7 @@ router.put('/payments/:id/unverify/:installmentId', schoolAuth, async (req, res)
     }
 });
 
-// Get school UPI QR Code
+// Get school UPI QR Code and UPI ID
 router.get('/upi-qr', schoolAuth, async (req, res) => {
     try {
         const School = require('../models/School');
@@ -321,26 +321,35 @@ router.get('/upi-qr', schoolAuth, async (req, res) => {
         if (!school) {
             return res.status(404).json({ message: 'School not found' });
         }
-        res.json({ upiqrCode: school.upiqrCode || '' });
+        res.json({ 
+            upiqrCode: school.upiqrCode || '',
+            upiId: school.upiId || ''
+        });
     } catch (error) {
         console.error('Get school QR error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
-// Update school UPI QR Code
+// Update school UPI QR Code and UPI ID
 router.post('/upi-qr', schoolAuth, async (req, res) => {
     try {
         const School = require('../models/School');
-        const { upiqrCode } = req.body;
-        if (!upiqrCode) {
-            return res.status(400).json({ message: 'QR Code is required' });
-        }
-        const school = await School.findByIdAndUpdate(req.schoolId, { upiqrCode }, { new: true });
+        const { upiqrCode, upiId } = req.body;
+        
+        const updateData = {};
+        if (upiqrCode !== undefined) updateData.upiqrCode = upiqrCode;
+        if (upiId !== undefined) updateData.upiId = upiId;
+
+        const school = await School.findByIdAndUpdate(req.schoolId, updateData, { new: true });
         if (!school) {
             return res.status(404).json({ message: 'School not found' });
         }
-        res.json({ message: 'UPI QR Code updated successfully', upiqrCode: school.upiqrCode });
+        res.json({ 
+            message: 'UPI settings updated successfully', 
+            upiqrCode: school.upiqrCode || '',
+            upiId: school.upiId || ''
+        });
     } catch (error) {
         console.error('Update school QR error:', error);
         res.status(500).json({ message: 'Server error' });

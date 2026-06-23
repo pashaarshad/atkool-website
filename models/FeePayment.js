@@ -39,6 +39,10 @@ const installmentSchema = new mongoose.Schema({
     },
     submittedDate: {
         type: Date
+    },
+    submittedAmount: {
+        type: Number,
+        default: 0
     }
 }, { _id: true });
 
