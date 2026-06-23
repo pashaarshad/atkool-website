@@ -203,121 +203,146 @@
 
     <!-- UPI Payment Modal -->
     <div class="modal-overlay" id="parentPaymentModal">
-        <div class="modal" style="max-width: 500px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-                <h2 style="margin:0; font-size:18px;">Submit UPI Payment Proof</h2>
-                <button onclick="closeParentPaymentModal()" style="border:none; background:none; font-size:20px; font-weight:700; cursor:pointer; color:#64748b;">&times;</button>
+        <div class="modal" style="max-width: 500px; background:#111317; color:#fff; border: 1px solid #2d3139; padding: 20px; border-radius:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #2d3139; padding-bottom:10px;">
+                <h2 style="margin:0; font-size:18px; color:#fff;" id="modalWizardTitle">School Fee Payment</h2>
+                <button onclick="closeParentPaymentModal()" style="border:none; background:none; font-size:20px; font-weight:700; cursor:pointer; color:#94a3b8;">&times;</button>
             </div>
             
-            <!-- Choose Payment Amount -->
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:16px;">
-                <div style="font-size:11px; font-weight:800; color:#475569; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Choose Payment Amount</div>
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#1e293b; cursor:pointer; margin:0;">
-                        <input type="radio" name="paymentAmountOption" value="full" checked onchange="togglePaymentAmountOption()" style="width:16px; height:16px; accent-color:#4338CA;">
-                        Full Remaining Amount (<span id="optionFullAmount">₹0</span>)
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#1e293b; cursor:pointer; margin:0;">
-                        <input type="radio" name="paymentAmountOption" value="custom" onchange="togglePaymentAmountOption()" style="width:16px; height:16px; accent-color:#4338CA;">
-                        Custom Payment
-                    </label>
-                    <div id="customAmountInputContainer" style="display:none; margin-top:4px; margin-left:24px;">
-                        <div style="position:relative; display:flex; align-items:center;">
-                            <span style="position:absolute; left:10px; font-size:13px; font-weight:700; color:#64748b;">₹</span>
-                            <input type="number" id="customPaymentAmountInput" placeholder="Enter amount to pay" style="width:100%; padding:6px 10px 6px 20px; font-size:13px; border:1px solid #cbd5e1; border-radius:6px; outline:none; font-weight:700; color:#059669; background:#fff;" oninput="onCustomAmountChange()">
+            <!-- STEP 1: CHOOSE AMOUNT -->
+            <div id="paymentStep1" style="display:block;">
+                <div style="background:#1f222a; border:1px solid #2d3139; border-radius:12px; padding:16px; margin-bottom:20px;">
+                    <div style="font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Choose Payment Amount</div>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <label style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:#fff; cursor:pointer; margin:0;">
+                            <input type="radio" name="paymentAmountOption" value="full" checked onchange="togglePaymentAmountOption()" style="width:18px; height:18px; accent-color:#d97706;">
+                            Full Remaining Amount (<span id="optionFullAmount" style="color:#d97706; font-weight:700;">₹0</span>)
+                        </label>
+                        <label style="display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:#fff; cursor:pointer; margin:0;">
+                            <input type="radio" name="paymentAmountOption" value="custom" onchange="togglePaymentAmountOption()" style="width:18px; height:18px; accent-color:#d97706;">
+                            Custom Payment
+                        </label>
+                        <div id="customAmountInputContainer" style="display:none; margin-top:6px; margin-left:28px;">
+                            <div style="position:relative; display:flex; align-items:center;">
+                                <span style="position:absolute; left:12px; font-size:14px; font-weight:700; color:#94a3b8;">₹</span>
+                                <input type="number" id="customPaymentAmountInput" placeholder="Enter amount to pay" style="width:100%; padding:8px 12px 8px 24px; font-size:14px; border:1px solid #2d3139; border-radius:8px; outline:none; font-weight:700; color:#10b981; background:#111317;" oninput="onCustomAmountChange()">
+                            </div>
                         </div>
                     </div>
                 </div>
+                <button type="button" onclick="goToStep2()" style="width:100%; background:#d97706; color:#fff; padding:12px; border-radius:10px; border:none; font-weight:700; font-size:14px; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#b45309'" onmouseout="this.style.background='#d97706'">Proceed to Payment</button>
             </div>
 
-            <!-- Scan QR Code to Pay Header (from user screenshots) -->
-            <div style="text-align:center; margin-bottom:14px; background:#fafafa; border-radius:10px; padding:10px; border:1px solid #eaeaea;">
-                <div style="font-size:13px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">Scan QR Code to Pay</div>
-                <div style="font-size:32px; font-weight:900; color:#d97706; margin-top:2px;" id="modalDisplayAmount">₹0</div>
-            </div>
+            <!-- STEP 2: SCAN QR & LAUNCH APPS (Matches image 3) -->
+            <div id="paymentStep2" style="display:none; text-align:center;">
+                <!-- Scan QR Code to Pay Header -->
+                <div style="font-size:14px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Scan QR Code to Pay</div>
+                <div style="font-size:36px; font-weight:900; color:#eab308; margin-bottom:16px;" id="modalDisplayAmount">₹0</div>
 
-            <!-- School QR display inside modal for quick reference -->
-            <div style="display:flex; gap:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:16px; align-items:center;">
-                <div id="modalSchoolQrContainer" style="width:95px; height:95px; border-radius:8px; background:#fff; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; cursor:pointer;">
-                    <span style="font-size:11px; color:#64748b; font-weight:600;">No QR</span>
-                </div>
-                <div style="flex:1; min-width:0;">
-                    <div style="font-weight:800; color:#0F172A; font-size:13px; margin-bottom:2px;">Scan & Pay via UPI</div>
-                    <div style="font-size:11px; color:#64748b; line-height:1.4; margin-bottom:6px;">Scan this QR code using GPay, PhonePe, Paytm, or copy the ID below.</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:#e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; gap:8px;">
-                        <span style="font-family:monospace; font-weight:700; color:#1e293b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;" id="modalUpiIdText">Not Configured</span>
-                        <button type="button" onclick="copyModalUpiId()" style="background:#4338CA; color:#fff; border:none; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer; flex-shrink:0;">Copy</button>
+                <!-- QR & UPI ID Grid -->
+                <div style="display:flex; justify-content:center; gap:20px; align-items:center; margin-bottom:16px; flex-wrap:wrap;">
+                    <!-- White QR Container -->
+                    <div id="modalSchoolQrContainer" style="width:180px; height:180px; border-radius:16px; background:#fff; padding:10px; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                        <span style="font-size:12px; color:#111317; font-weight:700;">No QR Code</span>
                     </div>
-                </div>
-            </div>
 
-            <!-- Pay via Apps Selection -->
-            <div style="margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:16px;" id="paymentAppSection">
-                <div style="font-size:10px; font-weight:800; color:#475569; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Pay Now Via App</div>
-                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
-                    <button type="button" onclick="startPaymentRedirect('gpay')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border:1px solid #e2e8f0; border-radius:10px; padding:10px 6px; background:#fff; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='#4338CA'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#fff';">
-                        <span style="font-weight:800; font-size:13px; font-family:sans-serif; letter-spacing:-0.5px;"><span style="color:#4285F4;">G</span><span style="color:#EA4335;">P</span><span style="color:#FBBC05;">a</span><span style="color:#34A853;">y</span></span>
-                        <span style="font-size:10px; color:#475569; font-weight:600;">Google Pay</span>
-                    </button>
-                    <button type="button" onclick="startPaymentRedirect('phonepe')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border:1px solid #e2e8f0; border-radius:10px; padding:10px 6px; background:#fff; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='#4338CA'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#fff';">
-                        <span style="color:#5f259f; font-weight:800; font-size:13px; font-family:sans-serif; letter-spacing:-0.5px;">PhonePe</span>
-                        <span style="font-size:10px; color:#475569; font-weight:600;">PhonePe</span>
-                    </button>
-                    <button type="button" onclick="startPaymentRedirect('paytm')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border:1px solid #e2e8f0; border-radius:10px; padding:10px 6px; background:#fff; cursor:pointer; transition:all 0.2s; box-shadow:0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='#4338CA'; this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='#fff';">
-                        <span style="color:#00b9f1; font-weight:800; font-size:13px; font-family:sans-serif; letter-spacing:-0.5px;">Paytm</span>
-                        <span style="font-size:10px; color:#475569; font-weight:600;">Paytm</span>
-                    </button>
-                </div>
-                <button type="button" onclick="startCountdownOnly()" style="width:100%; border:1px dashed #4338CA; background:#f5f3ff; color:#4338CA; padding:10px; border-radius:8px; margin-top:8px; cursor:pointer; font-size:11px; font-weight:700; transition:background 0.2s;" onmouseover="this.style.background='#ebe9fe'" onmouseout="this.style.background='#f5f3ff'">I paid already / Scanned QR manually</button>
-            </div>
-
-            <!-- Countdown Waiting Area -->
-            <div id="countdownArea" style="display:none; text-align:center; background:#fffbeb; border:1px solid #fef3c7; border-radius:10px; padding:12px; margin-bottom:16px;">
-                <div style="font-size:12px; font-weight:800; color:#d97706; margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:6px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px; height:14px; animation:spin 2s linear infinite;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    Awaiting Payment Completion
-                </div>
-                <div style="font-size:11px; color:#b45309; margin-bottom:8px; line-height:1.4;">Complete transaction in UPI app. Upload screenshot in <strong id="countdownSeconds">15</strong> seconds.</div>
-                <div style="width:100%; height:5px; background:#fde68a; border-radius:3px; overflow:hidden; position:relative;">
-                    <div id="countdownBar" style="width:100%; height:100%; background:#d97706; position:absolute; left:0; top:0; transition:width 1s linear;"></div>
-                </div>
-            </div>
-
-            <form id="parentPaymentForm" onsubmit="submitPaymentProof(event)">
-                <!-- Amount Paid Form Field -->
-                <div class="form-group">
-                    <label>Amount Paid (₹) *</label>
-                    <input type="number" id="parentAmountPaidInput" required style="font-weight:700; color:#059669; background:#f8fafc;" readonly>
-                </div>
-
-                <div class="form-group" id="screenshotGroup">
-                    <label>Upload Payment Receipt Screenshot *</label>
-                    <input type="file" id="receiptScreenshotInput" required accept="image/*" onchange="processReceiptScreenshot(event)" style="border:2px dashed #cbd5e1; padding:20px 10px; text-align:center; cursor:pointer; background:#faf5ff; display:block; width:100%;">
-                </div>
-
-                <!-- OCR Status -->
-                <div id="ocrStatusArea" style="display:none; background:#eef2ff; border:1px solid #c7d2fe; border-radius:10px; padding:10px 14px; margin-bottom:16px; font-size:12px; color:#4338CA; font-weight:600;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <div style="width:14px; height:14px; border:2px solid #4338CA; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; flex-shrink:0;"></div>
-                        <span id="ocrStatusText">Scanning receipt...</span>
+                    <!-- UPI ID pill card -->
+                    <div style="background:#1f222a; border:1px solid #2d3139; border-radius:10px; padding:10px 14px; display:flex; flex-direction:column; gap:4px; text-align:left; min-width:180px;">
+                        <span style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase;">UPI ID</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-family:monospace; font-weight:700; color:#fff; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:130px;" id="modalUpiIdText">Not Configured</span>
+                            <button type="button" onclick="copyModalUpiId()" style="background:#2d3139; border:none; color:#94a3b8; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#94a3b8'">Copy</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>UTR Number / UPI Ref No (12 Digits) *</label>
-                    <input type="text" id="parentUtrInput" required pattern="\d{12}" title="UTR must be a 12 digit number" placeholder="e.g. 623456789012">
+                <!-- 5-min Transaction Timer -->
+                <div style="display:inline-flex; align-items:center; gap:6px; background:#1f222a; border:1px solid #2d3139; border-radius:20px; padding:6px 14px; font-size:13px; font-weight:700; color:#fff; margin-bottom:20px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px; height:14px; color:#94a3b8;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span id="transactionTimerText">5:00</span> <span style="color:#94a3b8; font-weight:500;">remaining</span>
                 </div>
 
-                <div class="form-group">
-                    <label>Transaction ID *</label>
-                    <input type="text" id="parentTxnIdInput" required placeholder="e.g. T260623123456">
+                <!-- Pay via Apps Title -->
+                <div style="text-align:left; font-size:10px; font-weight:800; color:#94a3b8; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Pay Now Via App</div>
+                
+                <!-- Apps grid -->
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:20px;">
+                    <button type="button" onclick="startPaymentRedirect('gpay')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border:1px solid #2d3139; border-radius:12px; padding:12px 6px; background:#1f222a; cursor:pointer; color:#fff; transition:all 0.2s;" onmouseover="this.style.borderColor='#eab308'; this.style.background='#282c35';" onmouseout="this.style.borderColor='#2d3139'; this.style.background='#1f222a';">
+                        <span style="font-weight:800; font-size:14px; font-family:sans-serif; letter-spacing:-0.5px;"><span style="color:#4285F4;">G</span><span style="color:#EA4335;">P</span><span style="color:#FBBC05;">a</span><span style="color:#34A853;">y</span></span>
+                        <span style="font-size:10px; color:#94a3b8; font-weight:600;">Google Pay</span>
+                    </button>
+                    <button type="button" onclick="startPaymentRedirect('phonepe')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border:1px solid #2d3139; border-radius:12px; padding:12px 6px; background:#1f222a; cursor:pointer; color:#fff; transition:all 0.2s;" onmouseover="this.style.borderColor='#eab308'; this.style.background='#282c35';" onmouseout="this.style.borderColor='#2d3139'; this.style.background='#1f222a';">
+                        <span style="color:#5f259f; font-weight:800; font-size:14px; font-family:sans-serif; letter-spacing:-0.5px;">PhonePe</span>
+                        <span style="font-size:10px; color:#94a3b8; font-weight:600;">PhonePe</span>
+                    </button>
+                    <button type="button" onclick="startPaymentRedirect('paytm')" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border:1px solid #2d3139; border-radius:12px; padding:12px 6px; background:#1f222a; cursor:pointer; color:#fff; transition:all 0.2s;" onmouseover="this.style.borderColor='#eab308'; this.style.background='#282c35';" onmouseout="this.style.borderColor='#2d3139'; this.style.background='#1f222a';">
+                        <span style="color:#00b9f1; font-weight:800; font-size:14px; font-family:sans-serif; letter-spacing:-0.5px;">Paytm</span>
+                        <span style="font-size:10px; color:#94a3b8; font-weight:600;">Paytm</span>
+                    </button>
                 </div>
 
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeParentPaymentModal()">Cancel</button>
-                    <button type="submit" class="btn-submit" id="submitProofBtn">Submit Proof</button>
+                <!-- Bottom action button/bar -->
+                <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+                    <!-- Countdown Bar / Complete Button -->
+                    <button type="button" id="step2ConfirmBtn" onclick="goToStep3()" disabled style="width:100%; border:none; background:#2d3139; color:#94a3b8; padding:12px; border-radius:10px; font-size:13px; font-weight:700; cursor:not-allowed; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        Please complete payment... Confirmation enabled in 15s
+                    </button>
+
+                    <button type="button" onclick="goToStep1()" style="background:none; border:none; color:#94a3b8; font-size:12px; cursor:pointer; text-decoration:underline;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#94a3b8'">Go Back</button>
                 </div>
-            </form>
+            </div>
+
+            <!-- STEP 3: CONFIRM PAYMENT & EXTRACT UTR (Matches image 4) -->
+            <div id="paymentStep3" style="display:none;">
+                <form id="parentPaymentForm" onsubmit="submitPaymentProof(event)">
+                    <!-- Green checkmark icon -->
+                    <div style="display:flex; flex-direction:column; align-items:center; text-align:center; margin-bottom:20px;">
+                        <div style="width:50px; height:50px; border-radius:50%; background:rgba(16,185,129,0.1); border:2px solid #10b981; display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" style="width:24px; height:24px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <h3 style="margin:0; font-size:18px; font-weight:700; color:#fff; margin-bottom:4px;">Payment Confirmation</h3>
+                        <p style="margin:0; font-size:12px; color:#94a3b8;">Enter your UTR Number to complete registration</p>
+                    </div>
+
+                    <!-- Amount Paid Form Field (Hidden or readonly style) -->
+                    <input type="hidden" id="parentAmountPaidInput">
+
+                    <!-- Enter UTR Input Box (Matches layout) -->
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <input type="text" id="parentUtrInput" required pattern="\d{12}" title="UTR must be a 12 digit number" placeholder="Enter UTR Number (Digits Only)" style="width:100%; padding:14px; font-size:15px; border:2px solid #d97706; border-radius:10px; text-align:center; font-weight:700; color:#fff; background:#111317; letter-spacing:1px; outline:none;" onfocus="this.style.borderColor='#eab308'" onblur="this.style.borderColor='#d97706'">
+                        <div style="text-align:center; font-size:11px; color:#94a3b8; margin-top:8px;">You can find the UTR Number in your UPI app's transaction history</div>
+                    </div>
+
+                    <!-- Payment Screenshot Input -->
+                    <div class="form-group" id="screenshotGroup" style="margin-bottom:15px; border-top: 1px solid #2d3139; padding-top:15px;">
+                        <label style="font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">Payment Screenshot *</label>
+                        <input type="file" id="receiptScreenshotInput" required accept="image/*" onchange="processReceiptScreenshot(event)" style="width:100%; border:1px solid #2d3139; background:#1f222a; color:#fff; border-radius:8px; padding:10px; cursor:pointer;">
+                        <div style="font-size:10px; color:#94a3b8; margin-top:4px;">Upload screenshot (Max 5MB)</div>
+                    </div>
+
+                    <!-- OCR Status -->
+                    <div id="ocrStatusArea" style="display:none; background:#1e1b4b; border:1px solid #312e81; border-radius:8px; padding:10px; margin-bottom:15px; font-size:11px; color:#c7d2fe; font-weight:600;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="width:12px; height:12px; border:2px solid #c7d2fe; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; flex-shrink:0;"></div>
+                            <span id="ocrStatusText">Scanning receipt...</span>
+                        </div>
+                    </div>
+
+                    <!-- Transaction ID (usually hidden or shown for double check) -->
+                    <div class="form-group" style="display:none;">
+                        <label style="font-size:11px; color:#94a3b8;">Transaction ID *</label>
+                        <input type="text" id="parentTxnIdInput" placeholder="Transaction ID">
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+                        <button type="submit" class="btn-submit" id="submitProofBtn" style="width:100%; background:#d97706; border:none; color:#fff; font-weight:700; padding:12px; border-radius:10px; font-size:14px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#b45309'" onmouseout="this.style.background='#d97706'">Submit Registration</button>
+                        
+                        <button type="button" onclick="goToStep2()" style="background:none; border:none; color:#94a3b8; font-size:12px; cursor:pointer; text-decoration:underline;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#94a3b8'">Go Back</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
         </div>
     </div>
     
@@ -873,14 +898,11 @@
                 btn.classList.remove('open');
             } else {
                 row.classList.add('show');
-                btn.classList.add('open');
-            }
-        }
-
-        let activeUpiId = '';
+                btn.classList.add('open'        let activeUpiId = '';
         let activeInstallmentAmount = 0;
         let activeInstallmentLabel = '';
         let countdownIntervalId = null;
+        let transactionTimerIntervalId = null;
 
         function openParentPaymentModal(paymentId, installmentId, label, amount, qrCode, upiId) {
             activeVerificationPaymentId = paymentId;
@@ -899,7 +921,7 @@
             if (qrCode) {
                 qrContainer.innerHTML = `<img src="${qrCode}" style="width:100%; height:100%; object-fit:contain; cursor:pointer;" onclick="viewQrFullscreen('${qrCode}')" title="Click to zoom">`;
             } else {
-                qrContainer.innerHTML = `<span style="font-size:11px; color:#64748b; font-weight:600; text-align:center;">No QR</span>`;
+                qrContainer.innerHTML = `<span style="font-size:11px; color:#111317; font-weight:600; text-align:center;">No QR</span>`;
             }
 
             // Set UPI ID text
@@ -920,26 +942,104 @@
             document.getElementById('modalDisplayAmount').textContent = '₹' + amount.toLocaleString();
             document.getElementById('parentAmountPaidInput').value = amount;
 
-            // Clear any running countdown
+            // Clear any running countdowns
             if (countdownIntervalId) {
                 clearInterval(countdownIntervalId);
                 countdownIntervalId = null;
             }
-            document.getElementById('countdownArea').style.display = 'none';
+            if (transactionTimerIntervalId) {
+                clearInterval(transactionTimerIntervalId);
+                transactionTimerIntervalId = null;
+            }
 
-            // Disable screenshot input until countdown runs/finishes
-            const screenshotInput = document.getElementById('receiptScreenshotInput');
-            screenshotInput.disabled = true;
-            screenshotInput.style.opacity = '0.5';
-            screenshotInput.style.cursor = 'not-allowed';
-            screenshotInput.required = true;
-
-            // Disable submit button
-            document.getElementById('submitProofBtn').disabled = true;
-            document.getElementById('submitProofBtn').style.opacity = '0.5';
-            document.getElementById('submitProofBtn').style.cursor = 'not-allowed';
+            // Reset step visibility to Step 1
+            document.getElementById('paymentStep1').style.display = 'block';
+            document.getElementById('paymentStep2').style.display = 'none';
+            document.getElementById('paymentStep3').style.display = 'none';
+            document.getElementById('modalWizardTitle').textContent = 'School Fee Payment';
 
             document.getElementById('parentPaymentModal').classList.add('show');
+        }
+
+        function goToStep1() {
+            document.getElementById('paymentStep1').style.display = 'block';
+            document.getElementById('paymentStep2').style.display = 'none';
+            document.getElementById('paymentStep3').style.display = 'none';
+            document.getElementById('modalWizardTitle').textContent = 'School Fee Payment';
+
+            if (transactionTimerIntervalId) {
+                clearInterval(transactionTimerIntervalId);
+                transactionTimerIntervalId = null;
+            }
+            if (countdownIntervalId) {
+                clearInterval(countdownIntervalId);
+                countdownIntervalId = null;
+            }
+        }
+
+        function goToStep2() {
+            const amount = getActivePaymentAmount();
+            if (amount <= 0) {
+                showToast('Please enter a valid payment amount.', 'error');
+                return;
+            }
+
+            document.getElementById('paymentStep1').style.display = 'none';
+            document.getElementById('paymentStep2').style.display = 'block';
+            document.getElementById('paymentStep3').style.display = 'none';
+            document.getElementById('modalWizardTitle').textContent = 'Scan QR & Pay';
+
+            // Start 5-minute transaction timer
+            startTransactionTimer();
+
+            // Reset the 15-second confirm button state
+            const confirmBtn = document.getElementById('step2ConfirmBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.style.background = '#2d3139';
+            confirmBtn.style.color = '#94a3b8';
+            confirmBtn.style.cursor = 'not-allowed';
+            confirmBtn.textContent = 'Please complete payment... Confirmation enabled in 15s';
+        }
+
+        function goToStep3() {
+            document.getElementById('paymentStep1').style.display = 'none';
+            document.getElementById('paymentStep2').style.display = 'none';
+            document.getElementById('paymentStep3').style.display = 'block';
+            document.getElementById('modalWizardTitle').textContent = 'Confirm Payment';
+
+            if (transactionTimerIntervalId) {
+                clearInterval(transactionTimerIntervalId);
+                transactionTimerIntervalId = null;
+            }
+        }
+
+        function startTransactionTimer() {
+            if (transactionTimerIntervalId) {
+                clearInterval(transactionTimerIntervalId);
+            }
+
+            const timerEl = document.getElementById('transactionTimerText');
+            let totalSeconds = 300; // 5 minutes
+
+            const updateTimerDisplay = () => {
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                timerEl.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            };
+
+            updateTimerDisplay();
+
+            transactionTimerIntervalId = setInterval(() => {
+                totalSeconds--;
+                updateTimerDisplay();
+
+                if (totalSeconds <= 0) {
+                    clearInterval(transactionTimerIntervalId);
+                    transactionTimerIntervalId = null;
+                    showToast('Transaction session expired. Please try again.', 'error');
+                    closeParentPaymentModal();
+                }
+            }, 1000);
         }
 
         function togglePaymentAmountOption() {
@@ -979,6 +1079,10 @@
             if (countdownIntervalId) {
                 clearInterval(countdownIntervalId);
                 countdownIntervalId = null;
+            }
+            if (transactionTimerIntervalId) {
+                clearInterval(transactionTimerIntervalId);
+                transactionTimerIntervalId = null;
             }
             document.getElementById('parentPaymentModal').classList.remove('show');
         }
@@ -1027,38 +1131,31 @@
                 clearInterval(countdownIntervalId);
             }
 
-            const countdownArea = document.getElementById('countdownArea');
-            const countdownSeconds = document.getElementById('countdownSeconds');
-            const countdownBar = document.getElementById('countdownBar');
-            
-            countdownArea.style.display = 'block';
+            const confirmBtn = document.getElementById('step2ConfirmBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.style.background = '#2d3139';
+            confirmBtn.style.color = '#94a3b8';
+            confirmBtn.style.cursor = 'not-allowed';
+
             let secondsLeft = 15;
-            countdownSeconds.textContent = secondsLeft;
-            countdownBar.style.width = '100%';
+            confirmBtn.textContent = `Please complete payment... Confirmation enabled in ${secondsLeft}s`;
 
             countdownIntervalId = setInterval(() => {
                 secondsLeft--;
-                countdownSeconds.textContent = secondsLeft;
-                const percentage = (secondsLeft / 15) * 100;
-                countdownBar.style.width = percentage + '%';
+                confirmBtn.textContent = `Please complete payment... Confirmation enabled in ${secondsLeft}s`;
 
                 if (secondsLeft <= 0) {
                     clearInterval(countdownIntervalId);
                     countdownIntervalId = null;
-                    countdownArea.style.display = 'none';
 
-                    // Enable screenshot input
-                    const screenshotInput = document.getElementById('receiptScreenshotInput');
-                    screenshotInput.disabled = false;
-                    screenshotInput.style.opacity = '1';
-                    screenshotInput.style.cursor = 'pointer';
-
-                    // Enable submit button
-                    document.getElementById('submitProofBtn').disabled = false;
-                    document.getElementById('submitProofBtn').style.opacity = '1';
-                    document.getElementById('submitProofBtn').style.cursor = 'pointer';
+                    // Enable the I have completed the payment button
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.background = '#10b981';
+                    confirmBtn.style.color = '#fff';
+                    confirmBtn.style.cursor = 'pointer';
+                    confirmBtn.textContent = '✓ I have completed the payment';
                     
-                    showToast('Timer finished. You can now upload payment receipt screenshot and submit proof.', 'success');
+                    showToast('Payment verification enabled. Click the green button to confirm.', 'success');
                 }
             }, 1000);
         }
