@@ -391,18 +391,18 @@
                     <input type="text" id="teacherName" required>
                 </div>
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="teacherEmail">
+                    <label>Email *</label>
+                    <input type="email" id="teacherEmail" required placeholder="Enter Gmail ID">
                 </div>
                 <div class="form-group">
                     <label>Password (for staff login)</label>
                     <input type="password" id="teacherPassword" placeholder="Leave empty to keep unchanged">
                 </div>
                 <div class="form-group">
-                    <label>Mobile No</label>
+                    <label>Mobile No *</label>
                     <input type="text" id="teacherMobile" maxlength="10" pattern="\d{10}"
                         title="Please enter exactly 10 digits" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                        placeholder="Enter 10 digit mobile number">
+                        placeholder="Enter 10 digit mobile number" required>
                 </div>
                 <div class="form-group">
                     <label>Staff Role *</label>
@@ -959,10 +959,26 @@
 
             var isClassTeacher = (role === 'Teacher') && document.getElementById('teacherIsClassTeacher').checked;
 
+            var emailVal = document.getElementById('teacherEmail').value.trim();
+            var mobileVal = document.getElementById('teacherMobile').value.trim();
+
+            if (!emailVal) {
+                showToast('Email / Gmail ID is required', 'error');
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+            if (!mobileVal || !/^\d{10}$/.test(mobileVal)) {
+                showToast('Mobile number must be exactly 10 digits', 'error');
+                return;
+            }
+
             var teacherData = {
                 name: document.getElementById('teacherName').value,
-                email: document.getElementById('teacherEmail').value,
-                mobileNo: document.getElementById('teacherMobile').value,
+                email: emailVal,
+                mobileNo: mobileVal,
                 role: role,
                 isClassTeacher: isClassTeacher,
                 classTeacherFor: isClassTeacher ? {
