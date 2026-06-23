@@ -60,7 +60,7 @@ router.get('/school-qr', parentAuth, async (req, res) => {
 // Parent submits payment proof for verification
 router.post('/payments/:id/submit-verification/:installmentId', parentAuth, async (req, res) => {
     try {
-        const { screenshot, utrNumber, transactionId } = req.body;
+        const { screenshot, utrNumber, transactionId, submittedAmount } = req.body;
 
         if (!screenshot) {
             return res.status(400).json({ message: 'Payment screenshot proof is required' });
@@ -86,6 +86,7 @@ router.post('/payments/:id/submit-verification/:installmentId', parentAuth, asyn
         installment.utrNumber = utrNumber || '';
         installment.transactionId = transactionId || '';
         installment.submittedDate = new Date();
+        installment.submittedAmount = Number(submittedAmount) || installment.amount;
 
         await payment.save();
 

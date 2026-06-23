@@ -209,14 +209,41 @@
                 <button onclick="closeParentPaymentModal()" style="border:none; background:none; font-size:20px; font-weight:700; cursor:pointer; color:#64748b;">&times;</button>
             </div>
             
+            <!-- Choose Payment Amount -->
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:16px;">
+                <div style="font-size:11px; font-weight:800; color:#475569; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Choose Payment Amount</div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#1e293b; cursor:pointer; margin:0;">
+                        <input type="radio" name="paymentAmountOption" value="full" checked onchange="togglePaymentAmountOption()" style="width:16px; height:16px; accent-color:#4338CA;">
+                        Full Remaining Amount (<span id="optionFullAmount">₹0</span>)
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#1e293b; cursor:pointer; margin:0;">
+                        <input type="radio" name="paymentAmountOption" value="custom" onchange="togglePaymentAmountOption()" style="width:16px; height:16px; accent-color:#4338CA;">
+                        Custom Payment
+                    </label>
+                    <div id="customAmountInputContainer" style="display:none; margin-top:4px; margin-left:24px;">
+                        <div style="position:relative; display:flex; align-items:center;">
+                            <span style="position:absolute; left:10px; font-size:13px; font-weight:700; color:#64748b;">₹</span>
+                            <input type="number" id="customPaymentAmountInput" placeholder="Enter amount to pay" style="width:100%; padding:6px 10px 6px 20px; font-size:13px; border:1px solid #cbd5e1; border-radius:6px; outline:none; font-weight:700; color:#059669; background:#fff;" oninput="onCustomAmountChange()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scan QR Code to Pay Header (from user screenshots) -->
+            <div style="text-align:center; margin-bottom:14px; background:#fafafa; border-radius:10px; padding:10px; border:1px solid #eaeaea;">
+                <div style="font-size:13px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">Scan QR Code to Pay</div>
+                <div style="font-size:32px; font-weight:900; color:#d97706; margin-top:2px;" id="modalDisplayAmount">₹0</div>
+            </div>
+
             <!-- School QR display inside modal for quick reference -->
             <div style="display:flex; gap:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:16px; align-items:center;">
-                <div id="modalSchoolQrContainer" style="width:90px; height:90px; border-radius:8px; background:#fff; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+                <div id="modalSchoolQrContainer" style="width:95px; height:95px; border-radius:8px; background:#fff; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; cursor:pointer;">
                     <span style="font-size:11px; color:#64748b; font-weight:600;">No QR</span>
                 </div>
                 <div style="flex:1; min-width:0;">
-                    <div style="font-weight:800; color:#0F172A; font-size:14px; margin-bottom:2px;">Scan & Pay via UPI</div>
-                    <div style="font-size:11px; color:#64748b; line-height:1.4; margin-bottom:6px;">Scan this QR code using GPay, PhonePe, Paytm, or click below to launch the apps.</div>
+                    <div style="font-weight:800; color:#0F172A; font-size:13px; margin-bottom:2px;">Scan & Pay via UPI</div>
+                    <div style="font-size:11px; color:#64748b; line-height:1.4; margin-bottom:6px;">Scan this QR code using GPay, PhonePe, Paytm, or copy the ID below.</div>
                     <div style="display:flex; justify-content:space-between; align-items:center; background:#e2e8f0; border-radius:6px; padding:4px 8px; font-size:11px; gap:8px;">
                         <span style="font-family:monospace; font-weight:700; color:#1e293b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;" id="modalUpiIdText">Not Configured</span>
                         <button type="button" onclick="copyModalUpiId()" style="background:#4338CA; color:#fff; border:none; border-radius:4px; padding:2px 6px; font-size:10px; cursor:pointer; flex-shrink:0;">Copy</button>
@@ -250,13 +277,19 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px; height:14px; animation:spin 2s linear infinite;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     Awaiting Payment Completion
                 </div>
-                <div style="font-size:11px; color:#b45309; margin-bottom:8px; line-height:1.4;">Complete transaction in UPI app. Upload screenshot in <strong id="countdownSeconds">20</strong> seconds.</div>
+                <div style="font-size:11px; color:#b45309; margin-bottom:8px; line-height:1.4;">Complete transaction in UPI app. Upload screenshot in <strong id="countdownSeconds">15</strong> seconds.</div>
                 <div style="width:100%; height:5px; background:#fde68a; border-radius:3px; overflow:hidden; position:relative;">
                     <div id="countdownBar" style="width:100%; height:100%; background:#d97706; position:absolute; left:0; top:0; transition:width 1s linear;"></div>
                 </div>
             </div>
 
             <form id="parentPaymentForm" onsubmit="submitPaymentProof(event)">
+                <!-- Amount Paid Form Field -->
+                <div class="form-group">
+                    <label>Amount Paid (₹) *</label>
+                    <input type="number" id="parentAmountPaidInput" required style="font-weight:700; color:#059669; background:#f8fafc;" readonly>
+                </div>
+
                 <div class="form-group" id="screenshotGroup">
                     <label>Upload Payment Receipt Screenshot *</label>
                     <input type="file" id="receiptScreenshotInput" required accept="image/*" onchange="processReceiptScreenshot(event)" style="border:2px dashed #cbd5e1; padding:20px 10px; text-align:center; cursor:pointer; background:#faf5ff; display:block; width:100%;">
@@ -877,6 +910,16 @@
                 upiTextEl.textContent = 'Not Configured';
             }
 
+            // Set payment amount options
+            document.getElementById('optionFullAmount').textContent = '₹' + amount.toLocaleString();
+            document.querySelector('input[name="paymentAmountOption"][value="full"]').checked = true;
+            document.getElementById('customAmountInputContainer').style.display = 'none';
+            document.getElementById('customPaymentAmountInput').value = '';
+            
+            // Set active display amount & form input amount
+            document.getElementById('modalDisplayAmount').textContent = '₹' + amount.toLocaleString();
+            document.getElementById('parentAmountPaidInput').value = amount;
+
             // Clear any running countdown
             if (countdownIntervalId) {
                 clearInterval(countdownIntervalId);
@@ -897,6 +940,39 @@
             document.getElementById('submitProofBtn').style.cursor = 'not-allowed';
 
             document.getElementById('parentPaymentModal').classList.add('show');
+        }
+
+        function togglePaymentAmountOption() {
+            const option = document.querySelector('input[name="paymentAmountOption"]:checked').value;
+            const customContainer = document.getElementById('customAmountInputContainer');
+            
+            if (option === 'full') {
+                customContainer.style.display = 'none';
+                updateModalAmount(activeInstallmentAmount);
+            } else {
+                customContainer.style.display = 'block';
+                const customVal = Number(document.getElementById('customPaymentAmountInput').value) || 0;
+                updateModalAmount(customVal);
+            }
+        }
+
+        function onCustomAmountChange() {
+            const customVal = Number(document.getElementById('customPaymentAmountInput').value) || 0;
+            updateModalAmount(customVal);
+        }
+
+        function updateModalAmount(val) {
+            document.getElementById('modalDisplayAmount').textContent = '₹' + val.toLocaleString();
+            document.getElementById('parentAmountPaidInput').value = val;
+        }
+
+        function getActivePaymentAmount() {
+            const option = document.querySelector('input[name="paymentAmountOption"]:checked').value;
+            if (option === 'full') {
+                return activeInstallmentAmount;
+            } else {
+                return Number(document.getElementById('customPaymentAmountInput').value) || 0;
+            }
         }
 
         function closeParentPaymentModal() {
@@ -926,8 +1002,14 @@
                 return;
             }
 
+            const amount = getActivePaymentAmount();
+            if (amount <= 0) {
+                showToast('Please enter a valid payment amount.', 'error');
+                return;
+            }
+
             // Generate standard UPI URL: upi://pay?pa={upiId}&pn=School&am={amount}&cu=INR&tn={feeLabel}
-            const upiUrl = `upi://pay?pa=${activeUpiId}&pn=School&am=${activeInstallmentAmount}&cu=INR&tn=${encodeURIComponent(activeInstallmentLabel)}`;
+            const upiUrl = `upi://pay?pa=${activeUpiId}&pn=School&am=${amount}&cu=INR&tn=${encodeURIComponent(activeInstallmentLabel)}`;
             
             // Redirect parent
             window.location.href = upiUrl;
@@ -950,14 +1032,14 @@
             const countdownBar = document.getElementById('countdownBar');
             
             countdownArea.style.display = 'block';
-            let secondsLeft = 20;
+            let secondsLeft = 15;
             countdownSeconds.textContent = secondsLeft;
             countdownBar.style.width = '100%';
 
             countdownIntervalId = setInterval(() => {
                 secondsLeft--;
                 countdownSeconds.textContent = secondsLeft;
-                const percentage = (secondsLeft / 20) * 100;
+                const percentage = (secondsLeft / 15) * 100;
                 countdownBar.style.width = percentage + '%';
 
                 if (secondsLeft <= 0) {
@@ -1062,6 +1144,7 @@
 
             const utr = document.getElementById('parentUtrInput').value.trim();
             const txnId = document.getElementById('parentTxnIdInput').value.trim();
+            const amountPaid = document.getElementById('parentAmountPaidInput').value.trim();
 
             if (!activeScreenshotBase64) {
                 showToast('Please upload a receipt screenshot first.', 'error');
@@ -1076,7 +1159,8 @@
                     body: JSON.stringify({
                         screenshot: activeScreenshotBase64,
                         utrNumber: utr,
-                        transactionId: txnId
+                        transactionId: txnId,
+                        submittedAmount: amountPaid
                     })
                 });
 

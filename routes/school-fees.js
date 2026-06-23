@@ -247,7 +247,7 @@ router.put('/payments/:id/verify/:installmentId', schoolAuth, async (req, res) =
         let allPaid = true;
         payment.installments.forEach(inst => {
             if (inst.status === 'Paid') {
-                totalPaid += inst.amount;
+                totalPaid += (inst.submittedAmount || inst.amount);
             } else {
                 allPaid = false;
             }
@@ -292,7 +292,7 @@ router.put('/payments/:id/unverify/:installmentId', schoolAuth, async (req, res)
         let allPaid = true;
         payment.installments.forEach(inst => {
             if (inst.status === 'Paid') {
-                totalPaid += inst.amount;
+                totalPaid += (inst.submittedAmount || inst.amount);
             } else {
                 allPaid = false;
             }
@@ -381,6 +381,7 @@ router.get('/pending-verifications', schoolAuth, async (req, res) => {
                         feeName: p.feeStructureId ? p.feeStructureId.feeName : 'N/A',
                         label: inst.label,
                         amount: inst.amount,
+                        submittedAmount: inst.submittedAmount || inst.amount,
                         submittedDate: inst.submittedDate,
                         utrNumber: inst.utrNumber,
                         transactionId: inst.transactionId,
@@ -423,7 +424,7 @@ router.put('/payments/:id/reject/:installmentId', schoolAuth, async (req, res) =
         let allPaid = true;
         payment.installments.forEach(inst => {
             if (inst.status === 'Paid') {
-                totalPaid += inst.amount;
+                totalPaid += (inst.submittedAmount || inst.amount);
             } else {
                 allPaid = false;
             }
