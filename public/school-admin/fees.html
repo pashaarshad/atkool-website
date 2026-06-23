@@ -28,11 +28,6 @@
         .school-sidebar-item:hover { background:#eef2ff; color:#4338CA; border-color:#c7d2fe; }
         .school-sidebar-item.active { background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border-color:transparent; box-shadow:0 4px 12px rgba(67,56,202,.3); }
         .school-content { flex:1; padding:10px; }
-        .stats-circles { display:flex; justify-content:center; gap:40px; margin-bottom:28px; padding:20px 0; }
-        .stat-circle { width:130px; height:130px; border-radius:50%; border:3px solid #e0e7ff; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(67,56,202,.1); transition:all .3s; }
-        .stat-circle:hover { border-color:#4338CA; transform:translateY(-3px); box-shadow:0 8px 25px rgba(67,56,202,.2); }
-        .stat-circle-label { font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.5px; text-align:center; }
-        .stat-circle-value { font-size:24px; font-weight:800; background:linear-gradient(135deg,#4338CA,#7C3AED); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
         .profile-wrapper { position:relative; }
         .profile-dropdown { display:none; position:absolute; top:50px; right:0; background:#fff; border:1px solid #e2e8f0; border-radius:14px; min-width:160px; box-shadow:0 10px 40px rgba(0,0,0,.15); z-index:1000; overflow:hidden; }
         .profile-dropdown.show { display:block; }
@@ -48,27 +43,40 @@
         .toast.error { background:linear-gradient(135deg,#ef4444,#dc2626); }
         @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
 
-        /* ===== PAGE TITLE BAR ===== */
         .page-title-bar { display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 22px; margin-bottom:18px; box-shadow:0 2px 8px rgba(0,0,0,.03); }
         .page-title { display:flex; align-items:center; gap:10px; font-size:18px; font-weight:700; color:#0F172A; }
         .page-title svg { width:26px; height:26px; stroke:#4338CA; flex-shrink:0; }
 
-        /* Tabs Layout */
-        .tabs-header { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
-        .tab-btn { padding: 10px 20px; border: none; background: transparent; font-size: 14px; font-weight: 700; color: #64748b; cursor: pointer; border-radius: 8px; transition: all .2s; }
-        .tab-btn.active { color: #4338CA; background: #eef2ff; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        /* Stats Bar */
+        .stats-bar { display:flex; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
+        .stat-card { flex:1; min-width:140px; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:18px 20px; display:flex; align-items:center; gap:14px; box-shadow:0 2px 8px rgba(0,0,0,.03); transition:all .3s; }
+        .stat-card:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(67,56,202,.1); border-color:#c7d2fe; }
+        .stat-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .stat-icon svg { width:22px; height:22px; stroke:#fff; }
+        .stat-icon.purple { background:linear-gradient(135deg,#4338CA,#6366f1); }
+        .stat-icon.green { background:linear-gradient(135deg,#10b981,#059669); }
+        .stat-icon.red { background:linear-gradient(135deg,#ef4444,#dc2626); }
+        .stat-icon.amber { background:linear-gradient(135deg,#f59e0b,#d97706); }
+        .stat-info { display:flex; flex-direction:column; }
+        .stat-value { font-size:22px; font-weight:800; color:#0F172A; }
+        .stat-label { font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
 
-        /* Form styling */
-        .form-section { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,.03); }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; }
-        .form-group input, .form-group select { padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: border-color .2s; }
-        .form-group input:focus, .form-group select:focus { border-color: #4338CA; }
-        .btn-save { padding: 12px 24px; background: linear-gradient(135deg,#4338CA,#6366f1); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: transform .2s; box-shadow:0 4px 12px rgba(67,56,202,.25); }
-        .btn-save:hover { transform: translateY(-1px); }
+        /* Tabs */
+        .tabs-header { display:flex; gap:10px; margin-bottom:20px; border-bottom:2px solid #e2e8f0; padding-bottom:8px; }
+        .tab-btn { padding:10px 20px; border:none; background:transparent; font-size:14px; font-weight:700; color:#64748b; cursor:pointer; border-radius:8px; transition:all .2s; }
+        .tab-btn.active { color:#4338CA; background:#eef2ff; }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+
+        /* Form */
+        .form-section { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 4px 15px rgba(0,0,0,.03); }
+        .form-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:20px; }
+        .form-group { display:flex; flex-direction:column; gap:6px; }
+        .form-group label { font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; }
+        .form-group input, .form-group select { padding:10px 14px; border:2px solid #e2e8f0; border-radius:8px; font-size:14px; outline:none; transition:border-color .2s; }
+        .form-group input:focus, .form-group select:focus { border-color:#4338CA; }
+        .btn-save { padding:12px 24px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; transition:transform .2s; box-shadow:0 4px 12px rgba(67,56,202,.25); }
+        .btn-save:hover { transform:translateY(-1px); }
 
         /* Tables */
         .table-container { width:100%; background:#fff; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,.04); }
@@ -81,24 +89,74 @@
         .search-filters input, .search-filters select { padding:10px 16px; border:2px solid #e2e8f0; border-radius:10px; font-size:13px; background:#fff; transition:all .3s; flex:1; min-width:150px; }
         .search-filters input:focus, .search-filters select:focus { outline:none; border-color:#4338CA; }
 
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; text-transform: uppercase; }
-        .status-paid { background: #d1fae5; color: #059669; }
-        .status-unpaid { background: #fee2e2; color: #dc2626; }
+        /* Status Badges */
+        .status-badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; display:inline-block; text-transform:uppercase; }
+        .status-paid { background:#d1fae5; color:#059669; }
+        .status-unpaid { background:#fee2e2; color:#dc2626; }
+        .status-partial { background:#fef3c7; color:#d97706; }
 
-        .action-btn { padding: 6px 12px; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .2s; }
-        .btn-collect { background: #eef2ff; color: #4338CA; border: 1px solid #c7d2fe; }
-        .btn-collect:hover { background: #4338CA; color: #fff; }
+        /* Mode Badge */
+        .mode-badge { padding:3px 10px; border-radius:6px; font-size:11px; font-weight:700; }
+        .mode-full { background:#eef2ff; color:#4338CA; }
+        .mode-installment { background:#fef3c7; color:#92400e; }
+        .mode-custom { background:#f3e8ff; color:#7c3aed; }
 
-        /* Modal Overlay */
+        /* Expandable Row */
+        .expand-btn { width:28px; height:28px; border:none; background:#f1f5f9; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:all .2s; font-size:14px; font-weight:700; color:#475569; }
+        .expand-btn:hover { background:#eef2ff; color:#4338CA; }
+        .expand-btn.open { background:#4338CA; color:#fff; transform:rotate(180deg); }
+
+        /* Installment Details Row */
+        .installment-row { display:none; }
+        .installment-row.show { display:table-row; }
+        .installment-details { padding:16px 20px; background:linear-gradient(135deg,#f8fafc,#f1f5f9); }
+        .installment-grid { display:flex; flex-direction:column; gap:8px; }
+        .installment-item { display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; transition:all .2s; }
+        .installment-item:hover { border-color:#c7d2fe; }
+        .installment-item.paid { border-left:4px solid #10b981; }
+        .installment-item.unpaid { border-left:4px solid #ef4444; }
+        .inst-info { display:flex; flex-direction:column; gap:2px; }
+        .inst-label { font-weight:700; font-size:13px; color:#0F172A; }
+        .inst-amount { font-size:12px; color:#64748b; }
+        .inst-date { font-size:11px; color:#94a3b8; }
+        .inst-actions { display:flex; align-items:center; gap:8px; }
+
+        .btn-verify { padding:6px 14px; background:linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; transition:all .2s; }
+        .btn-verify:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(16,185,129,.3); }
+        .btn-unverify { padding:6px 14px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; transition:all .2s; }
+        .btn-unverify:hover { background:#fecaca; }
+        .btn-mode { padding:6px 12px; background:#eef2ff; color:#4338CA; border:1px solid #c7d2fe; border-radius:8px; font-weight:700; font-size:11px; cursor:pointer; transition:all .2s; }
+        .btn-mode:hover { background:#4338CA; color:#fff; }
+        .btn-delete-struct { padding:5px 12px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; }
+        .btn-delete-struct:hover { background:#fecaca; }
+
+        /* Modal */
         .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center; }
         .modal-overlay.show { display:flex; }
-        .modal { background:#fff; border-radius:18px; width:90%; max-width:400px; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.2); text-align: center; }
+        .modal { background:#fff; border-radius:18px; width:90%; max-width:500px; max-height:80vh; overflow-y:auto; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
         .modal h2 { font-size:20px; font-weight:800; color:#0F172A; margin-bottom:15px; }
-        .modal p { color: #64748b; font-size: 14px; margin-bottom: 20px; }
-        .modal-actions { display:flex; justify-content:center; gap:10px; margin-top:20px; }
+        .modal p { color:#64748b; font-size:14px; margin-bottom:16px; }
+        .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid #f1f5f9; }
         .btn-cancel { padding:10px 20px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
         .btn-cancel:hover { background:#e2e8f0; }
-        .btn-confirm { padding:10px 20px; background:linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
+
+        /* Mode selector cards */
+        .mode-selector { display:flex; gap:12px; margin-bottom:16px; }
+        .mode-card { flex:1; padding:16px; border:2px solid #e2e8f0; border-radius:12px; text-align:center; cursor:pointer; transition:all .25s; }
+        .mode-card:hover { border-color:#a5b4fc; background:#eef2ff; }
+        .mode-card.selected { border-color:#4338CA; background:linear-gradient(135deg,#eef2ff,#f5f3ff); box-shadow:0 4px 12px rgba(67,56,202,.15); }
+        .mode-card h4 { font-size:14px; font-weight:800; color:#0F172A; margin-bottom:4px; }
+        .mode-card p { font-size:11px; color:#64748b; margin:0; }
+
+        /* Custom installment inputs */
+        .custom-installments { display:none; }
+        .custom-installments.show { display:block; }
+        .custom-row { display:flex; gap:10px; margin-bottom:8px; align-items:center; }
+        .custom-row input { flex:1; padding:8px 12px; border:2px solid #e2e8f0; border-radius:8px; font-size:13px; }
+        .custom-row input:focus { outline:none; border-color:#4338CA; }
+        .btn-add-inst { padding:6px 14px; background:#eef2ff; color:#4338CA; border:1px solid #c7d2fe; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; margin-top:8px; }
+        .btn-remove-inst { width:28px; height:28px; background:#fee2e2; color:#dc2626; border:none; border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
     </style>
     <link rel="stylesheet" href="../css/school-admin-layout.css">
 </head>
@@ -161,26 +219,73 @@
                 </div>
             </div>
 
-            <!-- Stats Overview -->
-            <div class="stats-circles">
-                <div class="stat-circle">
-                    <span class="stat-circle-label">Total Allocated</span>
-                    <span class="stat-circle-value" id="statTotal">&#8377;0</span>
+            <!-- Stats & QR Code Settings -->
+            <div style="display:flex; gap:16px; margin-bottom:22px; flex-wrap:wrap; align-items: stretch;">
+                <div class="stats-bar" style="flex:3; margin-bottom:0; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:16px;">
+                    <div class="stat-card" style="margin-bottom:0;">
+                        <div class="stat-icon purple">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statTotal">₹0</div>
+                            <div class="stat-label">Total Allocated</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="margin-bottom:0;">
+                        <div class="stat-icon green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statCollected">₹0</div>
+                            <div class="stat-label">Collected</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="margin-bottom:0;">
+                        <div class="stat-icon red">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statPending">₹0</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="margin-bottom:0;">
+                        <div class="stat-icon amber">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statPartial">0</div>
+                            <div class="stat-label">Partial Payments</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-circle">
-                    <span class="stat-circle-label">Collected</span>
-                    <span class="stat-circle-value" id="statCollected" style="background: linear-gradient(135deg,#10b981,#059669); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">&#8377;0</span>
-                </div>
-                <div class="stat-circle">
-                    <span class="stat-circle-label">Pending</span>
-                    <span class="stat-circle-value" id="statPending" style="background: linear-gradient(135deg,#ef4444,#dc2626); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">&#8377;0</span>
+
+                <!-- UPI QR Code Upload Card -->
+                <div class="stat-card" style="flex:1.2; min-width:280px; flex-direction:column; align-items:stretch; gap:8px; padding:15px; position:relative; justify-content:space-between; margin-bottom: 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:8px; margin-bottom:4px;">
+                        <div style="font-size:12px; font-weight:800; color:#0F172A; text-transform:uppercase; letter-spacing:.5px; display:flex; align-items:center; gap:6px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#4338CA" stroke-width="2" style="width:16px; height:16px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect></svg>
+                            UPI QR Code
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <div id="schoolQrPreview" style="width:70px; height:70px; border-radius:8px; border:2px dashed #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:#f8fafc; cursor:pointer;" onclick="triggerQrUpload()">
+                            <span style="font-size:10px; color:#64748b; font-weight:600; text-align:center; padding:4px;">No QR</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                            <span style="font-size:11px; color:#64748b; font-weight:500; line-height:1.3;">Upload school's UPI QR Code image so parents can scan and pay.</span>
+                            <input type="file" id="schoolQrInput" style="display:none;" accept="image/*" onchange="handleQrUpload(event)">
+                            <button class="btn-mode" style="padding:6px 10px; font-size:11px; align-self:flex-start;" onclick="triggerQrUpload()">Upload QR Code</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Tab Headers -->
             <div class="tabs-header">
                 <button class="tab-btn active" onclick="switchTab('structuresTab', this)">Fee Structures</button>
-                <button class="tab-btn" onclick="switchTab('ledgerTab', this)">Student Ledger</button>
+                <button class="tab-btn" onclick="switchTab('ledgerTab', this)">Student Fee Ledger</button>
+                <button class="tab-btn" id="pendingTabBtn" onclick="switchTab('pendingVerificationsTab', this)">Verification Pending <span id="pendingBadge" style="background:#dc2626; color:#fff; border-radius:10px; padding:2px 8px; font-size:11px; margin-left:4px; display:none;">0</span></button>
             </div>
 
             <!-- TAB 1: Fee Structures -->
@@ -191,11 +296,11 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Fee Name *</label>
-                                <input type="text" id="feeName" required placeholder="e.g. Tuition Fee Q1">
+                                <input type="text" id="feeName" required placeholder="e.g. Annual Tuition Fee">
                             </div>
                             <div class="form-group">
-                                <label>Amount (INR) *</label>
-                                <input type="number" id="feeAmount" required placeholder="e.g. 15000">
+                                <label>Total Amount (INR) *</label>
+                                <input type="number" id="feeAmount" required placeholder="e.g. 30000">
                             </div>
                             <div class="form-group">
                                 <label>Applicable Class *</label>
@@ -233,18 +338,17 @@
                                 <th>Amount</th>
                                 <th>Applicable Class</th>
                                 <th>Due Date</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="structuresTableBody">
-                            <tr>
-                                <td colspan="5" style="text-align:center;padding:20px;">Loading fee structures...</td>
-                            </tr>
+                            <tr><td colspan="6" style="text-align:center;padding:20px;">Loading fee structures...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- TAB 2: Ledger -->
+            <!-- TAB 2: Student Fee Ledger -->
             <div id="ledgerTab" class="tab-content">
                 <div class="search-filters">
                     <input type="text" id="searchStudent" placeholder="Search by student name" oninput="loadLedger()">
@@ -267,6 +371,7 @@
                         <option value="">-- All Statuses --</option>
                         <option value="Paid">Paid</option>
                         <option value="Unpaid">Unpaid</option>
+                        <option value="Partial">Partial</option>
                     </select>
                 </div>
 
@@ -274,21 +379,48 @@
                     <table>
                         <thead>
                             <tr>
+                                <th style="width:40px;"></th>
                                 <th>#</th>
-                                <th>Student ID</th>
-                                <th>Name</th>
+                                <th>Student</th>
                                 <th>Class</th>
                                 <th>Fee Name</th>
-                                <th>Amount</th>
+                                <th>Total Amount</th>
+                                <th>Paid</th>
+                                <th>Mode</th>
                                 <th>Status</th>
-                                <th>Collect Date</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="ledgerTableBody">
+                            <tr><td colspan="10" style="text-align:center;padding:20px;">Loading student ledger...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: Verification Pending -->
+            <div id="pendingVerificationsTab" class="tab-content">
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,.02);">
+                    <div style="font-size:14px; font-weight:700; color:#334155;">Review parent payment proof submissions (receipt screenshots and UTRs) to verify payments.</div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
                             <tr>
-                                <td colspan="9" style="text-align:center;padding:20px;">Loading student ledger...</td>
+                                <th>#</th>
+                                <th>Student</th>
+                                <th>Class</th>
+                                <th>Fee Details</th>
+                                <th>Amount</th>
+                                <th>UTR / Txn ID</th>
+                                <th>Submitted Date</th>
+                                <th>Screenshot</th>
+                                <th style="text-align:center;">Actions</th>
                             </tr>
+                        </thead>
+                        <tbody id="pendingTableBody">
+                            <tr><td colspan="9" style="text-align:center;padding:20px;">No verifications pending.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -296,28 +428,75 @@
         </div>
     </div>
 
-    <!-- Collect Payment Modal -->
-    <div class="modal-overlay" id="collectModal">
+    <!-- Change Mode Modal -->
+    <div class="modal-overlay" id="modeModal">
         <div class="modal">
-            <h2>Record Payment</h2>
-            <p id="collectModalMsg">Are you sure you want to mark this fee as paid?</p>
-            <div class="form-group" style="margin-bottom: 20px; text-align: left;">
-                <label>Payment Method</label>
-                <select id="paymentMethod" style="width: 100%;">
-                    <option value="Cash">Cash</option>
-                    <option value="Card">Card</option>
-                </select>
+            <h2>Change Payment Mode</h2>
+            <p id="modeModalMsg">Select how this fee should be collected:</p>
+
+            <div class="mode-selector">
+                <div class="mode-card selected" onclick="selectMode('Full')" id="modeCard_Full">
+                    <h4>Full</h4>
+                    <p>Single payment</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('3 Installments')" id="modeCard_3">
+                    <h4>3 Installments</h4>
+                    <p>Split into 3 equal parts</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('Customized')" id="modeCard_Custom">
+                    <h4>Customized</h4>
+                    <p>Define custom splits</p>
+                </div>
             </div>
+
+            <div class="custom-installments" id="customInstallmentsSection">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <label style="font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;">Custom Installments</label>
+                    <span style="font-size:12px;color:#64748b;">Total: ₹<span id="customTotal">0</span> / ₹<span id="customTarget">0</span></span>
+                </div>
+                <div id="customInstallmentsList"></div>
+                <button type="button" class="btn-add-inst" onclick="addCustomInstallment()">+ Add Installment</button>
+            </div>
+
             <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="closeCollectModal()">Cancel</button>
-                <button type="button" class="btn-confirm" onclick="confirmCollection()">Confirm Collection</button>
+                <button type="button" class="btn-cancel" onclick="closeModeModal()">Cancel</button>
+                <button type="button" class="btn-save" onclick="confirmModeChange()">Apply Mode</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screenshot Viewer Modal -->
+    <div class="modal-overlay" id="screenshotModal">
+        <div class="modal" style="max-width: 600px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+                <h2 style="margin:0; font-size:18px;">Payment Proof Screenshot</h2>
+                <button onclick="closeScreenshotModal()" style="border:none; background:none; font-size:20px; font-weight:700; cursor:pointer; color:#64748b;">&times;</button>
+            </div>
+            <div style="text-align:center; max-height:50vh; overflow-y:auto; background:#0f172a; border-radius:10px; padding:10px; margin-bottom:15px; border:1px solid #e2e8f0; display:flex; align-items:center; justify-content:center;">
+                <img id="modalScreenshotImg" src="" style="max-width:100%; max-height:48vh; object-fit:contain; border-radius:6px;" alt="Receipt Screenshot">
+            </div>
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">UTR Number</div>
+                    <div id="modalUtrText" style="font-weight:700; color:#0F172A; font-size:14px; word-break:break-all;">-</div>
+                </div>
+                <div>
+                    <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Transaction ID</div>
+                    <div id="modalTxnText" style="font-weight:700; color:#0F172A; font-size:14px; word-break:break-all;">-</div>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" class="btn-cancel" onclick="closeScreenshotModal()">Close</button>
+                <button type="button" class="btn-unverify" id="modalRejectBtn" style="padding:10px 20px;">Reject Payment</button>
+                <button type="button" class="btn-verify" id="modalApproveBtn" style="padding:10px 20px;">✓ Approve & Mark Paid</button>
             </div>
         </div>
     </div>
 
     <script>
-        var schoolId = '';
         var activePaymentId = '';
+        var activeModeSelection = 'Full';
+        var activeTotalAmount = 0;
 
         function showToast(message, type) {
             var container = document.getElementById('toastContainer');
@@ -325,29 +504,26 @@
             toast.className = 'toast ' + (type || 'info');
             toast.textContent = message;
             container.appendChild(toast);
-            setTimeout(function () { toast.remove(); }, 3000);
+            setTimeout(function() { toast.remove(); }, 3000);
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             var token = localStorage.getItem('schoolToken');
-            if (!token) {
-                window.location.href = 'index.html';
-                return;
-            }
-
+            if (!token) { window.location.href = 'index.html'; return; }
             loadSchoolData();
             setupEventListeners();
             loadStructures();
             loadLedger();
+            loadSchoolQr();
+            loadPendingVerifications();
         });
 
         function setupEventListeners() {
-            document.getElementById('profileIcon').addEventListener('click', function (e) {
+            document.getElementById('profileIcon').addEventListener('click', function(e) {
                 e.stopPropagation();
                 document.getElementById('profileDropdown').classList.toggle('show');
             });
-
-            document.addEventListener('click', function () {
+            document.addEventListener('click', function() {
                 document.getElementById('profileDropdown').classList.remove('show');
             });
         }
@@ -355,47 +531,39 @@
         async function loadSchoolData() {
             var token = localStorage.getItem('schoolToken');
             try {
-                var response = await fetch('/api/school-auth/me', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                if (!response.ok) {
-                    window.location.href = 'index.html';
-                    return;
-                }
+                var response = await fetch('/api/school-auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+                if (!response.ok) { window.location.href = 'index.html'; return; }
                 var school = await response.json();
-                schoolId = school._id;
                 document.getElementById('schoolName').textContent = school.name.toUpperCase();
                 document.getElementById('profileEmail').textContent = school.email || 'Profile';
-                if (school.logo) {
-                    document.getElementById('schoolLogo').innerHTML = '<img src="' + school.logo + '" alt="Logo">';
-                }
-            } catch (error) {
-                console.error('Load school data error:', error);
-            }
+                if (school.logo) document.getElementById('schoolLogo').innerHTML = '<img src="' + school.logo + '" alt="Logo">';
+            } catch (error) { console.error('Load school data error:', error); }
         }
 
         function switchTab(tabId, el) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
+            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
             el.classList.add('active');
             document.getElementById(tabId).classList.add('active');
+            if (tabId === 'pendingVerificationsTab') {
+                loadPendingVerifications();
+            } else if (tabId === 'ledgerTab') {
+                loadLedger();
+            }
         }
 
+
+        // ===== FEE STRUCTURES =====
         async function loadStructures() {
             var token = localStorage.getItem('schoolToken');
             var tbody = document.getElementById('structuresTableBody');
             try {
-                var response = await fetch('/api/school-fees/structures', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
+                var response = await fetch('/api/school-fees/structures', { headers: { 'Authorization': 'Bearer ' + token } });
                 var data = await response.json();
-
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">No fee structures configured yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">No fee structures configured yet.</td></tr>';
                     return;
                 }
-
                 tbody.innerHTML = data.map(function(s, index) {
                     return '<tr>' +
                         '<td>' + (index + 1) + '</td>' +
@@ -403,158 +571,497 @@
                         '<td>&#8377;' + s.amount.toLocaleString() + '</td>' +
                         '<td>' + (s.className === 'All' ? 'All Classes' : 'Class ' + s.className) + '</td>' +
                         '<td>' + new Date(s.dueDate).toLocaleDateString() + '</td>' +
+                        '<td><button class="btn-delete-struct" onclick="deleteStructure(\'' + s._id + '\')">Delete</button></td>' +
                         '</tr>';
                 }).join('');
-
             } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:red;">Error loading structures.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:red;">Error loading structures.</td></tr>';
             }
         }
 
         async function saveFeeStructure(e) {
             e.preventDefault();
             var token = localStorage.getItem('schoolToken');
-            
             var feeName = document.getElementById('feeName').value;
             var amount = document.getElementById('feeAmount').value;
             var className = document.getElementById('feeClass').value;
             var dueDate = document.getElementById('feeDueDate').value;
-
             try {
                 var response = await fetch('/api/school-fees/structures', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ feeName, amount, className, dueDate })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ feeName: feeName, amount: amount, className: className, dueDate: dueDate })
                 });
-
                 var data = await response.json();
                 if (response.ok) {
-                    showToast('Fee structure configured and allocated!', 'success');
+                    showToast('Fee structure created and allocated!', 'success');
                     document.getElementById('feeStructureForm').reset();
                     loadStructures();
                     loadLedger();
                 } else {
                     showToast(data.message || 'Error configuring fee', 'error');
                 }
-            } catch (error) {
-                showToast('Server error during fee structure creation', 'error');
-            }
+            } catch (error) { showToast('Server error', 'error'); }
         }
 
+        async function deleteStructure(id) {
+            if (!confirm('Delete this fee structure and all associated student records?')) return;
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-fees/structures/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    showToast('Fee structure deleted', 'success');
+                    loadStructures();
+                    loadLedger();
+                } else {
+                    showToast('Error deleting', 'error');
+                }
+            } catch (error) { showToast('Server error', 'error'); }
+        }
+
+        // ===== STUDENT LEDGER =====
         async function loadLedger() {
             var token = localStorage.getItem('schoolToken');
             var tbody = document.getElementById('ledgerTableBody');
-            
             var search = document.getElementById('searchStudent').value;
             var className = document.getElementById('filterClass').value;
             var status = document.getElementById('filterStatus').value;
-
             var params = new URLSearchParams();
             if (search) params.append('search', search);
             if (className) params.append('className', className);
             if (status) params.append('status', status);
 
             try {
-                var response = await fetch('/api/school-fees/payments?' + params.toString(), {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
+                var response = await fetch('/api/school-fees/payments?' + params.toString(), { headers: { 'Authorization': 'Bearer ' + token } });
                 var data = await response.json();
 
-                // Calculate ledger totals
-                var total = 0;
-                var collected = 0;
-                var pending = 0;
-
+                // Calculate stats
+                var total = 0, collected = 0, pending = 0, partialCount = 0;
                 data.forEach(function(p) {
-                    var amt = p.feeStructureId ? p.feeStructureId.amount : 0;
+                    var amt = p.totalAmount || (p.feeStructureId ? p.feeStructureId.amount : 0);
                     total += amt;
-                    if (p.status === 'Paid') {
-                        collected += amt;
-                    } else {
-                        pending += amt;
-                    }
+                    collected += (p.amountPaid || 0);
+                    pending += (amt - (p.amountPaid || 0));
+                    if (p.status === 'Partial') partialCount++;
                 });
 
                 document.getElementById('statTotal').textContent = '₹' + total.toLocaleString();
                 document.getElementById('statCollected').textContent = '₹' + collected.toLocaleString();
                 document.getElementById('statPending').textContent = '₹' + pending.toLocaleString();
+                document.getElementById('statPartial').textContent = partialCount;
 
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;">No ledger records found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;">No ledger records found.</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = data.map(function(p, index) {
-                    const student = p.studentId || {};
-                    const structure = p.feeStructureId || {};
-                    
-                    var statusBadge = p.status === 'Paid' 
-                        ? '<span class="status-badge status-paid">Paid</span>' 
-                        : '<span class="status-badge status-unpaid">Unpaid</span>';
+                var rows = '';
+                data.forEach(function(p, index) {
+                    var student = p.studentId || {};
+                    var structure = p.feeStructureId || {};
+                    var totalAmt = p.totalAmount || structure.amount || 0;
 
-                    var actionBtn = p.status === 'Unpaid' 
-                        ? '<button class="action-btn btn-collect" onclick="openCollectModal(\'' + p._id + '\', \'' + student.name + '\', \'' + structure.feeName + '\')">Collect</button>'
-                        : '<span style="color:#64748b; font-style:italic; font-size:11px;">Paid (' + p.paymentMethod + ')</span>';
+                    var statusClass = p.status === 'Paid' ? 'status-paid' : (p.status === 'Partial' ? 'status-partial' : 'status-unpaid');
+                    var statusBadge = '<span class="status-badge ' + statusClass + '">' + p.status + '</span>';
 
-                    var collectDate = p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : '-';
+                    var modeClass = p.paymentMode === 'Full' ? 'mode-full' : (p.paymentMode === '3 Installments' ? 'mode-installment' : 'mode-custom');
+                    var modeBadge = '<span class="mode-badge ' + modeClass + '">' + (p.paymentMode || 'Full') + '</span>';
+
+                    var rowId = 'detail_' + p._id;
+
+                    // Main row
+                    rows += '<tr>' +
+                        '<td><button class="expand-btn" onclick="toggleDetail(\'' + p._id + '\', this)">▼</button></td>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td><strong>' + (student.name || 'N/A') + '</strong><br><span style="font-size:11px;color:#94a3b8;">' + (student.studentId || '') + '</span></td>' +
+                        '<td>' + (student.className || '-') + '-' + (student.section || 'A') + '</td>' +
+                        '<td>' + (structure.feeName || 'N/A') + '</td>' +
+                        '<td>&#8377;' + totalAmt.toLocaleString() + '</td>' +
+                        '<td>&#8377;' + (p.amountPaid || 0).toLocaleString() + '</td>' +
+                        '<td>' + modeBadge + '</td>' +
+                        '<td>' + statusBadge + '</td>' +
+                        '<td><button class="btn-mode" onclick="openModeModal(\'' + p._id + '\', ' + totalAmt + ', \'' + (p.paymentMode || 'Full') + '\')">Change Mode</button></td>' +
+                        '</tr>';
+
+                    // Expandable installment detail row
+                    var installments = p.installments || [];
+                    var instHtml = '';
+                    if (installments.length === 0) {
+                        instHtml = '<div style="text-align:center;color:#94a3b8;padding:12px;">No installments configured</div>';
+                    } else {
+                        instHtml = '<div class="installment-grid">';
+                        installments.forEach(function(inst) {
+                            var isPaid = inst.status === 'Paid';
+                            var paidDate = inst.paidDate ? new Date(inst.paidDate).toLocaleDateString() : '';
+                            instHtml += '<div class="installment-item ' + (isPaid ? 'paid' : 'unpaid') + '">' +
+                                '<div class="inst-info">' +
+                                '<div class="inst-label">' + inst.label + '</div>' +
+                                '<div class="inst-amount">₹' + inst.amount.toLocaleString() + '</div>' +
+                                (isPaid ? '<div class="inst-date">Verified on ' + paidDate + '</div>' : '') +
+                                '</div>' +
+                                '<div class="inst-actions">' +
+                                '<span class="status-badge ' + (isPaid ? 'status-paid' : 'status-unpaid') + '">' + inst.status + '</span>' +
+                                (isPaid
+                                    ? '<button class="btn-unverify" onclick="unverifyInstallment(\'' + p._id + '\', \'' + inst._id + '\')">Undo</button>'
+                                    : '<button class="btn-verify" onclick="verifyInstallment(\'' + p._id + '\', \'' + inst._id + '\')">✓ Verify Paid</button>'
+                                ) +
+                                '</div>' +
+                                '</div>';
+                        });
+                        instHtml += '</div>';
+                    }
+
+                    rows += '<tr class="installment-row" id="' + rowId + '">' +
+                        '<td colspan="10"><div class="installment-details">' +
+                        '<div style="font-size:13px;font-weight:700;color:#334155;margin-bottom:10px;">Installment Breakdown</div>' +
+                        instHtml +
+                        '</div></td></tr>';
+                });
+
+                tbody.innerHTML = rows;
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:20px;color:red;">Error loading ledger.</td></tr>';
+            }
+        }
+
+        function toggleDetail(paymentId, btn) {
+            var row = document.getElementById('detail_' + paymentId);
+            if (row.classList.contains('show')) {
+                row.classList.remove('show');
+                btn.classList.remove('open');
+            } else {
+                row.classList.add('show');
+                btn.classList.add('open');
+            }
+        }
+
+        // ===== VERIFY / UNVERIFY INSTALLMENTS =====
+        async function verifyInstallment(paymentId, installmentId) {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-fees/payments/' + paymentId + '/verify/' + installmentId, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await response.json();
+                if (response.ok) {
+                    showToast(data.message || 'Installment verified!', 'success');
+                    loadLedger();
+                } else {
+                    showToast(data.message || 'Error', 'error');
+                }
+            } catch (error) { showToast('Server error', 'error'); }
+        }
+
+        async function unverifyInstallment(paymentId, installmentId) {
+            if (!confirm('Are you sure you want to undo this verification?')) return;
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-fees/payments/' + paymentId + '/unverify/' + installmentId, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await response.json();
+                if (response.ok) {
+                    showToast(data.message || 'Verification undone', 'success');
+                    loadLedger();
+                } else {
+                    showToast(data.message || 'Error', 'error');
+                }
+            } catch (error) { showToast('Server error', 'error'); }
+        }
+
+        // ===== CHANGE MODE MODAL =====
+        function openModeModal(paymentId, totalAmount, currentMode) {
+            activePaymentId = paymentId;
+            activeTotalAmount = totalAmount;
+            activeModeSelection = currentMode || 'Full';
+
+            document.getElementById('customTarget').textContent = totalAmount.toLocaleString();
+            document.getElementById('modeModalMsg').textContent = 'Total fee: ₹' + totalAmount.toLocaleString() + '. Choose collection mode:';
+
+            // Reset mode cards
+            document.querySelectorAll('.mode-card').forEach(function(c) { c.classList.remove('selected'); });
+            if (activeModeSelection === 'Full') document.getElementById('modeCard_Full').classList.add('selected');
+            else if (activeModeSelection === '3 Installments') document.getElementById('modeCard_3').classList.add('selected');
+            else document.getElementById('modeCard_Custom').classList.add('selected');
+
+            // Show/hide custom section
+            if (activeModeSelection === 'Customized') {
+                document.getElementById('customInstallmentsSection').classList.add('show');
+                initCustomInstallments();
+            } else {
+                document.getElementById('customInstallmentsSection').classList.remove('show');
+            }
+
+            document.getElementById('modeModal').classList.add('show');
+        }
+
+        function closeModeModal() {
+            activePaymentId = '';
+            document.getElementById('modeModal').classList.remove('show');
+        }
+
+        function selectMode(mode) {
+            activeModeSelection = mode;
+            document.querySelectorAll('.mode-card').forEach(function(c) { c.classList.remove('selected'); });
+            if (mode === 'Full') document.getElementById('modeCard_Full').classList.add('selected');
+            else if (mode === '3 Installments') document.getElementById('modeCard_3').classList.add('selected');
+            else document.getElementById('modeCard_Custom').classList.add('selected');
+
+            if (mode === 'Customized') {
+                document.getElementById('customInstallmentsSection').classList.add('show');
+                initCustomInstallments();
+            } else {
+                document.getElementById('customInstallmentsSection').classList.remove('show');
+            }
+        }
+
+        function initCustomInstallments() {
+            var list = document.getElementById('customInstallmentsList');
+            list.innerHTML = '';
+            addCustomInstallment();
+            addCustomInstallment();
+            updateCustomTotal();
+        }
+
+        function addCustomInstallment() {
+            var list = document.getElementById('customInstallmentsList');
+            var count = list.children.length + 1;
+            var div = document.createElement('div');
+            div.className = 'custom-row';
+            div.innerHTML = '<input type="text" placeholder="Label (e.g. April)" value="Installment ' + count + '" class="ci-label">' +
+                '<input type="number" placeholder="Amount" class="ci-amount" oninput="updateCustomTotal()">' +
+                '<button class="btn-remove-inst" onclick="this.parentElement.remove(); updateCustomTotal();">×</button>';
+            list.appendChild(div);
+        }
+
+        function updateCustomTotal() {
+            var total = 0;
+            document.querySelectorAll('.ci-amount').forEach(function(inp) {
+                total += parseFloat(inp.value) || 0;
+            });
+            document.getElementById('customTotal').textContent = total.toLocaleString();
+            var el = document.getElementById('customTotal');
+            if (Math.abs(total - activeTotalAmount) <= 1) {
+                el.style.color = '#059669';
+            } else {
+                el.style.color = '#dc2626';
+            }
+        }
+
+        async function confirmModeChange() {
+            var token = localStorage.getItem('schoolToken');
+            var body = { paymentMode: activeModeSelection };
+
+            if (activeModeSelection === 'Customized') {
+                var customInstallments = [];
+                document.querySelectorAll('.custom-row').forEach(function(row) {
+                    var label = row.querySelector('.ci-label').value.trim();
+                    var amount = parseFloat(row.querySelector('.ci-amount').value) || 0;
+                    if (label && amount > 0) {
+                        customInstallments.push({ label: label, amount: amount });
+                    }
+                });
+                if (customInstallments.length === 0) {
+                    showToast('Add at least one installment with amount', 'error');
+                    return;
+                }
+                body.customInstallments = customInstallments;
+            }
+
+            try {
+                var response = await fetch('/api/school-fees/payments/' + activePaymentId + '/mode', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(body)
+                });
+                var data = await response.json();
+                if (response.ok) {
+                    showToast('Payment mode changed to ' + activeModeSelection, 'success');
+                    closeModeModal();
+                    loadLedger();
+                } else {
+                    showToast(data.message || 'Error changing mode', 'error');
+                }
+            } catch (error) { showToast('Server error', 'error'); }
+        }
+
+        // ===== UPI QR CODE UPLOAD & RETRIEVAL =====
+        function triggerQrUpload() {
+            document.getElementById('schoolQrInput').click();
+        }
+
+        async function handleQrUpload(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+
+            var reader = new FileReader();
+            reader.onload = async function(e) {
+                var base64Img = e.target.result;
+                var token = localStorage.getItem('schoolToken');
+                try {
+                    var response = await fetch('/api/school-fees/upi-qr', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({ upiqrCode: base64Img })
+                    });
+                    var data = await response.json();
+                    if (response.ok) {
+                        showToast('UPI QR Code updated successfully!', 'success');
+                        document.getElementById('schoolQrPreview').innerHTML = '<img src="' + base64Img + '" style="width:100%; height:100%; object-fit:contain;">';
+                    } else {
+                        showToast(data.message || 'Failed to upload QR Code', 'error');
+                    }
+                } catch (error) {
+                    showToast('Server error during QR Code upload', 'error');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function loadSchoolQr() {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-fees/upi-qr', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await response.json();
+                if (data && data.upiqrCode) {
+                    document.getElementById('schoolQrPreview').innerHTML = '<img src="' + data.upiqrCode + '" style="width:100%; height:100%; object-fit:contain;">';
+                }
+            } catch (error) {
+                console.error('Error loading school QR:', error);
+            }
+        }
+
+        // ===== PENDING VERIFICATIONS =====
+        async function loadPendingVerifications() {
+            var token = localStorage.getItem('schoolToken');
+            var tbody = document.getElementById('pendingTableBody');
+            try {
+                var response = await fetch('/api/school-fees/pending-verifications', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await response.json();
+                
+                // Update badge
+                var badge = document.getElementById('pendingBadge');
+                if (data.length > 0) {
+                    badge.textContent = data.length;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;">No verifications pending.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(function(item, index) {
+                    var student = item.student || {};
+                    var submittedDateStr = item.submittedDate ? new Date(item.submittedDate).toLocaleString() : '-';
+                    var previewHtml = item.screenshot 
+                        ? '<button class="btn-mode" onclick="openScreenshotModal(\'' + item.screenshot + '\', \'' + (item.utrNumber || '-') + '\', \'' + (item.transactionId || '-') + '\', \'' + item.paymentId + '\', \'' + item.installmentId + '\')">View Proof</button>'
+                        : '<span style="color:#94a3b8; font-size:11px;">No Image</span>';
 
                     return '<tr>' +
                         '<td>' + (index + 1) + '</td>' +
-                        '<td>' + (student.studentId || 'N/A') + '</td>' +
-                        '<td><strong>' + (student.name || 'N/A') + '</strong></td>' +
-                        '<td>' + (student.className || 'N/A') + '-' + (student.section || 'A') + '</td>' +
-                        '<td>' + (structure.feeName || 'N/A') + '</td>' +
-                        '<td>&#8377;' + (structure.amount || 0).toLocaleString() + '</td>' +
-                        '<td>' + statusBadge + '</td>' +
-                        '<td>' + collectDate + '</td>' +
-                        '<td>' + actionBtn + '</td>' +
+                        '<td><strong>' + (student.name || 'N/A') + '</strong><br><span style="font-size:11px;color:#94a3b8;">' + (student.studentId || '') + '</span></td>' +
+                        '<td>Class ' + (student.className || '-') + '-' + (student.section || 'A') + '</td>' +
+                        '<td><strong>' + item.feeName + '</strong><br><span style="font-size:11px;color:#64748b;">' + item.label + '</span></td>' +
+                        '<td>₹' + item.amount.toLocaleString() + '</td>' +
+                        '<td>UTR: <strong>' + (item.utrNumber || '-') + '</strong><br><span style="font-size:11px;color:#64748b;">Txn ID: ' + (item.transactionId || '-') + '</span></td>' +
+                        '<td>' + submittedDateStr + '</td>' +
+                        '<td>' + previewHtml + '</td>' +
+                        '<td>' +
+                        '<div style="display:flex; gap:6px; justify-content:center;">' +
+                        '<button class="btn-verify" style="padding:6px 10px;" onclick="approvePending(\'' + item.paymentId + '\', \'' + item.installmentId + '\')">Verify</button>' +
+                        '<button class="btn-unverify" style="padding:6px 10px; margin:0;" onclick="rejectPending(\'' + item.paymentId + '\', \'' + item.installmentId + '\')">Reject</button>' +
+                        '</div>' +
+                        '</td>' +
                         '</tr>';
                 }).join('');
-
             } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:red;">Error loading ledger.</td></tr>';
+                console.error('Load pending verifications error:', error);
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:red;">Error loading pending verifications.</td></tr>';
             }
         }
 
-        function openCollectModal(paymentId, studentName, feeName) {
-            activePaymentId = paymentId;
-            document.getElementById('collectModalMsg').textContent = 'Collect ' + feeName + ' in cash/card from "' + studentName + '"?';
-            document.getElementById('collectModal').classList.add('show');
-        }
-
-        function closeCollectModal() {
-            activePaymentId = '';
-            document.getElementById('collectModal').classList.remove('show');
-        }
-
-        async function confirmCollection() {
+        async function approvePending(paymentId, installmentId) {
+            if (!confirm('Approve this payment installment and mark it as Paid?')) return;
             var token = localStorage.getItem('schoolToken');
-            var paymentMethod = document.getElementById('paymentMethod').value;
-
             try {
-                var response = await fetch('/api/school-fees/payments/' + activePaymentId + '/collect', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ paymentMethod })
+                var response = await fetch('/api/school-fees/payments/' + paymentId + '/verify/' + installmentId, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token }
                 });
-
                 var data = await response.json();
                 if (response.ok) {
-                    showToast('Payment collected and recorded!', 'success');
-                    closeCollectModal();
+                    showToast('Payment verified successfully!', 'success');
+                    loadPendingVerifications();
                     loadLedger();
                 } else {
-                    showToast(data.message || 'Error recording payment', 'error');
+                    showToast(data.message || 'Error verifying payment', 'error');
                 }
             } catch (error) {
-                showToast('Server error during payment collection', 'error');
+                showToast('Server error', 'error');
             }
+        }
+
+        async function rejectPending(paymentId, installmentId) {
+            if (!confirm('Reject this payment proof? The parent will need to submit proof again.')) return;
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-fees/payments/' + paymentId + '/reject/' + installmentId, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await response.json();
+                if (response.ok) {
+                    showToast('Payment proof rejected.', 'info');
+                    loadPendingVerifications();
+                    loadLedger();
+                } else {
+                    showToast(data.message || 'Error rejecting payment', 'error');
+                }
+            } catch (error) {
+                showToast('Server error', 'error');
+            }
+        }
+
+        // ===== SCREENSHOT MODAL =====
+        function openScreenshotModal(screenshotSrc, utr, txn, paymentId, installmentId) {
+            document.getElementById('modalScreenshotImg').src = screenshotSrc;
+            document.getElementById('modalUtrText').textContent = utr;
+            document.getElementById('modalTxnText').textContent = txn;
+            
+            // Set up modal action buttons
+            var approveBtn = document.getElementById('modalApproveBtn');
+            var rejectBtn = document.getElementById('modalRejectBtn');
+
+            approveBtn.onclick = function() {
+                closeScreenshotModal();
+                approvePending(paymentId, installmentId);
+            };
+            rejectBtn.onclick = function() {
+                closeScreenshotModal();
+                rejectPending(paymentId, installmentId);
+            };
+
+            document.getElementById('screenshotModal').classList.add('show');
+        }
+
+        function closeScreenshotModal() {
+            document.getElementById('screenshotModal').classList.remove('show');
+            document.getElementById('modalScreenshotImg').src = '';
         }
 
         function logout() {

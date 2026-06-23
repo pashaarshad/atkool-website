@@ -6,6 +6,7 @@
     <title>Parent Dashboard - ATKool</title>
     <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Inter',sans-serif; background:#F1F5F9; display:flex; height:100vh; overflow:hidden; }
@@ -89,6 +90,37 @@
         .toast-success { background:#10b981; }
         .toast-error { background:#ef4444; }
 
+        /* Modal Overlay & Modal */
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center; }
+        .modal-overlay.show { display:flex; }
+        .modal { background:#fff; border-radius:18px; width:90%; max-width:550px; max-height:85vh; overflow-y:auto; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+        .modal h2 { font-size:20px; font-weight:800; color:#0F172A; margin-bottom:12px; }
+        .modal p { color:#64748b; font-size:14px; margin-bottom:16px; line-height:1.5; }
+        .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid #f1f5f9; }
+        .btn-cancel { padding:10px 20px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
+        .btn-cancel:hover { background:#e2e8f0; }
+        .btn-submit { padding:10px 20px; background:linear-gradient(135deg,#4338CA,#6366f1); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
+        .btn-submit:hover { transform:translateY(-1px); }
+
+        /* Expandable Installments styles */
+        .expand-btn { width:26px; height:26px; border:none; background:#f1f5f9; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:all .2s; font-size:12px; font-weight:700; color:#475569; }
+        .expand-btn:hover { background:#eef2ff; color:#4338CA; }
+        .expand-btn.open { background:#4338CA; color:#fff; transform:rotate(180deg); }
+        .installment-row { display:none; }
+        .installment-row.show { display:table-row; }
+        .installment-details { padding:16px 20px; background:#f8fafc; border-bottom:1px solid #e2e8f0; }
+        .installment-grid { display:flex; flex-direction:column; gap:8px; }
+        .installment-item { display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; transition:all .2s; }
+        .installment-item:hover { border-color:#c7d2fe; }
+        .installment-item.paid { border-left:4px solid #10b981; }
+        .installment-item.unpaid { border-left:4px solid #ef4444; }
+        .installment-item.pending { border-left:4px solid #f59e0b; }
+        .inst-info { display:flex; flex-direction:column; gap:2px; }
+        .inst-label { font-weight:700; font-size:13px; color:#0F172A; }
+        .inst-amount { font-size:12px; color:#64748b; }
+        .inst-date { font-size:11px; color:#94a3b8; }
+        .inst-actions { display:flex; align-items:center; gap:8px; }
+
         @media(max-width:768px) {
             .sidebar { display:none; }
             .stats-grid { grid-template-columns:1fr; }
@@ -168,6 +200,62 @@
             <!-- Dynamic content loads here -->
         </div>
     </div>
+
+    <!-- UPI Payment Modal -->
+    <div class="modal-overlay" id="parentPaymentModal">
+        <div class="modal" style="max-width: 500px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+                <h2 style="margin:0; font-size:18px;">Submit UPI Payment Proof</h2>
+                <button onclick="closeParentPaymentModal()" style="border:none; background:none; font-size:20px; font-weight:700; cursor:pointer; color:#64748b;">&times;</button>
+            </div>
+            
+            <!-- School QR display inside modal for quick reference -->
+            <div style="display:flex; gap:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:16px; align-items:center;">
+                <div id="modalSchoolQrContainer" style="width:90px; height:90px; border-radius:8px; background:#fff; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+                    <span style="font-size:11px; color:#64748b; font-weight:600;">No QR</span>
+                </div>
+                <div>
+                    <div style="font-weight:800; color:#0F172A; font-size:14px; margin-bottom:2px;">Scan & Pay via UPI</div>
+                    <div style="font-size:12px; color:#64748b; line-height:1.4;">Scan this QR code using Google Pay, PhonePe, Paytm, or any UPI app to pay the installment amount.</div>
+                </div>
+            </div>
+
+            <form id="parentPaymentForm" onsubmit="submitPaymentProof(event)">
+                <div class="form-group">
+                    <label>Upload Payment Receipt Screenshot *</label>
+                    <input type="file" id="receiptScreenshotInput" required accept="image/*" onchange="processReceiptScreenshot(event)" style="border:2px dashed #cbd5e1; padding:20px 10px; text-align:center; cursor:pointer; background:#faf5ff; display:block; width:100%;">
+                </div>
+
+                <!-- OCR Status -->
+                <div id="ocrStatusArea" style="display:none; background:#eef2ff; border:1px solid #c7d2fe; border-radius:10px; padding:10px 14px; margin-bottom:16px; font-size:12px; color:#4338CA; font-weight:600;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:14px; height:14px; border:2px solid #4338CA; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; flex-shrink:0;"></div>
+                        <span id="ocrStatusText">Scanning receipt...</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>UTR Number / UPI Ref No (12 Digits) *</label>
+                    <input type="text" id="parentUtrInput" required pattern="\d{12}" title="UTR must be a 12 digit number" placeholder="e.g. 623456789012">
+                </div>
+
+                <div class="form-group">
+                    <label>Transaction ID *</label>
+                    <input type="text" id="parentTxnIdInput" required placeholder="e.g. T260623123456">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeParentPaymentModal()">Cancel</button>
+                    <button type="submit" class="btn-submit" id="submitProofBtn">Submit Proof</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Simple spinner animation -->
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 
     <div class="toast" id="toast"></div>
 
@@ -533,31 +621,80 @@
         }
 
         // ============ FEES & PAYMENTS ============
+        let activeVerificationPaymentId = '';
+        let activeVerificationInstallmentId = '';
+        let activeScreenshotBase64 = '';
+
+        function viewQrFullscreen(src) {
+            const zoomModal = document.createElement('div');
+            zoomModal.className = 'modal-overlay show';
+            zoomModal.style.zIndex = '3000';
+            zoomModal.onclick = () => zoomModal.remove();
+            zoomModal.innerHTML = `
+                <div style="position:relative; max-width:90%; max-height:90%; background:#fff; padding:15px; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 10px 40px rgba(0,0,0,.3);" onclick="event.stopPropagation()">
+                    <img src="${src}" style="max-width:100%; max-height:80vh; object-fit:contain; border-radius:6px;">
+                    <div style="margin-top:10px; font-size:14px; font-weight:700; color:#334155;">Scan QR to Pay via UPI</div>
+                    <button style="position:absolute; top:-12px; right:-12px; width:30px; height:30px; border-radius:50%; background:#ef4444; color:#fff; border:none; font-weight:bold; font-size:16px; cursor:pointer;" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                </div>
+            `;
+            document.body.appendChild(zoomModal);
+        }
+
         async function loadFees() {
             const content = document.getElementById('mainContent');
             try {
-                const data = await fetchWithAuth('/api/parent-fees');
-                if (!data) return;
+                // Fetch fees and school QR in parallel
+                const [feesData, qrData] = await Promise.all([
+                    fetchWithAuth('/api/parent-fees'),
+                    fetchWithAuth('/api/parent-fees/school-qr')
+                ]);
 
-                const fees = Array.isArray(data) ? data : [];
-                const totalDue = fees.filter(f => f.status === 'Unpaid').reduce((sum, f) => sum + (f.feeStructureId?.amount || 0), 0);
-                const totalPaid = fees.filter(f => f.status === 'Paid').reduce((sum, f) => sum + (f.feeStructureId?.amount || 0), 0);
+                if (!feesData) return;
+
+                const fees = Array.isArray(feesData) ? feesData : [];
+                const upiqrCode = qrData?.upiqrCode || '';
+
+                // Calculate stats
+                let totalAmount = 0;
+                let totalPaid = 0;
+                let totalPending = 0;
+
+                fees.forEach(f => {
+                    totalAmount += f.totalAmount || 0;
+                    totalPaid += f.amountPaid || 0;
+                    totalPending += ((f.totalAmount || 0) - (f.amountPaid || 0));
+                });
 
                 let html = `
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value" style="color:#4338CA">₹${(totalPaid + totalDue).toLocaleString()}</div>
-                            <div class="stat-label">Total Fees</div>
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:24px; align-items:stretch;">
+                        <!-- Stats Grid -->
+                        <div class="stats-grid" style="flex:3; margin-bottom:0; display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+                            <div class="stat-card" style="margin-bottom:0; padding:18px;">
+                                <div class="stat-value" style="color:#4338CA; font-size:24px;">₹${totalAmount.toLocaleString()}</div>
+                                <div class="stat-label">Total Allocated</div>
+                            </div>
+                            <div class="stat-card" style="margin-bottom:0; padding:18px;">
+                                <div class="stat-value" style="color:#059669; font-size:24px;">₹${totalPaid.toLocaleString()}</div>
+                                <div class="stat-label">Paid</div>
+                            </div>
+                            <div class="stat-card" style="margin-bottom:0; padding:18px;">
+                                <div class="stat-value" style="color:#dc2626; font-size:24px;">₹${totalPending.toLocaleString()}</div>
+                                <div class="stat-label">Pending</div>
+                            </div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-value" style="color:#059669">₹${totalPaid.toLocaleString()}</div>
-                            <div class="stat-label">Paid</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" style="color:#dc2626">₹${totalDue.toLocaleString()}</div>
-                            <div class="stat-label">Pending</div>
+
+                        <!-- School QR Code display on the right -->
+                        <div class="stat-card" style="flex:1.2; min-width:280px; flex-direction:row; align-items:center; gap:12px; padding:14px; margin-bottom:0; justify-content:flex-start; text-align:left;">
+                            <div id="parentSchoolQrPreview" style="width:70px; height:70px; border-radius:8px; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; background:#f8fafc; cursor:pointer;">
+                                ${upiqrCode ? `<img src="${upiqrCode}" style="width:100%; height:100%; object-fit:contain;" onclick="viewQrFullscreen('${upiqrCode}')" title="Click to zoom">` : `<span style="font-size:10px; color:#64748b; font-weight:600; text-align:center;">No QR</span>`}
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                                <span style="font-size:12px; font-weight:800; color:#0F172A; text-transform:uppercase; letter-spacing:.5px;">UPI QR Code</span>
+                                <span style="font-size:11px; color:#64748b; font-weight:500; line-height:1.3;">Scan the QR code to make UPI payments for fees. Click to enlarge.</span>
+                            </div>
                         </div>
                     </div>
+
                     <div class="card">
                         <div class="card-header">
                             <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line></svg>
@@ -567,92 +704,248 @@
                 if (fees.length === 0) {
                     html += '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">No fee records found.</div>';
                 } else {
-                    html += `<table><thead><tr><th>Fee Name</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Payment Date</th><th>Action</th></tr></thead><tbody>`;
+                    html += `<table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;"></th>
+                                <th>Fee Name</th>
+                                <th>Total Amount</th>
+                                <th>Paid</th>
+                                <th>Pending</th>
+                                <th>Mode</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                    
                     fees.forEach(f => {
                         const structure = f.feeStructureId || {};
+                        const total = f.totalAmount || structure.amount || 0;
+                        const paid = f.amountPaid || 0;
+                        const pending = total - paid;
+                        
+                        const statusClass = f.status === 'Paid' ? 'status-paid' : (f.status === 'Partial' ? 'status-partial' : 'status-unpaid');
+                        const statusBadge = `<span class="status-badge ${statusClass}">${f.status}</span>`;
+
+                        const modeText = f.paymentMode || 'Full';
+                        const detailRowId = `inst_detail_${f._id}`;
+
                         html += `<tr>
-                            <td><strong>${structure.feeName || 'N/A'}</strong></td>
-                            <td>₹${(structure.amount || 0).toLocaleString()}</td>
-                            <td>${structure.dueDate ? new Date(structure.dueDate).toLocaleDateString() : '-'}</td>
-                            <td><span class="status-badge status-${f.status === 'Paid' ? 'paid' : 'unpaid'}">${f.status}</span></td>
-                            <td>${f.paymentDate ? new Date(f.paymentDate).toLocaleDateString() : '-'}</td>
-                            <td>${f.status === 'Paid' ? '<span style="color:#64748b;font-size:12px;font-weight:700">Paid</span>' : `<button class="btn btn-primary" style="padding:8px 14px;font-size:12px" onclick="startParentPayment('${f._id}')">Pay Now</button>`}</td>
+                            <td><button class="expand-btn" onclick="toggleInstallmentBreakdown('${f._id}', this)">▼</button></td>
+                            <td><strong>${structure.feeName || 'N/A'}</strong><br><span style="font-size:11px; color:#94a3b8;">Due: ${structure.dueDate ? new Date(structure.dueDate).toLocaleDateString() : '-'}</span></td>
+                            <td>₹${total.toLocaleString()}</td>
+                            <td>₹${paid.toLocaleString()}</td>
+                            <td>₹${pending.toLocaleString()}</td>
+                            <td><span style="font-size:12px; font-weight:700; color:#475569;">${modeText}</span></td>
+                            <td>${statusBadge}</td>
+                        </tr>`;
+
+                        // Render installment details row
+                        let instHtml = '<div class="installment-grid">';
+                        const installments = f.installments || [];
+                        
+                        if (installments.length === 0) {
+                            instHtml += `<div style="text-align:center; padding:10px; color:#94a3b8;">No installments found.</div>`;
+                        } else {
+                            installments.forEach(inst => {
+                                const isPaid = inst.status === 'Paid';
+                                const isPending = inst.status === 'Verification Pending';
+                                
+                                let actionHtml = '';
+                                if (isPaid) {
+                                    const paidDateStr = inst.paidDate ? new Date(inst.paidDate).toLocaleDateString() : '';
+                                    actionHtml = `<span class="status-badge status-paid">Verified Paid</span>${paidDateStr ? `<br><span style="font-size:10px; color:#94a3b8;">on ${paidDateStr}</span>` : ''}`;
+                                } else if (isPending) {
+                                    actionHtml = `<span class="status-badge status-pending" style="background:#fef3c7; color:#d97706;">Pending Verification</span>`;
+                                } else {
+                                    actionHtml = `<button class="btn btn-primary" style="padding:6px 14px; font-size:12px;" onclick="openParentPaymentModal('${f._id}', '${inst._id}', '${inst.label}', ${inst.amount}, '${upiqrCode}')">Pay UPI</button>`;
+                                }
+
+                                instHtml += `
+                                    <div class="installment-item ${isPaid ? 'paid' : (isPending ? 'pending' : 'unpaid')}">
+                                        <div class="inst-info">
+                                            <div class="inst-label">${inst.label}</div>
+                                            <div class="inst-amount">₹${inst.amount.toLocaleString()}</div>
+                                            ${inst.utrNumber ? `<div style="font-size:10px; color:#64748b; margin-top:2px;">UTR: <strong>${inst.utrNumber}</strong></div>` : ''}
+                                        </div>
+                                        <div class="inst-actions">
+                                            ${actionHtml}
+                                        </div>
+                                    </div>`;
+                            });
+                        }
+                        instHtml += '</div>';
+
+                        html += `<tr class="installment-row" id="${detailRowId}">
+                            <td colspan="7">
+                                <div class="installment-details">
+                                    <div style="font-size:12px; font-weight:700; color:#475569; margin-bottom:10px;">Installment Payments Details</div>
+                                    ${instHtml}
+                                </div>
+                            </td>
                         </tr>`;
                     });
+
                     html += `</tbody></table>`;
                 }
                 html += `</div>`;
                 content.innerHTML = html;
             } catch(e) {
+                console.error(e);
                 content.innerHTML = `<div class="card"><div class="card-header">Fees & Payments</div><div style="text-align:center;padding:30px;color:#64748b">No fee records available.</div></div>`;
             }
         }
 
-        function loadRazorpayScript() {
-            return new Promise((resolve, reject) => {
-                if (window.Razorpay) {
-                    resolve();
-                    return;
-                }
-                const script = document.createElement('script');
-                script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-                script.onload = resolve;
-                script.onerror = () => reject(new Error('Unable to load Razorpay checkout'));
-                document.body.appendChild(script);
-            });
+        function toggleInstallmentBreakdown(paymentId, btn) {
+            const row = document.getElementById(`inst_detail_${paymentId}`);
+            if (row.classList.contains('show')) {
+                row.classList.remove('show');
+                btn.classList.remove('open');
+            } else {
+                row.classList.add('show');
+                btn.classList.add('open');
+            }
         }
 
-        async function startParentPayment(paymentId) {
-            const orderData = await fetchWithAuth(`/api/parent-fees/${paymentId}/create-order`, { method: 'POST' });
-            if (!orderData || orderData.message) {
-                showToast(orderData?.message || 'Unable to start payment', 'error');
-                return;
+        function openParentPaymentModal(paymentId, installmentId, label, amount, qrCode) {
+            activeVerificationPaymentId = paymentId;
+            activeVerificationInstallmentId = installmentId;
+            activeScreenshotBase64 = '';
+
+            // Reset modal form
+            document.getElementById('parentPaymentForm').reset();
+            document.getElementById('ocrStatusArea').style.display = 'none';
+
+            // Set QR code inside modal
+            const qrContainer = document.getElementById('modalSchoolQrContainer');
+            if (qrCode) {
+                qrContainer.innerHTML = `<img src="${qrCode}" style="width:100%; height:100%; object-fit:contain;" onclick="viewQrFullscreen('${qrCode}')" title="Click to zoom">`;
+            } else {
+                qrContainer.innerHTML = `<span style="font-size:11px; color:#64748b; font-weight:600; text-align:center;">No QR</span>`;
             }
 
-            if (orderData.mode === 'mock') {
-                const result = await fetchWithAuth(`/api/parent-fees/${paymentId}/pay`, { method: 'POST' });
-                if (result && result.payment) {
-                    showToast('Demo payment completed.');
-                    loadFees();
-                } else {
-                    showToast(result?.message || 'Demo payment failed', 'error');
+            document.getElementById('parentPaymentModal').classList.add('show');
+        }
+
+        function closeParentPaymentModal() {
+            document.getElementById('parentPaymentModal').classList.remove('show');
+        }
+
+        async function processReceiptScreenshot(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                activeScreenshotBase64 = e.target.result;
+                
+                // Show OCR progress area
+                const statusArea = document.getElementById('ocrStatusArea');
+                const statusText = document.getElementById('ocrStatusText');
+                statusArea.style.display = 'block';
+                statusText.textContent = 'Scanning screenshot with OCR... (Initializing)';
+
+                try {
+                    // Initialize Tesseract worker
+                    const worker = await Tesseract.createWorker('eng');
+                    statusText.textContent = 'Scanning screenshot... (Processing Image)';
+                    const ret = await worker.recognize(activeScreenshotBase64);
+                    const text = ret.data.text;
+                    await worker.terminate();
+
+                    statusText.textContent = 'Scanning screenshot... (Analyzing Text)';
+                    console.log('OCR Extracted Text:', text);
+
+                    // Scan for UTR (typically a 12-digit number starting with recent numbers like 3,4,5,6)
+                    const utrMatch = text.match(/\b\d{12}\b/);
+                    let extractedUtr = '';
+                    if (utrMatch) {
+                        extractedUtr = utrMatch[0];
+                        console.log('Extracted UTR:', extractedUtr);
+                    } else {
+                        // try to search near word UTR
+                        const utrWordMatch = text.match(/UTR\s*[:\-\#]*\s*(\d+)/i);
+                        if (utrWordMatch && utrWordMatch[1] && utrWordMatch[1].length >= 8) {
+                            extractedUtr = utrWordMatch[1];
+                        }
+                    }
+
+                    // Scan for Transaction ID / Ref No
+                    const txnMatch = text.match(/(?:TXN|Transaction|Ref|Reference)\s*(?:ID|No|Num|Number)?\s*[:\-\#\s]+([A-Za-z0-9]+)/i);
+                    let extractedTxnId = '';
+                    if (txnMatch && txnMatch[1]) {
+                        extractedTxnId = txnMatch[1].trim();
+                    } else {
+                        // fallback to find alphanumeric strings of typical transaction length (9-16)
+                        const alphanumericMatches = text.match(/\b[A-Za-z0-9]{9,16}\b/g);
+                        if (alphanumericMatches) {
+                            const txnCandidate = alphanumericMatches.find(item => !/^\d+$/.test(item));
+                            if (txnCandidate) {
+                                extractedTxnId = txnCandidate;
+                            }
+                        }
+                    }
+
+                    // Fill fields
+                    if (extractedUtr) {
+                        document.getElementById('parentUtrInput').value = extractedUtr;
+                    }
+                    if (extractedTxnId) {
+                        document.getElementById('parentTxnIdInput').value = extractedTxnId;
+                    }
+
+                    statusText.textContent = 'Scan completed! Auto-populated extracted UTR/Transaction details.';
+                    setTimeout(() => { statusArea.style.display = 'none'; }, 4000);
+                } catch (err) {
+                    console.error('OCR Error:', err);
+                    statusText.textContent = 'Scan failed. Please input UTR and Transaction ID manually.';
                 }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function submitPaymentProof(event) {
+            event.preventDefault();
+            const submitBtn = document.getElementById('submitProofBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            const utr = document.getElementById('parentUtrInput').value.trim();
+            const txnId = document.getElementById('parentTxnIdInput').value.trim();
+
+            if (!activeScreenshotBase64) {
+                showToast('Please upload a receipt screenshot first.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Proof';
                 return;
             }
 
             try {
-                await loadRazorpayScript();
-                const options = {
-                    key: orderData.keyId,
-                    amount: orderData.order.amount,
-                    currency: orderData.order.currency || 'INR',
-                    name: 'ATKool',
-                    description: orderData.payment?.feeName || 'School fee payment',
-                    order_id: orderData.order.id,
-                    handler: async function (response) {
-                        const result = await fetchWithAuth(`/api/parent-fees/${paymentId}/verify`, {
-                            method: 'POST',
-                            body: JSON.stringify(response)
-                        });
-                        if (result && result.payment) {
-                            showToast('Payment successful.');
-                            loadFees();
-                        } else {
-                            showToast(result?.message || 'Payment verification failed', 'error');
-                        }
-                    },
-                    prefill: {
-                        name: studentData.parentName || studentData.name || ''
-                    },
-                    theme: {
-                        color: '#4338CA'
-                    }
-                };
-                new Razorpay(options).open();
-            } catch (error) {
-                showToast(error.message || 'Payment checkout failed', 'error');
+                const result = await fetchWithAuth(`/api/parent-fees/payments/${activeVerificationPaymentId}/submit-verification/${activeVerificationInstallmentId}`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        screenshot: activeScreenshotBase64,
+                        utrNumber: utr,
+                        transactionId: txnId
+                    })
+                });
+
+                if (result && result.payment) {
+                    showToast('Payment proof submitted successfully!', 'success');
+                    closeParentPaymentModal();
+                    loadFees();
+                } else {
+                    showToast(result?.message || 'Failed to submit payment proof.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Server error.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Proof';
             }
         }
+
 
         // ============ DATESHEETS ============
         async function loadDateSheets() {

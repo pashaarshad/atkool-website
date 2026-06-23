@@ -16,12 +16,15 @@ function schoolAuth(req, res, next) {
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_admin_secret_key_2024');
 
-        if (decoded.type !== 'school') {
+        if (decoded.type === 'school') {
+            req.schoolId = decoded.schoolId;
+            next();
+        } else if (decoded.type === 'teacher' && decoded.role === 'Principal') {
+            req.schoolId = decoded.schoolId;
+            next();
+        } else {
             return res.status(401).json({ message: 'Invalid token type' });
         }
-
-        req.schoolId = decoded.schoolId;
-        next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid token' });
     }
@@ -39,7 +42,7 @@ router.get('/structures', schoolAuth, async (req, res) => {
     }
 });
 
-// Configure a new fee structure ( Tuition, Transport, Exam etc )
+// Configure a new fee structure
 router.post('/structures', schoolAuth, async (req, res) => {
     try {
         const { feeName, amount, className, dueDate } = req.body;
@@ -64,15 +67,22 @@ router.post('/structures', schoolAuth, async (req, res) => {
 
         const students = await Student.find(studentQuery);
         
-        // Auto-allocate this fee as unpaid to all target students
+        // Auto-allocate this fee as unpaid (Full mode by default) to all target students
         const paymentPromises = students.map(student => {
             return FeePayment.create({
                 studentId: student._id,
                 schoolId: req.schoolId,
                 feeStructureId: newStructure._id,
+                paymentMode: 'Full',
+                totalAmount: parseFloat(amount),
                 amountPaid: 0,
                 status: 'Unpaid',
-                paymentMethod: 'None'
+                installments: [{
+                    installmentNumber: 1,
+                    label: 'Full Payment',
+                    amount: parseFloat(amount),
+                    status: 'Unpaid'
+                }]
             });
         });
 
@@ -88,6 +98,22 @@ router.post('/structures', schoolAuth, async (req, res) => {
     }
 });
 
+// Delete a fee structure
+router.delete('/structures/:id', schoolAuth, async (req, res) => {
+    try {
+        const structure = await FeeStructure.findOneAndDelete({ _id: req.params.id, schoolId: req.schoolId });
+        if (!structure) {
+            return res.status(404).json({ message: 'Fee structure not found' });
+        }
+        // Also delete all payments linked to this structure
+        await FeePayment.deleteMany({ feeStructureId: req.params.id, schoolId: req.schoolId });
+        res.json({ message: 'Fee structure and all associated records deleted' });
+    } catch (error) {
+        console.error('Delete fee structure error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Get all student fee ledgers / payments
 router.get('/payments', schoolAuth, async (req, res) => {
     try {
@@ -98,21 +124,18 @@ router.get('/payments', schoolAuth, async (req, res) => {
             matchQuery.status = status;
         }
 
-        // Fetch payments and populate Student and FeeStructure
         let payments = await FeePayment.find(matchQuery)
             .populate('studentId')
             .populate('feeStructureId')
             .sort({ createdAt: -1 });
 
-        // Filter in memory for className and search name since populate queries are nested
+        // Filter in memory for className and search name
         if (className || search) {
             payments = payments.filter(p => {
                 const student = p.studentId;
                 if (!student) return false;
-
                 const matchesClass = className ? student.className === className : true;
                 const matchesSearch = search ? student.name.toLowerCase().includes(search.toLowerCase()) : true;
-
                 return matchesClass && matchesSearch;
             });
         }
@@ -124,12 +147,13 @@ router.get('/payments', schoolAuth, async (req, res) => {
     }
 });
 
-// Collect manual cash / check payment
-router.post('/payments/:id/collect', schoolAuth, async (req, res) => {
+// Change payment mode for a student's fee record
+router.put('/payments/:id/mode', schoolAuth, async (req, res) => {
     try {
-        const { paymentMethod } = req.body;
-        if (!paymentMethod || !['Cash', 'Card'].includes(paymentMethod)) {
-            return res.status(400).json({ message: 'Valid payment method (Cash/Card) is required' });
+        const { paymentMode, customInstallments } = req.body;
+
+        if (!paymentMode || !['Full', '3 Installments', 'Customized'].includes(paymentMode)) {
+            return res.status(400).json({ message: 'Valid payment mode is required (Full / 3 Installments / Customized)' });
         }
 
         const payment = await FeePayment.findOne({ _id: req.params.id, schoolId: req.schoolId })
@@ -139,24 +163,270 @@ router.post('/payments/:id/collect', schoolAuth, async (req, res) => {
             return res.status(404).json({ message: 'Fee record not found' });
         }
 
-        if (payment.status === 'Paid') {
-            return res.status(400).json({ message: 'Fee already paid' });
+        const totalAmount = payment.feeStructureId.amount;
+
+        // Build installments based on mode
+        let installments = [];
+
+        if (paymentMode === 'Full') {
+            installments = [{
+                installmentNumber: 1,
+                label: 'Full Payment',
+                amount: totalAmount,
+                status: 'Unpaid'
+            }];
+        } else if (paymentMode === '3 Installments') {
+            const perInstallment = Math.floor(totalAmount / 3);
+            const remainder = totalAmount - (perInstallment * 3);
+            installments = [
+                { installmentNumber: 1, label: '1st Installment', amount: perInstallment, status: 'Unpaid' },
+                { installmentNumber: 2, label: '2nd Installment', amount: perInstallment, status: 'Unpaid' },
+                { installmentNumber: 3, label: '3rd Installment', amount: perInstallment + remainder, status: 'Unpaid' }
+            ];
+        } else if (paymentMode === 'Customized') {
+            if (!customInstallments || !Array.isArray(customInstallments) || customInstallments.length === 0) {
+                return res.status(400).json({ message: 'Custom installments are required for Customized mode' });
+            }
+
+            // Validate that custom installments sum to total
+            const customSum = customInstallments.reduce((sum, ci) => sum + (parseFloat(ci.amount) || 0), 0);
+            if (Math.abs(customSum - totalAmount) > 1) { // allow ₹1 rounding tolerance
+                return res.status(400).json({ 
+                    message: `Custom installments total (₹${customSum}) must equal fee amount (₹${totalAmount})` 
+                });
+            }
+
+            installments = customInstallments.map((ci, index) => ({
+                installmentNumber: index + 1,
+                label: ci.label || ('Installment ' + (index + 1)),
+                amount: parseFloat(ci.amount),
+                status: 'Unpaid'
+            }));
         }
 
-        payment.status = 'Paid';
-        payment.amountPaid = payment.feeStructureId.amount;
-        payment.paymentMethod = paymentMethod;
-        payment.paymentDate = new Date();
-        payment.transactionId = 'CASH-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        payment.paymentMode = paymentMode;
+        payment.installments = installments;
+        payment.amountPaid = 0;
+        payment.status = 'Unpaid';
+        payment.totalAmount = totalAmount;
 
         await payment.save();
 
-        res.json({
-            message: 'Payment recorded successfully',
-            payment
+        res.json({ message: 'Payment mode updated to ' + paymentMode, payment });
+    } catch (error) {
+        console.error('Update payment mode error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Verify (mark as paid) a specific installment
+router.put('/payments/:id/verify/:installmentId', schoolAuth, async (req, res) => {
+    try {
+        const payment = await FeePayment.findOne({ _id: req.params.id, schoolId: req.schoolId })
+            .populate('feeStructureId');
+
+        if (!payment) {
+            return res.status(404).json({ message: 'Fee record not found' });
+        }
+
+        const installment = payment.installments.id(req.params.installmentId);
+        if (!installment) {
+            return res.status(404).json({ message: 'Installment not found' });
+        }
+
+        if (installment.status === 'Paid') {
+            return res.status(400).json({ message: 'This installment is already marked as paid' });
+        }
+
+        installment.status = 'Paid';
+        installment.paidDate = new Date();
+        installment.verifiedBy = 'School Admin';
+
+        // Recalculate total paid and overall status
+        let totalPaid = 0;
+        let allPaid = true;
+        payment.installments.forEach(inst => {
+            if (inst.status === 'Paid') {
+                totalPaid += inst.amount;
+            } else {
+                allPaid = false;
+            }
+        });
+
+        payment.amountPaid = totalPaid;
+        payment.status = allPaid ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
+
+        await payment.save();
+
+        res.json({ 
+            message: installment.label + ' verified as paid',
+            payment 
         });
     } catch (error) {
-        console.error('Collect fee error:', error);
+        console.error('Verify installment error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Unverify (mark as unpaid) a specific installment
+router.put('/payments/:id/unverify/:installmentId', schoolAuth, async (req, res) => {
+    try {
+        const payment = await FeePayment.findOne({ _id: req.params.id, schoolId: req.schoolId })
+            .populate('feeStructureId');
+
+        if (!payment) {
+            return res.status(404).json({ message: 'Fee record not found' });
+        }
+
+        const installment = payment.installments.id(req.params.installmentId);
+        if (!installment) {
+            return res.status(404).json({ message: 'Installment not found' });
+        }
+
+        installment.status = 'Unpaid';
+        installment.paidDate = null;
+        installment.verifiedBy = '';
+
+        // Recalculate
+        let totalPaid = 0;
+        let allPaid = true;
+        payment.installments.forEach(inst => {
+            if (inst.status === 'Paid') {
+                totalPaid += inst.amount;
+            } else {
+                allPaid = false;
+            }
+        });
+
+        payment.amountPaid = totalPaid;
+        payment.status = allPaid ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
+
+        await payment.save();
+
+        res.json({ 
+            message: installment.label + ' marked as unpaid',
+            payment 
+        });
+    } catch (error) {
+        console.error('Unverify installment error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get school UPI QR Code
+router.get('/upi-qr', schoolAuth, async (req, res) => {
+    try {
+        const School = require('../models/School');
+        const school = await School.findById(req.schoolId);
+        if (!school) {
+            return res.status(404).json({ message: 'School not found' });
+        }
+        res.json({ upiqrCode: school.upiqrCode || '' });
+    } catch (error) {
+        console.error('Get school QR error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Update school UPI QR Code
+router.post('/upi-qr', schoolAuth, async (req, res) => {
+    try {
+        const School = require('../models/School');
+        const { upiqrCode } = req.body;
+        if (!upiqrCode) {
+            return res.status(400).json({ message: 'QR Code is required' });
+        }
+        const school = await School.findByIdAndUpdate(req.schoolId, { upiqrCode }, { new: true });
+        if (!school) {
+            return res.status(404).json({ message: 'School not found' });
+        }
+        res.json({ message: 'UPI QR Code updated successfully', upiqrCode: school.upiqrCode });
+    } catch (error) {
+        console.error('Update school QR error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get all pending payment verifications for the school
+router.get('/pending-verifications', schoolAuth, async (req, res) => {
+    try {
+        const payments = await FeePayment.find({
+            schoolId: req.schoolId,
+            'installments.status': 'Verification Pending'
+        }).populate('studentId').populate('feeStructureId');
+
+        const pendingList = [];
+        payments.forEach(p => {
+            p.installments.forEach(inst => {
+                if (inst.status === 'Verification Pending') {
+                    pendingList.push({
+                        paymentId: p._id,
+                        installmentId: inst._id,
+                        student: p.studentId ? {
+                            id: p.studentId._id,
+                            name: p.studentId.name,
+                            studentId: p.studentId.studentId,
+                            className: p.studentId.className,
+                            section: p.studentId.section
+                        } : null,
+                        feeName: p.feeStructureId ? p.feeStructureId.feeName : 'N/A',
+                        label: inst.label,
+                        amount: inst.amount,
+                        submittedDate: inst.submittedDate,
+                        utrNumber: inst.utrNumber,
+                        transactionId: inst.transactionId,
+                        screenshot: inst.screenshot
+                    });
+                }
+            });
+        });
+
+        res.json(pendingList);
+    } catch (error) {
+        console.error('Get pending verifications error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Reject an installment payment
+router.put('/payments/:id/reject/:installmentId', schoolAuth, async (req, res) => {
+    try {
+        const payment = await FeePayment.findOne({ _id: req.params.id, schoolId: req.schoolId });
+        if (!payment) {
+            return res.status(404).json({ message: 'Fee record not found' });
+        }
+
+        const installment = payment.installments.id(req.params.installmentId);
+        if (!installment) {
+            return res.status(404).json({ message: 'Installment not found' });
+        }
+
+        installment.status = 'Unpaid';
+        // Clear UTR details and screenshot on rejection
+        installment.screenshot = '';
+        installment.utrNumber = '';
+        installment.transactionId = '';
+        installment.paidDate = null;
+        installment.verifiedBy = '';
+
+        // Recalculate overall status
+        let totalPaid = 0;
+        let allPaid = true;
+        payment.installments.forEach(inst => {
+            if (inst.status === 'Paid') {
+                totalPaid += inst.amount;
+            } else {
+                allPaid = false;
+            }
+        });
+
+        payment.amountPaid = totalPaid;
+        payment.status = allPaid ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
+
+        await payment.save();
+        res.json({ message: 'Payment verification rejected', payment });
+    } catch (error) {
+        console.error('Reject installment error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

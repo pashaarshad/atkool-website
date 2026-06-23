@@ -59,6 +59,11 @@ const schoolSchema = new mongoose.Schema({
     // School Images (maximum 6)
     schoolImages: [String],
 
+    upiqrCode: {
+        type: String,
+        default: ''
+    },
+
     deleteOtp: {
         code: { type: String },
         expiresAt: { type: Date }
