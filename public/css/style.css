@@ -352,3 +352,37 @@ body {
     .login-box { padding:30px 24px; }
     .login-box h1 { font-size:22px; }
 }
+
+/* ===== PASSWORD TOGGLE HELPERS ===== */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+.password-wrapper input {
+    width: 100%;
+    padding-right: 45px !important;
+}
+.password-toggle-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+.password-toggle-btn:hover {
+    color: #4338CA;
+    background-color: rgba(67, 56, 202, 0.05);
+}
+.password-toggle-btn svg {
+    width: 20px;
+    height: 20px;
+}
