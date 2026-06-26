@@ -1,0 +1,6 @@
+[2026-06-26T01:59:06.376Z] School Delete OTP generated:
+School Name: ATKool Test School
+School ID: test-12345
+OTP Code: 844009
+Expires At: 26/6/2026, 7:34:06 am
+-------------------------------------------
