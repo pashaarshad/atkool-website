@@ -117,37 +117,30 @@ document.addEventListener('DOMContentLoaded', function () {
     var schoolImagesInput = document.getElementById('schoolImages');
     schoolImagesInput.addEventListener('change', function () {
         var files = Array.from(this.files);
-        if (files.length > 6) {
-            showToast('You can only upload a maximum of 6 images', 'error');
+        if (schoolImagesBase64.length + files.length > 6) {
+            showToast('Maximum 6 images allowed. You already have ' + schoolImagesBase64.length + ' images.', 'error');
             this.value = '';
             return;
         }
 
-        schoolImagesBase64 = [];
-        var previewContainer = document.getElementById('imagePreviewContainer');
-        previewContainer.innerHTML = '';
-
-        files.forEach(function(file) {
+        var loadedCount = 0;
+        files.forEach(function (file) {
             var reader = new FileReader();
             reader.onload = function (e) {
                 var base64 = e.target.result;
                 schoolImagesBase64.push(base64);
-                
-                // Add preview
-                var previewDiv = document.createElement('div');
-                previewDiv.style.position = 'relative';
-                previewDiv.innerHTML = `
-                    <img src="${base64}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
-                    <div style="font-size: 10px; color: #666; text-align: center; margin-top: 5px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</div>
-                `;
-                previewContainer.appendChild(previewDiv);
+                loadedCount++;
+                if (loadedCount === files.length) {
+                    renderImagePreviews();
+                    showToast(files.length + ' images added successfully!', 'success');
+                }
             };
             reader.readAsDataURL(file);
         });
-        
-        if (files.length > 0) {
-            showToast(files.length + ' images selected', 'success');
-        }
+
+        this.value = '';
+    });
+
     // Setup Password Toggles
     const eyeOpenSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
     const eyeClosedSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
@@ -170,7 +163,56 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setupPasswordToggle('password', 'togglePassword');
     setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
+
+    // Real-time password match border check
+    var passwordInput = document.getElementById('password');
+    var confirmPasswordInput = document.getElementById('confirmPassword');
+
+    function checkPasswordMatch() {
+        var password = passwordInput.value;
+        var confirmPassword = confirmPasswordInput.value;
+
+        if (!confirmPassword) {
+            confirmPasswordInput.style.borderColor = '#e2e8f0';
+            return;
+        }
+
+        if (password === confirmPassword) {
+            confirmPasswordInput.style.borderColor = '#10b981'; // Green matching
+        } else {
+            confirmPasswordInput.style.borderColor = '#ef4444'; // Red mismatching
+        }
+    }
+
+    passwordInput.addEventListener('input', checkPasswordMatch);
+    confirmPasswordInput.addEventListener('input', checkPasswordMatch);
 });
+
+function renderImagePreviews() {
+    var previewContainer = document.getElementById('imagePreviewContainer');
+    if (!previewContainer) return;
+    previewContainer.innerHTML = '';
+
+    schoolImagesBase64.forEach(function (base64, index) {
+        var previewDiv = document.createElement('div');
+        previewDiv.style.position = 'relative';
+        previewDiv.style.width = '80px';
+        previewDiv.style.height = '100px';
+
+        previewDiv.innerHTML = `
+            <img src="${base64}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
+            <button type="button" class="remove-image-btn" onclick="removeSchoolImage(${index})" style="position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: #ef4444; color: #fff; border: none; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">×</button>
+            <div style="font-size: 10px; color: #666; text-align: center; margin-top: 5px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Image ${index + 1}</div>
+        `;
+        previewContainer.appendChild(previewDiv);
+    });
+}
+
+window.removeSchoolImage = function (index) {
+    schoolImagesBase64.splice(index, 1);
+    renderImagePreviews();
+    showToast('Image removed', 'info');
+};
 
 function setupFileUpload(inputId, nameSpanId, callback) {
     var input = document.getElementById(inputId);
