@@ -217,6 +217,7 @@ router.get('/teacher/unread-count', teacherAuth, async (req, res) => {
 // ============ PARENT CHAT ENDPOINTS ============
 
 // Get parent's chat partner (their class teacher)
+// Get all parent's chat partners (teachers of their student's class/section)
 router.get('/parent/conversations', parentAuth, async (req, res) => {
     try {
         const student = await Student.findById(req.studentId);
@@ -224,104 +225,107 @@ router.get('/parent/conversations', parentAuth, async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        // Find the class teacher for this student's class
-        let teacher = null;
-
-        // First try: find by teacherId reference on student
-        if (student.teacherId) {
-            teacher = await Teacher.findById(student.teacherId).select('name email mobileNo subject photo className classAssignments');
-        }
-
-        // Second try: find by classTeacherFor matching student's class and section
-        if (!teacher) {
-            teacher = await Teacher.findOne({
-                schoolId: req.schoolId,
+        // Find all teachers related to this student's class and section
+        const orConditions = [
+            {
                 isClassTeacher: true,
                 'classTeacherFor.className': student.className,
                 'classTeacherFor.section': student.section || 'A'
-            }).select('name email mobileNo subject photo className classAssignments');
-        }
-
-        // Third try: find any teacher assigned to student's class and section
-        if (!teacher) {
-            teacher = await Teacher.findOne({
-                schoolId: req.schoolId,
+            },
+            {
                 'classAssignments': {
                     $elemMatch: {
                         className: student.className,
                         section: student.section || 'A'
                     }
                 }
-            }).select('name email mobileNo subject photo className classAssignments');
+            }
+        ];
+
+        if (student.teacherId) {
+            orConditions.push({ _id: student.teacherId });
         }
 
-        // Fourth try: find class teacher matching student's class (ignore section)
-        if (!teacher) {
-            teacher = await Teacher.findOne({
+        let teachers = await Teacher.find({
+            schoolId: req.schoolId,
+            $or: orConditions
+        }).select('name email mobileNo subject photo className classAssignments isClassTeacher classTeacherFor');
+
+        // Fallback: if no teachers found for this class/section, try showing class teachers matching just the className
+        if (teachers.length === 0) {
+            teachers = await Teacher.find({
                 schoolId: req.schoolId,
-                isClassTeacher: true,
-                'classTeacherFor.className': student.className
-            }).select('name email mobileNo subject photo className classAssignments');
+                $or: [
+                    {
+                        isClassTeacher: true,
+                        'classTeacherFor.className': student.className
+                    },
+                    {
+                        'classAssignments.className': student.className
+                    }
+                ]
+            }).select('name email mobileNo subject photo className classAssignments isClassTeacher classTeacherFor');
         }
 
-        // Fifth try: find any teacher assigned to student's class (ignore section)
-        if (!teacher) {
-            teacher = await Teacher.findOne({
-                schoolId: req.schoolId,
-                'classAssignments.className': student.className
-            }).select('name email mobileNo subject photo className classAssignments');
-        }
-
-        // Sixth try: fallback to any active teacher in the school
-        if (!teacher) {
-            teacher = await Teacher.findOne({
+        // Second fallback: show any active teacher in the school
+        if (teachers.length === 0) {
+            teachers = await Teacher.find({
                 schoolId: req.schoolId,
                 status: 'Active'
-            }).select('name email mobileNo subject photo className classAssignments');
+            }).select('name email mobileNo subject photo className classAssignments isClassTeacher classTeacherFor');
         }
 
-        // Seventh try: fallback to any teacher in the school
-        if (!teacher) {
-            teacher = await Teacher.findOne({
-                schoolId: req.schoolId
-            }).select('name email mobileNo subject photo className classAssignments');
+        if (teachers.length === 0) {
+            return res.json({ conversations: [], message: 'No teachers assigned to your class yet.' });
         }
 
-        if (!teacher) {
-            return res.json({ conversations: [], message: 'No teacher assigned to your class yet.' });
-        }
+        // Map teachers to conversation objects with last message and unread count
+        const conversations = await Promise.all(teachers.map(async (teacher) => {
+            const lastMessage = await ChatMessage.findOne({
+                schoolId: req.schoolId,
+                studentId: req.studentId,
+                teacherId: teacher._id
+            }).sort({ createdAt: -1 });
 
-        // Get last message and unread count
-        const lastMessage = await ChatMessage.findOne({
-            schoolId: req.schoolId,
-            studentId: req.studentId,
-            teacherId: teacher._id
-        }).sort({ createdAt: -1 });
+            const unreadCount = await ChatMessage.countDocuments({
+                schoolId: req.schoolId,
+                studentId: req.studentId,
+                teacherId: teacher._id,
+                senderType: 'teacher',
+                isRead: false
+            });
 
-        const unreadCount = await ChatMessage.countDocuments({
-            schoolId: req.schoolId,
-            studentId: req.studentId,
-            teacherId: teacher._id,
-            senderType: 'teacher',
-            isRead: false
-        });
-
-        res.json({
-            conversations: [{
+            return {
                 teacher: {
                     _id: teacher._id,
                     name: teacher.name,
                     subject: teacher.subject,
-                    photo: teacher.photo
+                    photo: teacher.photo,
+                    isClassTeacher: teacher.isClassTeacher && 
+                                     teacher.classTeacherFor && 
+                                     teacher.classTeacherFor.className === student.className && 
+                                     teacher.classTeacherFor.section === (student.section || 'A')
                 },
                 lastMessage: lastMessage ? {
                     message: lastMessage.message,
+                    messageType: lastMessage.messageType || 'text',
                     senderType: lastMessage.senderType,
                     createdAt: lastMessage.createdAt
                 } : null,
                 unreadCount
-            }]
+            };
+        }));
+
+        // Sort: conversations with unread first, then by last message time
+        conversations.sort((a, b) => {
+            if (a.unreadCount > 0 && b.unreadCount === 0) return -1;
+            if (a.unreadCount === 0 && b.unreadCount > 0) return 1;
+            const aTime = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+            const bTime = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+            return bTime - aTime;
         });
+
+        res.json({ conversations });
     } catch (error) {
         console.error('Get parent conversations error:', error);
         res.status(500).json({ message: 'Server error' });

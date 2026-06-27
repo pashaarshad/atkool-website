@@ -29,8 +29,7 @@ function showToast(msg, type = 'success') {
 // ============ SIDEBAR ============
 const menuItems = [
     { id:'dashboard', label:'Overview', icon:'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
-    { id:'my-classes', label:'My Classes', icon:'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
-    { id:'students', label:'My Students', icon:'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+    { id:'students', label:'My Classes', icon:'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
     { id:'attendance', label:'Take Attendance', icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
     { id:'history', label:'Attendance History', icon:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
     { id:'chat', label:'Chat', icon:'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
@@ -38,12 +37,13 @@ const menuItems = [
     { id:'requests', label:'Student Requests', icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
     { id:'events', label:'School Events', icon:'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
     { id:'exams', label:'Upcoming Exams', icon:'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-    { id:'leaves', label:'Leave Management', icon:'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' },
+    { id:'leaves', label:'Leave Management', icon:'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z' },
     { id:'homework', label:'Homework', icon:'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
     { id:'marks-entry', label:'Marks Entry', icon:'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' }
 ];
 
 const sidebar = document.getElementById('sidebarMenu');
+sidebar.innerHTML = '';
 menuItems.forEach((m, i) => {
     const div = document.createElement('div');
     div.className = `menu-item${i === 0 ? ' active' : ''}`;
@@ -75,7 +75,6 @@ function loadView(view, el) {
     c.innerHTML = '<div class="loader">Loading...</div>';
     const views = { 
         dashboard: loadDashboard, 
-        'my-classes': loadMyClasses, 
         students: loadStudents, 
         attendance: loadAttendance, 
         history: loadHistory, 
@@ -114,7 +113,7 @@ async function loadDashboard() {
             <div class="stat-card bg-purple"><div class="icon">📊</div><div class="value">${attendPct}%</div><div class="label">Attendance Rate</div></div>
         </div>
         <div class="quick-actions">
-            <div class="action-tile" onclick="loadView('my-classes')"><div class="tile-icon" style="background:linear-gradient(135deg,#4338CA,#7C3AED)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#fff"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div><div class="tile-label">My Classes</div></div>
+            <div class="action-tile" onclick="loadView('students')"><div class="tile-icon" style="background:linear-gradient(135deg,#4338CA,#7C3AED)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#fff"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div><div class="tile-label">My Classes</div></div>
             <div class="action-tile" onclick="loadView('attendance')"><div class="tile-icon" style="background:#28A745"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#fff"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg></div><div class="tile-label">Take Attendance</div></div>
             <div class="action-tile" onclick="loadView('chat')"><div class="tile-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#fff"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg></div><div class="tile-label">Chat with Parents</div></div>
         </div>
@@ -125,8 +124,8 @@ async function loadDashboard() {
         </div>`;
 }
 
-// ============ MY CLASSES ============
-async function loadMyClasses() {
+// ============ MY CLASSES / STUDENTS VIEW ============
+async function loadStudents() {
     const c = document.getElementById('mainContent');
     const classes = await fetchAPI('/api/teacher/my-classes');
     if (!classes) return;
@@ -209,10 +208,10 @@ async function loadClassStudents(className, section) {
 
     c.innerHTML = `
         <div style="margin-bottom:20px;">
-            <button class="btn btn-outline" onclick="loadMyClasses()" style="margin-bottom:16px">← Back to My Classes</button>
+            <button class="btn btn-outline" onclick="loadStudents()" style="margin-bottom:16px; border-radius:8px; padding: 8px 16px; font-weight: 600; border-color: #6366f1; color: #6366f1; background: transparent; cursor: pointer;">← Back to My Classes</button>
         </div>
-        <div class="card">
-            <div class="card-header" style="display:flex;align-items:center;gap:12px;">
+        <div class="card" style="padding:0; overflow:hidden;">
+            <div class="card-header" style="display:flex;align-items:center;gap:12px;border-bottom:2px solid #f1f5f9;padding:20px 24px;">
                 <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center">
                     <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:22px;height:22px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </div>
@@ -220,48 +219,63 @@ async function loadClassStudents(className, section) {
                     <div style="font-size:18px;font-weight:800;color:#0F172A">Class ${className} — Section ${section}</div>
                     <div style="font-size:12px;color:#64748b;font-weight:600">${students.length} student${students.length !== 1 ? 's' : ''}</div>
                 </div>
-                <span class="badge" style="margin-left:auto">${students.length} total</span>
+                <span class="badge" style="margin-left:auto; background:#6366f1; color:#fff; border-radius:20px; font-weight:700; padding:4px 12px;">${students.length} total</span>
             </div>
-            ${students.length === 0 ? '<div class="empty-state"><p>No approved students in this class yet.</p></div>' :
-            `<table>
-                <thead><tr><th>#</th><th>Roll No</th><th>Name</th><th>Parent</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead>
-                <tbody>
-                ${students.map((s, i) => `
-                    <tr>
-                        <td>${i + 1}</td>
-                        <td>${s.rollNo || s.studentId || '-'}</td>
-                        <td><strong>${s.name}</strong></td>
-                        <td>${s.parentName || 'N/A'}</td>
-                        <td>${s.parentMobile || s.mobileNo || 'N/A'}</td>
-                        <td><span class="badge ${s.approvalStatus === 'Approved' ? 'badge-green' : 'badge-orange'}">${s.approvalStatus || 'Pending'}</span></td>
-                        <td>
-                            <button class="btn btn-primary" style="padding:5px 12px;font-size:11px" onclick="openChatWithStudent('${s._id}','${s.name}','${s.parentName || 'Parent'}')">💬 Chat</button>
-                            <button class="btn btn-outline" style="padding:5px 12px;font-size:11px;margin-left:4px" onclick="generateParentLogin('${s._id}','${s.name}')">🔑 Login</button>
-                        </td>
-                    </tr>
-                `).join('')}
-                </tbody>
-            </table>`}
+            ${students.length === 0 ? '<div class="empty-state" style="padding:40px;"><p>No approved students in this class yet.</p></div>' :
+            `<div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:1.5px solid #f1f5f9; background:#fafbfc; text-align:left;">
+                            <th style="padding:16px 24px; font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">#</th>
+                            <th style="padding:16px 24px; font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">Roll No</th>
+                            <th style="padding:16px 24px; font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">Name</th>
+                            <th style="padding:16px 24px; font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">Parent</th>
+                            <th style="padding:16px 24px; font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">Contact</th>
+                            <th style="padding:16px 24px; font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">Status</th>
+                            <th style="padding:16px 24px; font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    ${students.map((s, i) => {
+                        return `
+                        <tr style="border-bottom:1px solid #f1f5f9;">
+                            <td style="padding:16px 24px; font-size:14px; color:#475569; font-weight:600;">${i + 1}</td>
+                            <td style="padding:16px 24px; font-size:14px; color:#475569;">${s.rollNo || s.studentId || '-'}</td>
+                            <td style="padding:16px 24px; font-size:14px; color:#0f172a; font-weight:700;">${s.name}</td>
+                            <td style="padding:16px 24px; font-size:14px; color:#475569;">${s.parentName || 'N/A'}</td>
+                            <td style="padding:16px 24px; font-size:14px; color:#475569;">${s.parentMobile || s.mobileNo || 'N/A'}</td>
+                            <td style="padding:16px 24px; font-size:14px;">
+                                <span style="background:#10b981; color:#fff; font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px;">${s.approvalStatus || 'Approved'}</span>
+                            </td>
+                            <td style="padding:16px 24px; font-size:14px;">
+                                <div style="display:flex; gap:8px;">
+                                    <button onclick="openChatWithStudent('${s._id}','${s.name.replace(/'/g, "\\'")}','${(s.parentName || 'Parent').replace(/'/g, "\\'")}')" style="
+                                        background:#6366f1; color:#fff; border:none; border-radius:20px; padding:6px 14px; 
+                                        font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; transition:transform 0.2s;
+                                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                                        Chat
+                                    </button>
+                                    <button onclick="generateParentLogin('${s._id}','${s.name.replace(/'/g, "\\'")}')" style="
+                                        background:transparent; color:#6366f1; border:1px solid #6366f1; border-radius:20px; padding:6px 14px; 
+                                        font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; transition:transform 0.2s;
+                                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m-5 4a5 5 0 01-9-5 5 5 0 019 5zm0 0l5 5m0 0l1.5-1.5M20.25 18l-1.5 1.5M16.5 16.5l-1.5 1.5"></path></svg>
+                                        Login
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        `;
+                    }).join('')}
+                    </tbody>
+                </table>
+            </div>`}
         </div>`;
 }
 
 function openChatWithStudent(studentId, studentName, parentName) {
     loadChatConversation(studentId, studentName, parentName);
-}
-
-// ============ STUDENTS LIST ============
-async function loadStudents() {
-    const c = document.getElementById('mainContent');
-    const students = await fetchAPI('/api/teacher/students');
-    if (!students) return;
-    c.innerHTML = `
-        <div class="card">
-            <div class="card-header">My Students <span class="badge">${students.length} total</span></div>
-            ${students.length === 0 ? '<div class="empty-state"><p>No students assigned yet.</p><button class="btn btn-primary" onclick="loadView(\'add-student\')">+ Add Student</button></div>' :
-            `<table><thead><tr><th>Roll</th><th>Name</th><th>Class</th><th>Parent</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-            ${students.map(s => `<tr><td>${s.rollNo || '-'}</td><td><strong>${s.name}</strong></td><td>${s.className} ${s.section || ''}</td><td>${s.parentName || 'N/A'}</td><td>${s.parentMobile || 'N/A'}</td><td><span class="badge ${s.approvalStatus === 'Approved' ? 'badge-green' : 'badge-orange'}">${s.approvalStatus || 'Pending'}</span></td><td><button class="btn btn-primary" style="padding:6px 14px;font-size:12px" onclick="generateParentLogin('${s._id}','${s.name}')">🔑 Generate</button></td></tr>`).join('')}
-            </tbody></table>`}
-        </div>`;
 }
 
 async function generateParentLogin(studentId, studentName) {
@@ -290,11 +304,85 @@ let attendanceMap = {};
 
 async function loadAttendance() {
     const c = document.getElementById('mainContent');
-    const students = await fetchAPI('/api/teacher/students');
+    c.innerHTML = '<div class="loader">Loading classes...</div>';
+    const classes = await fetchAPI('/api/teacher/my-classes');
+    if (!classes) return;
+
+    if (classes.length === 0) {
+        c.innerHTML = `
+            <div class="card">
+                <div class="card-header">Take Attendance</div>
+                <div class="empty-state">
+                    <p>No classes assigned to you yet. Please contact your administrator.</p>
+                </div>
+            </div>`;
+        return;
+    }
+
+    const classCards = classes.map(cls => {
+        const gradients = [
+            'linear-gradient(135deg,#10b981,#059669)',
+            'linear-gradient(135deg,#f59e0b,#d97706)',
+            'linear-gradient(135deg,#ef4444,#dc2626)',
+            'linear-gradient(135deg,#4338CA,#7C3AED)',
+            'linear-gradient(135deg,#3b82f6,#2563eb)',
+            'linear-gradient(135deg,#8b5cf6,#7c3aed)',
+            'linear-gradient(135deg,#06b6d4,#0891b2)'
+        ];
+        const colorIndex = Math.abs((cls.className || '').charCodeAt(0) + (cls.section || 'A').charCodeAt(0)) % gradients.length;
+        
+        return `
+            <div class="class-card" onclick="loadAttendanceForClass('${cls.className}','${cls.section}')" style="
+                background:#fff; border:2px solid #e2e8f0; border-radius:20px; padding:28px; cursor:pointer; 
+                transition:all .3s; position:relative; overflow:hidden;
+            " onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 12px 30px rgba(67,56,202,.15)';this.style.borderColor='#c7d2fe'" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor='#e2e8f0'">
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+                    <div style="width:56px;height:56px;border-radius:16px;background:${gradients[colorIndex]};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:28px;height:28px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:20px;font-weight:800;color:#0F172A;">Class ${cls.className}</div>
+                        <div style="font-size:14px;font-weight:600;color:#64748b;">Section ${cls.section}</div>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <svg fill="none" stroke="#64748b" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <span style="font-size:14px;font-weight:700;color:#334155;">${cls.studentCount} Students</span>
+                    </div>
+                    ${cls.isClassTeacher ? '<span style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px">CLASS TEACHER</span>' : '<span style="background:#f1f5f9;color:#64748b;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">SUBJECT TEACHER</span>'}
+                </div>
+            </div>`;
+    }).join('');
+
+    c.innerHTML = `
+        <div class="card" style="border:none;background:transparent;box-shadow:none;padding:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center">
+                        <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:24px;height:24px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:22px;font-weight:800;color:#0F172A">Take Attendance</div>
+                        <div style="font-size:13px;color:#64748b;font-weight:600">Select a class to mark attendance for ${new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' })}</div>
+                    </div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">
+                ${classCards}
+            </div>
+        </div>`;
+}
+
+async function loadAttendanceForClass(className, section) {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = '<div class="loader">Loading students...</div>';
+
+    const students = await fetchAPI(`/api/teacher/students?className=${encodeURIComponent(className)}&section=${encodeURIComponent(section)}`);
     if (!students) return;
 
     const existing = await fetchAPI(`/api/teacher/attendance?date=${todayStr()}`);
-    const alreadyDone = existing && existing.length > 0;
+    const alreadyDone = existing && existing.some(a => a.className === className && a.section === section);
 
     attendanceMap = {};
     students.forEach(s => {
@@ -306,29 +394,42 @@ async function loadAttendance() {
     const absentCount = () => Object.values(attendanceMap).filter(v => v === 'absent').length;
 
     c.innerHTML = `
-        <div class="card">
-            <div class="card-header">Take Attendance — ${new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' })}</div>
-            ${alreadyDone ? '<div style="background:#fff3cd;border:1px solid #ffc107;padding:12px 16px;border-radius:10px;margin-bottom:16px;color:#856404;font-weight:500">⚠️ Attendance already submitted for today. You can update it below.</div>' : ''}
-            <div class="summary-bar">
-                <div class="summary-item" style="background:#28A745;border-radius:10px"><div class="count" id="presentCount">${presentCount()}</div><div class="text">Present</div></div>
-                <div class="summary-item" style="background:#DC3545;border-radius:10px"><div class="count" id="absentCount">${absentCount()}</div><div class="text">Absent</div></div>
-                <div class="summary-item" style="background:#007BFF;border-radius:10px"><div class="count">${students.length}</div><div class="text">Total</div></div>
+        <div class="card" style="padding:0; overflow:hidden;">
+            <div style="background:#fff; padding:16px 24px; display:flex; align-items:center; gap:14px; border-bottom:2px solid #f1f5f9">
+                <button onclick="loadAttendance()" style="background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;transition:.2s;display:flex;align-items:center;justify-content:center" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
+                    <svg fill="none" stroke="#64748b" viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <div>
+                    <div style="font-size:18px;font-weight:800;color:#0F172A">Class ${escapeHTML(className)} - Section ${escapeHTML(section)}</div>
+                    <div style="font-size:12px;color:#64748b;font-weight:600">${new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' })}</div>
+                </div>
             </div>
-            <div id="studentAttList">
-                ${students.length === 0 ? '<div class="empty-state"><p>No students to mark attendance for.</p></div>' :
-                students.map((s, i) => `
-                    <div class="student-attendance-row">
-                        <div style="width:32px;height:32px;background:rgba(107,78,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;font-weight:700;color:#6B4EFF;font-size:13px">${i + 1}</div>
-                        <div class="student-info"><div class="student-name">${s.name}</div><div class="student-meta">Roll: ${s.rollNo || '-'} | ${s.className}-${s.section || 'A'}</div></div>
-                        <div style="display:flex;gap:8px">
-                            <button class="att-btn absent ${attendanceMap[s._id] === 'absent' ? 'active' : ''}" id="abs-${s._id}" onclick="markAtt('${s._id}','absent')">A</button>
-                            <button class="att-btn present ${attendanceMap[s._id] === 'present' ? 'active' : ''}" id="pre-${s._id}" onclick="markAtt('${s._id}','present')">P</button>
+            
+            ${alreadyDone ? '<div style="background:#fff3cd;border:1px solid #ffc107;padding:12px 16px;border-radius:10px;margin:16px 24px 0 24px;color:#856404;font-weight:500;">⚠️ Attendance already submitted for today for this class. You can update it below.</div>' : ''}
+            
+            <div style="padding:24px;">
+                <div class="summary-bar" style="margin-top:0; margin-bottom:20px;">
+                    <div class="summary-item" style="background:#28A745;border-radius:10px"><div class="count" id="presentCount">${presentCount()}</div><div class="text">Present</div></div>
+                    <div class="summary-item" style="background:#DC3545;border-radius:10px"><div class="count" id="absentCount">${absentCount()}</div><div class="text">Absent</div></div>
+                    <div class="summary-item" style="background:#007BFF;border-radius:10px"><div class="count">${students.length}</div><div class="text">Total</div></div>
+                </div>
+                <div id="studentAttList">
+                    ${students.length === 0 ? '<div class="empty-state"><p>No students in this class to mark attendance for.</p></div>' :
+                    students.map((s, i) => `
+                        <div class="student-attendance-row">
+                            <div style="width:32px;height:32px;background:rgba(107,78,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;font-weight:700;color:#6B4EFF;font-size:13px">${i + 1}</div>
+                            <div class="student-info"><div class="student-name">${s.name}</div><div class="student-meta">Roll: ${s.rollNo || '-'} | Class: ${s.className}-${s.section || 'A'}</div></div>
+                            <div style="display:flex;gap:8px">
+                                <button class="att-btn absent ${attendanceMap[s._id] === 'absent' ? 'active' : ''}" id="abs-${s._id}" onclick="markAtt('${s._id}','absent')">A</button>
+                                <button class="att-btn present ${attendanceMap[s._id] === 'present' ? 'active' : ''}" id="pre-${s._id}" onclick="markAtt('${s._id}','present')">P</button>
+                            </div>
                         </div>
-                    </div>
-                `).join('')}
-            </div>
-            <div style="margin-top:20px;display:flex;gap:12px;justify-content:flex-end">
-                <button class="btn btn-success" id="submitAttBtn" onclick="submitAttendance()" ${students.length === 0 ? 'disabled' : ''}>✅ Submit Attendance</button>
+                    `).join('')}
+                </div>
+                <div style="margin-top:20px;display:flex;gap:12px;justify-content:flex-end">
+                    <button class="btn btn-secondary" onclick="loadAttendance()">Cancel</button>
+                    <button class="btn btn-success" id="submitAttBtn" onclick="submitAttendanceForClass('${className}','${section}')" ${students.length === 0 ? 'disabled' : ''}>✅ Submit Attendance</button>
+                </div>
             </div>
         </div>`;
 }
@@ -341,17 +442,17 @@ function markAtt(studentId, status) {
     document.getElementById('absentCount').textContent = Object.values(attendanceMap).filter(v => v === 'absent').length;
 }
 
-async function submitAttendance() {
+async function submitAttendanceForClass(className, section) {
     const btn = document.getElementById('submitAttBtn');
     btn.disabled = true;
     btn.textContent = 'Submitting...';
 
-    const students = await fetchAPI('/api/teacher/students');
-    const attendanceData = students.map(s => ({
-        studentId: s._id,
-        status: attendanceMap[s._id] || 'present',
-        className: s.className,
-        section: s.section
+    const studentIds = Object.keys(attendanceMap);
+    const attendanceData = studentIds.map(sid => ({
+        studentId: sid,
+        status: attendanceMap[sid] || 'present',
+        className: className,
+        section: section
     }));
 
     const result = await fetchAPI('/api/teacher/attendance', {
@@ -360,8 +461,8 @@ async function submitAttendance() {
     });
 
     if (result && result.message) {
-        showToast('Attendance submitted successfully!');
-        loadView('dashboard');
+        showToast(`Attendance for Class ${className}-${section} submitted successfully!`);
+        loadAttendance();
     } else {
         showToast('Failed to submit', 'error');
         btn.disabled = false;
@@ -561,6 +662,176 @@ async function loadChatConversation(studentId, studentName, parentName) {
     }, 5000);
 }
 
+function downloadBase64File(base64Data, filename) {
+    const link = document.createElement('a');
+    link.href = base64Data;
+    link.download = filename || 'attached_document';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function renderTeacherChatMessage(msg) {
+    const isMe = msg.senderType === 'teacher';
+    const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    
+    let contentHtml = '';
+    if (msg.messageType === 'image') {
+        contentHtml = `<img src="${msg.message}" style="max-width:100%; max-height:200px; border-radius:8px; display:block; margin-bottom:4px; cursor:pointer;" onclick="window.open('${msg.message}', '_blank')">`;
+    } else if (msg.messageType === 'file') {
+        const mimeMatch = msg.message.match(/data:([^;]+);/);
+        const mimeType = mimeMatch ? mimeMatch[1] : '';
+        let extension = 'file';
+        if (mimeType) {
+            const parts = mimeType.split('/');
+            extension = parts[1] || 'file';
+        }
+        contentHtml = `
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:${isMe ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.05)'};border-radius:8px;min-width:200px;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;stroke-width:2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Shared Document</div>
+                    <div style="font-size:10px;opacity:0.8;">Format: ${extension.toUpperCase()}</div>
+                </div>
+                <button onclick="downloadBase64File('${msg.message}', 'document.${extension}')" style="background:${isMe ? '#fff' : '#4338CA'};color:${isMe ? '#4338CA' : '#fff'};border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">Save</button>
+            </div>`;
+    } else {
+        contentHtml = `<div>${escapeHTML(msg.message)}</div>`;
+    }
+
+    return `
+        <div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:8px">
+            <div style="
+                max-width:70%;padding:12px 16px;border-radius:${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};
+                background:${isMe ? 'linear-gradient(135deg,#4338CA,#6366f1)' : '#f1f5f9'};
+                color:${isMe ? '#fff' : '#1e293b'};font-size:14px;line-height:1.5;
+                box-shadow:0 2px 8px ${isMe ? 'rgba(67,56,202,.2)' : 'rgba(0,0,0,.04)'};
+            ">
+                ${contentHtml}
+                <div style="font-size:10px;margin-top:4px;opacity:.7;text-align:${isMe ? 'right' : 'left'}">${time}${isMe && msg.isRead ? ' ✓✓' : ''}</div>
+            </div>
+        </div>`;
+}
+
+async function handleTeacherChatFileSelected(event, studentId) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const isMedia = file.type.startsWith('image/') || file.type.startsWith('video/') || file.type.startsWith('audio/');
+    const sizeInMB = file.size / (1024 * 1024);
+    if (isMedia) {
+        if (sizeInMB > 2) {
+            showToast('Media files (images, video, audio) must be less than 2 MB.', 'error');
+            event.target.value = '';
+            return;
+        }
+    } else {
+        if (sizeInMB > 3) {
+            showToast('Documents and other files must be less than 3 MB.', 'error');
+            event.target.value = '';
+            return;
+        }
+    }
+
+    showToast('Uploading attachment...', 'info');
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const base64Data = e.target.result;
+        const messageType = file.type.startsWith('image/') ? 'image' : 'file';
+
+        const result = await fetchAPI('/api/chat/teacher/send', {
+            method: 'POST',
+            body: JSON.stringify({
+                studentId,
+                message: base64Data,
+                messageType
+            })
+        });
+
+        if (result && result._id) {
+            showToast('Attachment sent successfully!');
+            const container = document.getElementById('chatMessages');
+            if (container) {
+                const emptyMsg = container.querySelector('[style*="text-align:center"]');
+                if (emptyMsg) emptyMsg.remove();
+                container.innerHTML += renderTeacherChatMessage(result);
+                container.scrollTop = container.scrollHeight;
+            }
+        } else {
+            showToast(result?.message || 'Failed to send attachment', 'error');
+        }
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+}
+
+async function loadChatConversation(studentId, studentName, parentName) {
+    if (chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
+    
+    const c = document.getElementById('mainContent');
+    c.innerHTML = '<div class="loader">Loading chat...</div>';
+
+    const messages = await fetchAPI(`/api/chat/teacher/messages/${studentId}`);
+    if (!messages) return;
+
+    const messagesHtml = messages.map(msg => renderTeacherChatMessage(msg)).join('');
+
+    c.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:calc(100vh - 140px);">
+            <!-- Chat Header -->
+            <div style="background:#fff;border-radius:16px 16px 0 0;padding:16px 24px;display:flex;align-items:center;gap:14px;border:1px solid #e2e8f0;border-bottom:2px solid #f1f5f9">
+                <button onclick="loadChat()" style="background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;transition:.2s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
+                    <svg fill="none" stroke="#64748b" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;flex-shrink:0">
+                    ${studentName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                    <div style="font-weight:700;color:#0F172A;font-size:15px">${studentName}</div>
+                    <div style="font-size:12px;color:#64748b;font-weight:500">Parent: ${parentName}</div>
+                </div>
+            </div>
+            
+            <!-- Messages Area -->
+            <div id="chatMessages" style="flex:1;overflow-y:auto;padding:20px 24px;background:#fafbfc;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0">
+                ${messages.length === 0 ? '<div style="text-align:center;color:#94a3b8;padding:40px;font-weight:500">Start a conversation with ' + parentName + '</div>' : messagesHtml}
+            </div>
+            
+            <!-- Input Area -->
+            <div style="background:#fff;border-radius:0 0 16px 16px;padding:16px 24px;display:flex;gap:12px;align-items:center;border:1px solid #e2e8f0;border-top:2px solid #f1f5f9;position:relative;">
+                <input type="file" id="teacherChatFileInput" style="display:none" onchange="handleTeacherChatFileSelected(event, '${studentId}')">
+                <button onclick="document.getElementById('teacherChatFileInput').click()" style="width:40px;height:40px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                    <svg fill="none" stroke="#475569" viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                </button>
+                <input type="text" id="chatInput" placeholder="Type a message..." style="flex:1;padding:12px 18px;border:2px solid #e2e8f0;border-radius:24px;font-size:14px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor='#4338CA'" onblur="this.style.borderColor='#e2e8f0'" onkeypress="if(event.key==='Enter')sendTeacherMessage('${studentId}')">
+                <button onclick="sendTeacherMessage('${studentId}')" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;box-shadow:0 4px 12px rgba(67,56,202,.3)" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
+                    <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                </button>
+            </div>
+        </div>`;
+
+    // Scroll to bottom
+    const chatDiv = document.getElementById('chatMessages');
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+
+    // Poll for new messages every 5 seconds
+    chatPollInterval = setInterval(async () => {
+        const newMessages = await fetchAPI(`/api/chat/teacher/messages/${studentId}`);
+        if (!newMessages) return;
+        const container = document.getElementById('chatMessages');
+        if (!container) { clearInterval(chatPollInterval); return; }
+        
+        const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
+        
+        if (newMessages.length > 0) {
+            container.innerHTML = newMessages.map(msg => renderTeacherChatMessage(msg)).join('');
+        }
+        if (wasAtBottom) container.scrollTop = container.scrollHeight;
+        updateChatBadge();
+    }, 5000);
+}
+
 async function sendTeacherMessage(studentId) {
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
@@ -577,15 +848,7 @@ async function sendTeacherMessage(studentId) {
         const chatDiv = document.getElementById('chatMessages');
         const emptyMsg = chatDiv.querySelector('[style*="text-align:center"]');
         if (emptyMsg) emptyMsg.remove();
-        
-        const time = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-        chatDiv.innerHTML += `
-            <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-                <div style="max-width:70%;padding:12px 16px;border-radius:16px 16px 4px 16px;background:linear-gradient(135deg,#4338CA,#6366f1);color:#fff;font-size:14px;line-height:1.5;box-shadow:0 2px 8px rgba(67,56,202,.2);">
-                    <div>${message}</div>
-                    <div style="font-size:10px;margin-top:4px;opacity:.7;text-align:right">${time}</div>
-                </div>
-            </div>`;
+        chatDiv.innerHTML += renderTeacherChatMessage(result);
         chatDiv.scrollTop = chatDiv.scrollHeight;
     } else {
         showToast('Failed to send message', 'error');
@@ -603,47 +866,278 @@ function formatChatTime(date) {
 }
 
 // ============ ADD STUDENT ============
-function loadAddStudent() {
+let teacherStudentLocalStream = null;
+
+function startTeacherStudentWebcam() {
+    var video = document.getElementById('teacherStudentWebcamVideo');
+    var container = document.getElementById('teacherStudentWebcamContainer');
+    container.style.display = 'flex';
+    document.getElementById('btnStartTeacherStudentCamera').style.display = 'none';
+    navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
+        .then(function (stream) {
+            teacherStudentLocalStream = stream;
+            video.srcObject = stream;
+        })
+        .catch(function (error) {
+            console.error("Webcam access error:", error);
+            showToast("Failed to access webcam.", "error");
+            stopTeacherStudentWebcam();
+        });
+}
+
+function stopTeacherStudentWebcam() {
+    var container = document.getElementById('teacherStudentWebcamContainer');
+    var video = document.getElementById('teacherStudentWebcamVideo');
+    if (container) container.style.display = 'none';
+    const btn = document.getElementById('btnStartTeacherStudentCamera');
+    if (btn) btn.style.display = 'inline-block';
+    if (teacherStudentLocalStream) {
+        teacherStudentLocalStream.getTracks().forEach(function(track) { track.stop(); });
+        teacherStudentLocalStream = null;
+    }
+    if (video) video.srcObject = null;
+}
+
+function captureTeacherStudentPhoto() {
+    var video = document.getElementById('teacherStudentWebcamVideo');
+    var canvas = document.createElement('canvas');
+    canvas.width = 320; canvas.height = 240;
+    var ctx = canvas.getContext('2d');
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    var base64 = canvas.toDataURL('image/jpeg');
+    document.getElementById('teacherStudentPhotoBase64').value = base64;
+    document.getElementById('teacherStudentPhotoPreview').src = base64;
+    document.getElementById('teacherStudentPhotoPreviewContainer').style.display = 'flex';
+    stopTeacherStudentWebcam();
+}
+
+function removeTeacherStudentPhoto() {
+    document.getElementById('teacherStudentPhotoBase64').value = '';
+    document.getElementById('teacherStudentPhotoPreview').src = '';
+    document.getElementById('teacherStudentPhotoPreviewContainer').style.display = 'none';
+    document.getElementById('teacherStudentPhotoFile').value = '';
+}
+
+async function loadAddStudent() {
     const c = document.getElementById('mainContent');
-    c.innerHTML = `
-        <div class="card">
-            <div class="card-header">Add New Student</div>
-            <form id="addStudentForm" onsubmit="submitStudent(event)">
-                <div class="form-grid">
-                    <div class="form-group"><label>Full Name *</label><input name="name" required placeholder="Student name"></div>
-                    <div class="form-group"><label>Class *</label><input name="className" required placeholder="e.g. 10"></div>
-                    <div class="form-group"><label>Section</label><input name="section" placeholder="e.g. A" value="A"></div>
-                    <div class="form-group"><label>Roll No</label><input name="rollNo" placeholder="e.g. 01"></div>
-                    <div class="form-group"><label>Email</label><input name="email" type="email" placeholder="student@email.com"></div>
-                    <div class="form-group"><label>Mobile</label><input name="mobileNo" placeholder="Student mobile"></div>
-                    <div class="form-group"><label>Parent Name</label><input name="parentName" placeholder="Parent name"></div>
-                    <div class="form-group"><label>Parent Mobile</label><input name="parentMobile" placeholder="Parent mobile"></div>
+
+    if (!teacherData.isClassTeacher) {
+        c.innerHTML = `
+            <div class="card">
+                <div class="card-header" style="color:#ef4444">Access Denied</div>
+                <div class="empty-state">
+                    <p>⚠️ Only Class Teachers are authorized to add new students. If you think this is a mistake, please contact your administrator.</p>
                 </div>
-                <div class="form-group"><label>Address</label><input name="address" placeholder="Full address"></div>
-                <div style="display:flex;gap:12px;margin-top:10px">
-                    <button type="submit" class="btn btn-success" id="addStudentBtn">+ Add Student</button>
-                    <button type="button" class="btn btn-outline" onclick="loadView('students')">Cancel</button>
+            </div>`;
+        return;
+    }
+
+    const assignedClass = teacherData.classTeacherFor || { className: '', section: 'A' };
+    
+    // Fetch vans
+    let vanOptions = '<option value="">-- No Van Assigned --</option>';
+    try {
+        const vans = await fetchAPI('/api/school-vans');
+        if (vans && vans.length > 0) {
+            vanOptions += vans.map(v => `<option value="${v._id}">${v.vehicleNumber} (${v.driverName})</option>`).join('');
+        }
+    } catch (e) {
+        console.error("Error loading school vans:", e);
+    }
+
+    c.innerHTML = `
+        <div class="card" style="max-width: 800px; margin: 0 auto; padding: 30px;">
+            <div class="card-header" style="font-size:22px; font-weight:800; color:#0F172A; border-bottom:2px solid #f1f5f9; padding-bottom:14px; margin-bottom:20px;">
+                Add Student
+            </div>
+            <form id="addStudentForm" onsubmit="submitStudent(event)" style="display: flex; flex-direction: column; gap: 15px;">
+                
+                <div class="form-group">
+                    <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Teacher</label>
+                    <input type="text" value="${escapeHTML(teacherData.name)}" disabled style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; background: #f8fafc; color: #64748b;">
+                </div>
+
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Class *</label>
+                        <select id="addStudentClassSelect" required disabled style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; background: #f8fafc; color: #64748b;">
+                            <option value="${escapeHTML(assignedClass.className)}">Class ${escapeHTML(assignedClass.className)}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Section *</label>
+                        <select id="addStudentSectionSelect" required disabled style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; background: #f8fafc; color: #64748b;">
+                            <option value="${escapeHTML(assignedClass.section)}">${escapeHTML(assignedClass.section)}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Student Name *</label>
+                    <input type="text" id="addStudentName" required placeholder="Enter student name" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px;">
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Gmail ID *</label>
+                    <input type="email" id="addStudentEmail" required placeholder="Enter Gmail ID (e.g. parent@gmail.com)" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px;">
+                </div>
+
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Student ID (SATA'S ID) *</label>
+                        <input type="text" id="addStudentId" required placeholder="Enter Student ID (SATA'S ID)" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Mobile No *</label>
+                        <input type="text" id="addMobileNo" required placeholder="Enter 10-digit mobile number" maxlength="10" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Parent Name</label>
+                        <input type="text" id="addParentName" placeholder="Parent name" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Parent Mobile *</label>
+                        <input type="text" id="addParentMobile" required placeholder="Parent mobile (10 digits)" maxlength="10" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Guardian Contact Number (Secondary)</label>
+                    <input type="text" id="addGuardianMobile" placeholder="Guardian contact number" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px;">
+                </div>
+
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Assigned Van / Bus</label>
+                        <select id="addVanSelect" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; cursor: pointer;">
+                            ${vanOptions}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Pickup Point</label>
+                        <input type="text" id="addPickupPoint" placeholder="e.g. Main Gate, Sector 4 Cross" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Student Photo</label>
+                    <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px;">
+                        <input type="file" id="teacherStudentPhotoFile" accept="image/jpeg,image/png" style="flex: 1; padding: 6px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px;">
+                        <button type="button" class="btn" id="btnStartTeacherStudentCamera" onclick="startTeacherStudentWebcam()" style="padding: 10px 18px; margin: 0; background: linear-gradient(135deg,#0F172A,#1e293b); color: white; font-weight: 600; border-radius: 10px; border: none; cursor: pointer;">📷 Use Camera</button>
+                    </div>
+                    
+                    <!-- Webcam Stream Container -->
+                    <div id="teacherStudentWebcamContainer" style="display: none; flex-direction: column; align-items: center; gap: 10px; padding: 10px; background: #f1f5f9; border-radius: 8px; margin-bottom: 10px;">
+                        <video id="teacherStudentWebcamVideo" width="320" height="240" autoplay style="border-radius: 8px; border: 2px solid #cbd5e1; transform: scaleX(-1);"></video>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn btn-success" onclick="captureTeacherStudentPhoto()" style="background:linear-gradient(135deg,#10b981,#059669); color: white; font-weight: 600; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">Capture</button>
+                            <button type="button" class="btn btn-outline" onclick="stopTeacherStudentWebcam()" style="padding: 8px 16px; border-radius: 8px; border: 2px solid #ccc; cursor: pointer;">Cancel</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Captured Image Preview & Hidden Base64 Storage -->
+                    <div id="teacherStudentPhotoPreviewContainer" style="display: none; align-items: center; gap: 15px; margin-top: 10px; padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                        <img id="teacherStudentPhotoPreview" src="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #4338CA;">
+                        <div>
+                            <span style="font-size: 13px; font-weight: 600; color: #334155;">Photo selected / captured</span>
+                            <button type="button" class="btn btn-outline" onclick="removeTeacherStudentPhoto()" style="padding: 4px 8px; font-size: 11px; margin-top: 5px; display: block; border-color:#dc2626; color:#dc2626; cursor: pointer;">Remove Photo</button>
+                        </div>
+                    </div>
+                    <input type="hidden" id="teacherStudentPhotoBase64">
+                </div>
+
+                <div style="display:flex; gap:12px; margin-top:20px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="loadView('students')" style="padding: 12px 24px; border-radius: 10px; border: 2px solid #ccc; font-weight: 600; cursor: pointer;">Cancel</button>
+                    <button type="submit" class="btn btn-success" id="addStudentBtn" style="padding: 12px 24px; border-radius: 10px; background: linear-gradient(135deg,#4338CA,#6366f1); color: white; font-weight: 600; border: none; cursor: pointer;">Add Student</button>
                 </div>
             </form>
         </div>`;
+
+    // Attach file input change listener
+    const fileInput = document.getElementById('teacherStudentPhotoFile');
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('teacherStudentPhotoBase64').value = e.target.result;
+                document.getElementById('teacherStudentPhotoPreview').src = e.target.result;
+                document.getElementById('teacherStudentPhotoPreviewContainer').style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 }
 
 async function submitStudent(e) {
     e.preventDefault();
-    const form = document.getElementById('addStudentForm');
     const btn = document.getElementById('addStudentBtn');
-    btn.disabled = true; btn.textContent = 'Adding...';
-    const fd = new FormData(form);
-    const body = {};
-    fd.forEach((v, k) => { if (v) body[k] = v; });
-    const result = await fetchAPI('/api/teacher/students', { method: 'POST', body: JSON.stringify(body) });
+    
+    const assignedClass = teacherData.classTeacherFor || { className: '', section: 'A' };
+    const name = document.getElementById('addStudentName').value.trim();
+    const className = assignedClass.className;
+    const section = assignedClass.section;
+    const email = document.getElementById('addStudentEmail').value.trim();
+    const studentId = document.getElementById('addStudentId').value.trim();
+    const mobileNo = document.getElementById('addMobileNo').value.trim();
+    const parentName = document.getElementById('addParentName').value.trim();
+    const parentMobile = document.getElementById('addParentMobile').value.trim();
+    const guardianMobile = document.getElementById('addGuardianMobile').value.trim();
+    const vanId = document.getElementById('addVanSelect').value;
+    const pickupPoint = document.getElementById('addPickupPoint').value.trim();
+    const photo = document.getElementById('teacherStudentPhotoBase64').value;
+
+    if (!name || !className) {
+        showToast('Name and Class are required', 'error');
+        return;
+    }
+    if (!email || !parentMobile || !mobileNo) {
+        showToast('Gmail ID, Mobile number, and Parent mobile number are required', 'error');
+        return;
+    }
+    if (!/^\d{10}$/.test(mobileNo) || !/^\d{10}$/.test(parentMobile)) {
+        showToast('Mobile number and Parent mobile number must be exactly 10 digits', 'error');
+        return;
+    }
+
+    btn.disabled = true; 
+    btn.textContent = 'Adding...';
+
+    const body = {
+        name,
+        className,
+        section,
+        rollNo: studentId,
+        studentId,
+        email,
+        mobileNo,
+        parentName,
+        parentMobile,
+        guardianMobile,
+        vanId: vanId || null,
+        pickupPoint,
+        photo
+    };
+
+    const result = await fetchAPI('/api/teacher/students', { 
+        method: 'POST', 
+        body: JSON.stringify(body) 
+    });
+
     if (result && result._id) {
         showToast('Student added! Pending admin approval.');
-        form.reset();
+        loadView('students');
     } else {
         showToast(result?.message || 'Failed to add student', 'error');
     }
-    btn.disabled = false; btn.textContent = '+ Add Student';
+    btn.disabled = false; 
+    btn.textContent = 'Add Student';
 }
 
 // ============ STUDENT REQUESTS ============

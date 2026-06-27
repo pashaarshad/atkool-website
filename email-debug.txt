@@ -1,0 +1,40 @@
+[2026-06-27T01:23:37.467Z] Email Verification Link generated:
+User Name: Arshad Pasha
+User Type: parent
+Email: arshadpashaintern@gmail.com
+Portal Login: /parent-login.html
+Link: http://localhost:3000/api/email-verification/verify/0d9a3c5267d68a15e9ea79f23800296c2b771bfa91ef60d4ad73d8a6f459b7f3
+Token: 0d9a3c5267d68a15e9ea79f23800296c2b771bfa91ef60d4ad73d8a6f459b7f3
+-------------------------------------------
+[2026-06-27T01:23:38.306Z] Email Verification Link generated:
+User Name: Arshad Pasha
+User Type: parent
+Email: arshadpashaintern@gmail.com
+Portal Login: /parent-login.html
+Link: http://localhost:3000/api/email-verification/verify/131b2da83548083b54140c3925e2335ec10374e2c3a5d05074d56cd595d3cf00
+Token: 131b2da83548083b54140c3925e2335ec10374e2c3a5d05074d56cd595d3cf00
+-------------------------------------------
+[2026-06-27T01:23:38.351Z] Email Verification Link generated:
+User Name: Arshad Pasha
+User Type: parent
+Email: arshadpashaintern@gmail.com
+Portal Login: /parent-login.html
+Link: http://localhost:3000/api/email-verification/verify/1e7b85c490b3bb9806dfb2469a0597b064984caf43ec09b09a2cea03a024041c
+Token: 1e7b85c490b3bb9806dfb2469a0597b064984caf43ec09b09a2cea03a024041c
+-------------------------------------------
+[2026-06-27T01:23:38.593Z] Email Verification Link generated:
+User Name: Arshad Pasha
+User Type: parent
+Email: arshadpashaintern@gmail.com
+Portal Login: /parent-login.html
+Link: http://localhost:3000/api/email-verification/verify/340506ad7e19ca3c2f273f432c83edc555234b33ee8c8e961a33394ef782b5e1
+Token: 340506ad7e19ca3c2f273f432c83edc555234b33ee8c8e961a33394ef782b5e1
+-------------------------------------------
+[2026-06-27T01:23:39.740Z] Email Verification Link generated:
+User Name: ttttttttttttttttttttttttttttttttttttt
+User Type: parent
+Email: t123456@gmail.com
+Portal Login: /parent-login.html
+Link: http://localhost:3000/api/email-verification/verify/4606f67e2bd5a0dd117bba5afe89545b3c8f0b242673577ec2ebdb14a02e5efb
+Token: 4606f67e2bd5a0dd117bba5afe89545b3c8f0b242673577ec2ebdb14a02e5efb
+-------------------------------------------
