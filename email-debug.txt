@@ -38,3 +38,19 @@ Portal Login: /parent-login.html
 Link: http://localhost:3000/api/email-verification/verify/4606f67e2bd5a0dd117bba5afe89545b3c8f0b242673577ec2ebdb14a02e5efb
 Token: 4606f67e2bd5a0dd117bba5afe89545b3c8f0b242673577ec2ebdb14a02e5efb
 -------------------------------------------
+[2026-06-27T01:29:47.343Z] Email Verification Link generated:
+User Name: Arshad Pasha
+User Type: parent
+Email: arshadpashaintern@gmail.com
+Portal Login: /parent-login.html
+Link: http://localhost:3000/api/email-verification/verify/862ed7616b716d429c36d65a3c895659d38d78d5ff5cd79cdf16182cdef907b2
+Token: 862ed7616b716d429c36d65a3c895659d38d78d5ff5cd79cdf16182cdef907b2
+-------------------------------------------
+[2026-06-27T01:29:48.632Z] Email Verification Link generated:
+User Name: Arshad Pasha
+User Type: parent
+Email: arshadpashaintern@gmail.com
+Portal Login: /parent-login.html
+Link: http://localhost:3000/api/email-verification/verify/9453f6c1cb47433ed86d1d8c4b0f9c8448d868a9cea7cce1bb66a7610435c9db
+Token: 9453f6c1cb47433ed86d1d8c4b0f9c8448d868a9cea7cce1bb66a7610435c9db
+-------------------------------------------

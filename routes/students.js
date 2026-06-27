@@ -168,8 +168,8 @@ router.post('/', schoolAuth, async (req, res) => {
             teacherId: teacherId || null,
             status: status || 'Active',
             approvalStatus: 'Approved', // School admin adds directly = auto approved
-            parentUsername,
-            parentPassword,
+            parentUsername: parentUsername || email,
+            parentPassword: parentPassword || 'test@123',
             photo
         });
 

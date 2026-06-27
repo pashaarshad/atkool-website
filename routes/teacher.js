@@ -137,6 +137,8 @@ router.post('/students', teacherAuth, async (req, res) => {
             address,
             status: 'Active',
             approvalStatus: 'Pending', // New students start as Pending until admin approves
+            parentUsername: email,
+            parentPassword: 'test@123',
             photo
         });
 

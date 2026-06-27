@@ -256,13 +256,6 @@ async function loadClassStudents(className, section) {
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                                         Chat
                                     </button>
-                                    <button onclick="generateParentLogin('${s._id}','${s.name.replace(/'/g, "\\'")}')" style="
-                                        background:transparent; color:#6366f1; border:1px solid #6366f1; border-radius:20px; padding:6px 14px; 
-                                        font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; transition:transform 0.2s;
-                                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m-5 4a5 5 0 01-9-5 5 5 0 019 5zm0 0l5 5m0 0l1.5-1.5M20.25 18l-1.5 1.5M16.5 16.5l-1.5 1.5"></path></svg>
-                                        Login
-                                    </button>
                                 </div>
                             </td>
                         </tr>
