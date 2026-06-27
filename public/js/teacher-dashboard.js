@@ -200,11 +200,15 @@ async function loadStudents() {
 }
 
 // ============ CLASS STUDENTS VIEW ============
+let currentClassStudents = [];
+
 async function loadClassStudents(className, section) {
     const c = document.getElementById('mainContent');
     c.innerHTML = '<div class="loader">Loading students...</div>';
     const students = await fetchAPI(`/api/teacher/students?className=${encodeURIComponent(className)}&section=${encodeURIComponent(section)}`);
     if (!students) return;
+
+    currentClassStudents = students;
 
     c.innerHTML = `
         <div style="margin-bottom:20px;">
@@ -213,7 +217,7 @@ async function loadClassStudents(className, section) {
         <div class="card" style="padding:0; overflow:hidden;">
             <div class="card-header" style="display:flex;align-items:center;gap:12px;border-bottom:2px solid #f1f5f9;padding:20px 24px;">
                 <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center">
-                    <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:22px;height:22px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:22px;height:22px"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </div>
                 <div>
                     <div style="font-size:18px;font-weight:800;color:#0F172A">Class ${className} — Section ${section}</div>
@@ -256,6 +260,13 @@ async function loadClassStudents(className, section) {
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                                         Chat
                                     </button>
+                                    <button onclick="viewStudentDetails('${s._id}')" style="
+                                        background:transparent; color:#6366f1; border:1px solid #6366f1; border-radius:20px; padding:6px 14px; 
+                                        font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; transition:transform 0.2s;
+                                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        View Info
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -269,6 +280,165 @@ async function loadClassStudents(className, section) {
 
 function openChatWithStudent(studentId, studentName, parentName) {
     loadChatConversation(studentId, studentName, parentName);
+}
+
+function viewStudentDetails(studentId) {
+    const s = currentClassStudents.find(student => student._id === studentId);
+    if (!s) return;
+
+    // Create a beautiful modal overlay
+    const modal = document.createElement('div');
+    modal.id = 'studentDetailsModal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(15, 23, 42, 0.6)';
+    modal.style.backdropFilter = 'blur(8px)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '9999';
+
+    const photoSrc = s.photo || 'https://images.unsplash.com/photo-1597075687490-8f673c6c17f6?q=80&w=256&auto=format&fit=crop';
+
+    modal.innerHTML = `
+        <div style="background: #fff; width: 90%; max-width: 600px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow: hidden; display: flex; flex-direction: column; animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+            <!-- Modal Header -->
+            <div style="background: linear-gradient(135deg, #4338CA, #6366f1); padding: 24px; color: #fff; display: flex; align-items: center; gap: 16px; position: relative;">
+                <img src="${photoSrc}" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.4);">
+                <div>
+                    <h3 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">${escapeHTML(s.name)}</h3>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9; font-weight: 600;">Student ID (SATA'S ID): ${escapeHTML(s.studentId || s.rollNo || 'N/A')}</p>
+                </div>
+                <button onclick="closeStudentDetailsModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 32px; height: 32px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">&times;</button>
+            </div>
+            
+            <!-- Modal Content (Scrollable) -->
+            <div style="padding: 24px; max-height: 70vh; overflow-y: auto; display: flex; flex-direction: column; gap: 20px;">
+                <!-- Basic details grid -->
+                <div>
+                    <h4 style="margin: 0 0 12px 0; color: #4338CA; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Academic Information</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #f1f5f9;">
+                        <div>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600; display: block;">CLASS & SECTION</span>
+                            <span style="font-size: 14px; color: #0f172a; font-weight: 700;">Class ${escapeHTML(s.className)} - ${escapeHTML(s.section || 'A')}</span>
+                        </div>
+                        <div>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600; display: block;">STATUS</span>
+                            <span style="display: inline-block; background: #10b981; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 20px; margin-top: 2px;">${escapeHTML(s.status || 'Active')}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact details -->
+                <div>
+                    <h4 style="margin: 0 0 12px 0; color: #4338CA; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Contact Information</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #f1f5f9;">
+                        <div>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600; display: block;">GMAIL ID (STUDENT EMAIL)</span>
+                            <span style="font-size: 14px; color: #0f172a; font-weight: 700; word-break: break-all;">${escapeHTML(s.email || 'N/A')}</span>
+                        </div>
+                        <div>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600; display: block;">STUDENT MOBILE NO</span>
+                            <span style="font-size: 14px; color: #0f172a; font-weight: 700;">${escapeHTML(s.mobileNo || 'N/A')}</span>
+                        </div>
+                        <div>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600; display: block;">PARENT NAME</span>
+                            <span style="font-size: 14px; color: #0f172a; font-weight: 700;">${escapeHTML(s.parentName || 'N/A')}</span>
+                        </div>
+                        <div>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600; display: block;">PARENT MOBILE NO</span>
+                            <span style="font-size: 14px; color: #0f172a; font-weight: 700;">${escapeHTML(s.parentMobile || 'N/A')}</span>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600; display: block;">GUARDIAN CONTACT NUMBER (SECONDARY)</span>
+                            <span style="font-size: 14px; color: #0f172a; font-weight: 700;">${escapeHTML(s.guardianMobile || 'N/A')}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logistics / transport details -->
+                <div>
+                    <h4 style="margin: 0 0 12px 0; color: #4338CA; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Logistics & Address</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #f1f5f9;">
+                        <div>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600; display: block;">ASSIGNED VAN / BUS</span>
+                            <span style="font-size: 14px; color: #0f172a; font-weight: 700;">${s.vanId ? 'Assigned' : 'No Van Assigned'}</span>
+                        </div>
+                        <div>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600; display: block;">PICKUP POINT</span>
+                            <span style="font-size: 14px; color: #0f172a; font-weight: 700;">${escapeHTML(s.pickupPoint || 'N/A')}</span>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600; display: block;">ADDRESS</span>
+                            <span style="font-size: 14px; color: #0f172a; font-weight: 700;">${escapeHTML(s.address || 'N/A')}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password and login details -->
+                <div>
+                    <h4 style="margin: 0 0 12px 0; color: #4338CA; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Parent Login Credentials</h4>
+                    <div style="background: #eef2ff; border: 1px solid #c7d2fe; padding: 16px; border-radius: 12px; display: flex; flex-direction: column; gap: 12px;">
+                        <div>
+                            <span style="font-size: 11px; color: #4338CA; font-weight: 700; display: block;">LOGIN USERNAME (STUDENT GMAIL OR PARENT PHONE)</span>
+                            <span style="font-size: 14px; color: #1e1b4b; font-weight: 800;">${escapeHTML(s.email || 'N/A')} / ${escapeHTML(s.parentMobile || 'N/A')}</span>
+                        </div>
+                        <div>
+                            <span style="font-size: 11px; color: #4338CA; font-weight: 700; display: block;">LOGIN PASSWORD</span>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
+                                <input type="password" id="modalParentPassword" value="${escapeHTML(s.parentPassword || 'test@123')}" readonly style="background: transparent; border: none; font-size: 15px; font-weight: 800; color: #1e1b4b; font-family: monospace; outline: none; width: 150px;">
+                                <button type="button" onclick="toggleModalPasswordVisibility()" style="background: none; border: none; color: #4338CA; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                                    <svg id="modalPasswordEyeIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 24px; display: flex; justify-content: flex-end;">
+                <button onclick="closeStudentDetailsModal()" style="background: #4338CA; color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; cursor: pointer; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#3730a3'" onmouseout="this.style.background='#4338CA'">Close</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // CSS Keyframe Animation
+    if (!document.getElementById('modalAnimationStyles')) {
+        const style = document.createElement('style');
+        style.id = 'modalAnimationStyles';
+        style.innerHTML = `
+            @keyframes modalFadeIn {
+                from { opacity: 0; transform: scale(0.95); }
+                to { opacity: 1; transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+function closeStudentDetailsModal() {
+    const modal = document.getElementById('studentDetailsModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function toggleModalPasswordVisibility() {
+    const input = document.getElementById('modalParentPassword');
+    const icon = document.getElementById('modalPasswordEyeIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />`;
+    } else {
+        input.type = 'password';
+        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>`;
+    }
 }
 
 async function generateParentLogin(studentId, studentName) {
