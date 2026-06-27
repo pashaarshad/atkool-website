@@ -912,7 +912,6 @@ function captureTeacherStudentPhoto() {
     document.getElementById('teacherStudentPhotoPreviewContainer').style.display = 'flex';
     stopTeacherStudentWebcam();
 }
-
 function removeTeacherStudentPhoto() {
     document.getElementById('teacherStudentPhotoBase64').value = '';
     document.getElementById('teacherStudentPhotoPreview').src = '';
@@ -922,19 +921,28 @@ function removeTeacherStudentPhoto() {
 
 async function loadAddStudent() {
     const c = document.getElementById('mainContent');
+    c.innerHTML = '<div class="loader">Loading...</div>';
 
-    if (!teacherData.isClassTeacher) {
+    // Fetch teacher's assigned classes
+    const classes = await fetchAPI('/api/teacher/my-classes');
+    if (!classes) return;
+
+    if (classes.length === 0) {
         c.innerHTML = `
             <div class="card">
                 <div class="card-header" style="color:#ef4444">Access Denied</div>
                 <div class="empty-state">
-                    <p>⚠️ Only Class Teachers are authorized to add new students. If you think this is a mistake, please contact your administrator.</p>
+                    <p>⚠️ No classes assigned to you yet. Please contact your administrator to get classes assigned.</p>
                 </div>
             </div>`;
         return;
     }
 
-    const assignedClass = teacherData.classTeacherFor || { className: '', section: 'A' };
+    const classOptions = classes.map(cls => `
+        <option value="${escapeHTML(cls.className)}|${escapeHTML(cls.section || 'A')}">
+            Class ${escapeHTML(cls.className)} - Section ${escapeHTML(cls.section || 'A')}
+        </option>
+    `).join('');
     
     // Fetch vans
     let vanOptions = '<option value="">-- No Van Assigned --</option>';
@@ -959,19 +967,11 @@ async function loadAddStudent() {
                     <input type="text" value="${escapeHTML(teacherData.name)}" disabled style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; background: #f8fafc; color: #64748b;">
                 </div>
 
-                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="form-group">
-                        <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Class *</label>
-                        <select id="addStudentClassSelect" required disabled style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; background: #f8fafc; color: #64748b;">
-                            <option value="${escapeHTML(assignedClass.className)}">Class ${escapeHTML(assignedClass.className)}</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Section *</label>
-                        <select id="addStudentSectionSelect" required disabled style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; background: #f8fafc; color: #64748b;">
-                            <option value="${escapeHTML(assignedClass.section)}">${escapeHTML(assignedClass.section)}</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label style="font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">Class & Section *</label>
+                    <select id="addStudentClassSelect" required style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; cursor: pointer;">
+                        ${classOptions}
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -1052,7 +1052,7 @@ async function loadAddStudent() {
                 </div>
 
                 <div style="display:flex; gap:12px; margin-top:20px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-outline" onclick="loadView('students')" style="padding: 12px 24px; border-radius: 10px; border: 2px solid #ccc; font-weight: 600; cursor: pointer;">Cancel</button>
+                    <button type="button" class="btn btn-outline" onclick="loadStudents()" style="padding: 12px 24px; border-radius: 10px; border: 2px solid #ccc; font-weight: 600; cursor: pointer;">Cancel</button>
                     <button type="submit" class="btn btn-success" id="addStudentBtn" style="padding: 12px 24px; border-radius: 10px; background: linear-gradient(135deg,#4338CA,#6366f1); color: white; font-weight: 600; border: none; cursor: pointer;">Add Student</button>
                 </div>
             </form>
@@ -1079,10 +1079,14 @@ async function submitStudent(e) {
     e.preventDefault();
     const btn = document.getElementById('addStudentBtn');
     
-    const assignedClass = teacherData.classTeacherFor || { className: '', section: 'A' };
+    const classVal = document.getElementById('addStudentClassSelect').value;
+    if (!classVal) {
+        showToast('Please select a class.', 'error');
+        return;
+    }
+    const [className, section] = classVal.split('|');
+
     const name = document.getElementById('addStudentName').value.trim();
-    const className = assignedClass.className;
-    const section = assignedClass.section;
     const email = document.getElementById('addStudentEmail').value.trim();
     const studentId = document.getElementById('addStudentId').value.trim();
     const mobileNo = document.getElementById('addMobileNo').value.trim();
@@ -1106,38 +1110,35 @@ async function submitStudent(e) {
         return;
     }
 
-    btn.disabled = true; 
-    btn.textContent = 'Adding...';
+    btn.disabled = true;
+    btn.textContent = 'Adding Student...';
 
-    const body = {
-        name,
-        className,
-        section,
-        rollNo: studentId,
-        studentId,
-        email,
-        mobileNo,
-        parentName,
-        parentMobile,
-        guardianMobile,
-        vanId: vanId || null,
-        pickupPoint,
-        photo
-    };
-
-    const result = await fetchAPI('/api/teacher/students', { 
-        method: 'POST', 
-        body: JSON.stringify(body) 
+    const result = await fetchAPI('/api/teacher/students', {
+        method: 'POST',
+        body: JSON.stringify({
+            name,
+            className,
+            section,
+            email,
+            studentId,
+            mobileNo,
+            parentName,
+            parentMobile,
+            guardianMobile,
+            vanId,
+            pickupPoint,
+            photo
+        })
     });
 
     if (result && result._id) {
-        showToast('Student added! Pending admin approval.');
-        loadView('students');
+        showToast(`Student ${name} added successfully! Credentials sent to email.`);
+        loadStudents();
     } else {
         showToast(result?.message || 'Failed to add student', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Add Student';
     }
-    btn.disabled = false; 
-    btn.textContent = 'Add Student';
 }
 
 // ============ STUDENT REQUESTS ============

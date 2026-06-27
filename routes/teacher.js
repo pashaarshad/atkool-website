@@ -98,15 +98,24 @@ router.post('/students', teacherAuth, async (req, res) => {
             return res.status(404).json({ message: 'Teacher not found' });
         }
 
-        // Class Teacher Restriction
-        if (!teacher.isClassTeacher) {
-            return res.status(403).json({ message: 'Access denied: only Class Teachers can add students' });
+        // Gather all assigned classes to check if teacher can add to this class/section
+        const classes = [];
+        if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+            teacher.classAssignments.forEach(c => {
+                classes.push({ className: c.className, section: c.section });
+            });
+        }
+        if (teacher.isClassTeacher && teacher.classTeacherFor && teacher.classTeacherFor.className) {
+            classes.push({
+                className: teacher.classTeacherFor.className,
+                section: teacher.classTeacherFor.section
+            });
         }
 
-        const primaryClass = teacher.classTeacherFor;
-        if (!primaryClass || primaryClass.className !== className || primaryClass.section !== (section || 'A')) {
+        const isAssigned = classes.some(c => c.className === className && c.section === (section || 'A'));
+        if (!isAssigned) {
             return res.status(403).json({ 
-                message: `Access denied: you can only add students to your assigned class (${primaryClass ? primaryClass.className + ' ' + primaryClass.section : 'None'})` 
+                message: `Access denied: you can only add students to your assigned classes.` 
             });
         }
 
