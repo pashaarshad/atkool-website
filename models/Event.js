@@ -19,6 +19,10 @@ const eventSchema = new mongoose.Schema({
         enum: ['All', 'Teachers', 'Students'],
         default: 'All'
     },
+    className: {
+        type: String,
+        default: ''
+    },
     image: {
         type: String,
         default: null

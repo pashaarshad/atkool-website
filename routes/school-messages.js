@@ -38,7 +38,7 @@ router.get('/', schoolAuth, async (req, res) => {
 
 router.post('/', schoolAuth, async (req, res) => {
     try {
-        const { sendTo, heading, message, targetTeacherId } = req.body;
+        const { sendTo, heading, message, targetTeacherId, className } = req.body;
 
         if (!heading || !message) {
             return res.status(400).json({ message: 'Heading and message are required' });
@@ -62,7 +62,8 @@ router.post('/', schoolAuth, async (req, res) => {
             sendTo: sendTo || 'All',
             heading,
             message,
-            targetTeacherId: sendTo === 'SpecificTeacher' ? targetTeacherId : null
+            targetTeacherId: sendTo === 'SpecificTeacher' ? targetTeacherId : null,
+            className: (sendTo === 'SpecificTeacher' || sendTo === 'Students') ? className : ''
         });
 
         res.status(201).json(newMessage);

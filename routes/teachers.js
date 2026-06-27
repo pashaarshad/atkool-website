@@ -119,9 +119,9 @@ router.post('/', schoolAuth, async (req, res) => {
             isEmailVerified: !email
         };
 
-        // Hash password if provided
+        // Store password in plain text if provided
         if (password) {
-            teacherData.password = await bcrypt.hash(password, 10);
+            teacherData.password = password;
         }
 
         const teacher = await Teacher.create(teacherData);
@@ -226,9 +226,9 @@ router.put('/:id', schoolAuth, async (req, res) => {
             updateData.isEmailVerified = false;
         }
 
-        // Hash password if provided
+        // Store password in plain text if provided
         if (password) {
-            updateData.password = await bcrypt.hash(password, 10);
+            updateData.password = password;
         }
 
         const teacher = await Teacher.findOneAndUpdate(

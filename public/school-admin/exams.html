@@ -233,19 +233,21 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Subject</label>
-                            <select class="form-select" id="examSubject" required>
-                                <option value="">Select Subject</option>
-                                <option value="Mathematics">Mathematics</option>
-                                <option value="Science">Science</option>
-                                <option value="English">English</option>
-                                <option value="Hindi">Hindi</option>
-                                <option value="Social Studies">Social Studies</option>
-                                <option value="Computer">Computer</option>
-                                <option value="Physics">Physics</option>
-                                <option value="Chemistry">Chemistry</option>
-                                <option value="Biology">Biology</option>
-                                <option value="Other">Other</option>
-                            </select>
+                            <div style="display: flex; gap: 8px;">
+                                <select class="form-select" id="examSubjectSelect" onchange="syncSubjectSelect(this.value)" style="flex: 1; min-width: 130px;">
+                                    <option value="">Select Subject</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Science">Science</option>
+                                    <option value="English">English</option>
+                                    <option value="Hindi">Hindi</option>
+                                    <option value="Social Studies">Social Studies</option>
+                                    <option value="Computer">Computer</option>
+                                    <option value="Physics">Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                    <option value="Biology">Biology</option>
+                                </select>
+                                <input type="text" class="form-input" id="examSubject" placeholder="Or type manually..." style="flex: 1;" required>
+                            </div>
                         </div>
                     </div>
                     <div class="form-row">
@@ -513,6 +515,7 @@
                 if (response.ok) {
                     showToast('Exam scheduled successfully!', 'success');
                     document.getElementById('examForm').reset();
+                    document.getElementById('examSubjectSelect').value = '';
                     document.getElementById('examDuration').value = '60';
                     document.getElementById('examMarks').value = '100';
                     loadExams();
@@ -524,6 +527,10 @@
                 showToast('Error scheduling exam', 'error');
             }
         }
+
+        window.syncSubjectSelect = function (val) {
+            document.getElementById('examSubject').value = val;
+        };
 
         async function updateStatus(examId, status) {
             var token = localStorage.getItem('schoolToken');

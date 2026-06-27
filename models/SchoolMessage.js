@@ -16,6 +16,10 @@ const schoolMessageSchema = new mongoose.Schema({
         ref: 'Teacher',
         default: null
     },
+    className: {
+        type: String,
+        default: ''
+    },
     heading: {
         type: String,
         required: true,

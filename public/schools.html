@@ -158,6 +158,19 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="schoolConfirmPassword">Confirm Password *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="schoolConfirmPassword" required>
+                        <button type="button" class="password-toggle-btn" id="toggleSchoolConfirmPassword">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="schoolPasswordFeedback" style="color: #ef4444; font-size: 12px; margin-top: 5px; display: none; font-weight: bold;"></div>
+                </div>
+                <div class="form-group">
                     <label for="schoolLogoFile">Logo (Square image for circular display)</label>
                     <input type="file" id="schoolLogoFile" accept=".jpg,.png,.svg">
                     <div id="schoolLogoPreview" style="margin-top: 10px;"></div>

@@ -39,7 +39,7 @@ router.get('/', schoolAuth, async (req, res) => {
 // Create new event
 router.post('/', schoolAuth, async (req, res) => {
     try {
-        const { name, description, eventFor, image } = req.body;
+        const { name, description, eventFor, image, className } = req.body;
 
         if (!name || !description) {
             return res.status(400).json({ message: 'Name and description are required' });
@@ -50,6 +50,7 @@ router.post('/', schoolAuth, async (req, res) => {
             name,
             description,
             eventFor: eventFor || 'All',
+            className: eventFor === 'Students' ? className : '',
             image
         });
 

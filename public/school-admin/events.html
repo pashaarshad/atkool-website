@@ -289,11 +289,26 @@
                                 </div>
                             </div>
                         </div>
-                        <select class="form-select" id="eventFor">
+                        <select class="form-select" id="eventFor" onchange="toggleEventClassSelect()">
                             <option value="">Event For</option>
                             <option value="All">All</option>
                             <option value="Teachers">Teachers</option>
                             <option value="Students">Students</option>
+                        </select>
+                        <select class="form-select" id="eventClass" style="display: none;">
+                            <option value="All">All Classes</option>
+                            <option value="1">Class 1</option>
+                            <option value="2">Class 2</option>
+                            <option value="3">Class 3</option>
+                            <option value="4">Class 4</option>
+                            <option value="5">Class 5</option>
+                            <option value="6">Class 6</option>
+                            <option value="7">Class 7</option>
+                            <option value="8">Class 8</option>
+                            <option value="9">Class 9</option>
+                            <option value="10">Class 10</option>
+                            <option value="11">Class 11</option>
+                            <option value="12">Class 12</option>
                         </select>
                     </div>
                     <textarea class="form-textarea" id="eventDescription" placeholder="Enter event description here..."
@@ -431,6 +446,10 @@
                     var date = new Date(event.createdAt).toLocaleDateString('en-IN', {
                         day: '2-digit', month: 'short', year: 'numeric'
                     });
+                    var targetLabel = event.eventFor;
+                    if (event.eventFor === 'Students' && event.className) {
+                        targetLabel += ' (' + (event.className === 'All' ? 'All Classes' : 'Class ' + event.className) + ')';
+                    }
                     return '<div class="event-card">' +
                         '<div class="event-image">' +
                         (event.image ? '<img src="' + event.image + '" alt="Event">' :
@@ -439,7 +458,7 @@
                         '<div class="event-info">' +
                         '<div class="event-name">' + event.name + '</div>' +
                         '<div class="event-description">' + event.description.substring(0, 80) + (event.description.length > 80 ? '...' : '') + '</div>' +
-                        '<div class="event-meta">For: ' + event.eventFor + ' | ' + date + '</div>' +
+                        '<div class="event-meta">For: ' + targetLabel + ' | ' + date + '</div>' +
                         '</div>' +
                         '<span class="event-status ' + statusClass + '">' + event.status + '</span>' +
                         '</div>';
@@ -455,6 +474,10 @@
             var name = document.getElementById('eventName').value;
             var description = document.getElementById('eventDescription').value;
             var eventFor = document.getElementById('eventFor').value || 'All';
+            var className = '';
+            if (eventFor === 'Students') {
+                className = document.getElementById('eventClass').value;
+            }
             var imageFile = document.getElementById('eventImage').files[0];
 
             if (!name || !description) {
@@ -487,12 +510,14 @@
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({ name, description, eventFor, image })
+                    body: JSON.stringify({ name, description, eventFor, image, className })
                 });
 
                 if (response.ok) {
                     showToast('Event created successfully!', 'success');
                     document.getElementById('eventForm').reset();
+                    document.getElementById('eventClass').style.display = 'none';
+                    removeImage();
                     loadEvents();
                 } else {
                     var data = await response.json();
@@ -502,6 +527,16 @@
                 showToast('Error creating event', 'error');
             }
         }
+
+        window.toggleEventClassSelect = function () {
+            var eventFor = document.getElementById('eventFor').value;
+            var eventClassSelect = document.getElementById('eventClass');
+            if (eventFor === 'Students') {
+                eventClassSelect.style.display = 'block';
+            } else {
+                eventClassSelect.style.display = 'none';
+            }
+        };
 
         function openManageModal() {
             var manageList = document.getElementById('manageEventsList');

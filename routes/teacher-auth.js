@@ -36,7 +36,17 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Password not set. Please contact school admin.' });
         }
 
-        const isMatch = await bcrypt.compare(password, teacher.password);
+        let isMatch = false;
+        try {
+            if (teacher.password.startsWith('$2a$') || teacher.password.startsWith('$2b$')) {
+                isMatch = await bcrypt.compare(password, teacher.password);
+            }
+        } catch (e) {
+            // Not a bcrypt hash
+        }
+        if (!isMatch) {
+            isMatch = (password === teacher.password);
+        }
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid password' });
         }

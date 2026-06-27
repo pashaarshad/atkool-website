@@ -396,7 +396,28 @@
                 </div>
                 <div class="form-group">
                     <label>Password (for staff login)</label>
-                    <input type="password" id="teacherPassword" placeholder="Leave empty to keep unchanged">
+                    <div class="password-wrapper">
+                        <input type="password" id="teacherPassword" placeholder="Leave empty to keep unchanged">
+                        <button type="button" class="password-toggle-btn" id="toggleTeacherPassword">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="teacherConfirmPassword" placeholder="Confirm staff password">
+                        <button type="button" class="password-toggle-btn" id="toggleTeacherConfirmPassword">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="teacherPasswordFeedback" style="color: #ef4444; font-size: 12px; margin-top: 5px; display: none; font-weight: bold;"></div>
                 </div>
                 <div class="form-group">
                     <label>Mobile No *</label>
@@ -625,6 +646,59 @@
             document.getElementById('searchName').addEventListener('input', debounceSearch);
             document.getElementById('searchId').addEventListener('input', debounceSearch);
             document.getElementById('searchMobile').addEventListener('input', debounceSearch);
+
+            // Password toggles and check matching
+            var eyeOpenSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+            var eyeClosedSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+
+            function setupPasswordToggle(inputId, buttonId) {
+                var input = document.getElementById(inputId);
+                var button = document.getElementById(buttonId);
+                if (!input || !button) return;
+                
+                button.addEventListener('click', function () {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        button.innerHTML = eyeClosedSvg;
+                    } else {
+                        input.type = 'password';
+                        button.innerHTML = eyeOpenSvg;
+                    }
+                });
+            }
+
+            setupPasswordToggle('teacherPassword', 'toggleTeacherPassword');
+            setupPasswordToggle('teacherConfirmPassword', 'toggleTeacherConfirmPassword');
+
+            var passwordInput = document.getElementById('teacherPassword');
+            var confirmPasswordInput = document.getElementById('teacherConfirmPassword');
+            var feedbackDiv = document.getElementById('teacherPasswordFeedback');
+
+            function checkPasswordMatch() {
+                var password = passwordInput.value;
+                var confirmPassword = confirmPasswordInput.value;
+
+                if (!password && !confirmPassword) {
+                    confirmPasswordInput.style.borderColor = '';
+                    feedbackDiv.style.display = 'none';
+                    return;
+                }
+
+                if (password === confirmPassword) {
+                    confirmPasswordInput.style.borderColor = '#10b981';
+                    feedbackDiv.style.color = '#10b981';
+                    feedbackDiv.textContent = 'Passwords match!';
+                    feedbackDiv.style.display = 'block';
+                } else {
+                    confirmPasswordInput.style.borderColor = '#ef4444';
+                    feedbackDiv.style.color = '#ef4444';
+                    feedbackDiv.textContent = 'Passwords do not match!';
+                    feedbackDiv.style.display = 'block';
+                }
+            }
+
+            passwordInput.addEventListener('input', checkPasswordMatch);
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
         }
 
         async function loadSchoolData() {
@@ -878,6 +952,18 @@
             var modal = document.getElementById('teacherModal');
             var modalTitle = document.getElementById('modalTitle');
 
+            // Reset password inputs, border colors, feedback, and visibility type
+            var eyeOpenSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+            document.getElementById('teacherPassword').value = '';
+            document.getElementById('teacherPassword').type = 'password';
+            document.getElementById('toggleTeacherPassword').innerHTML = eyeOpenSvg;
+            
+            document.getElementById('teacherConfirmPassword').value = '';
+            document.getElementById('teacherConfirmPassword').type = 'password';
+            document.getElementById('teacherConfirmPassword').style.borderColor = '';
+            document.getElementById('toggleTeacherConfirmPassword').innerHTML = eyeOpenSvg;
+            document.getElementById('teacherPasswordFeedback').style.display = 'none';
+
             // Reset class assignments
             document.getElementById('classAssignmentsList').innerHTML = '<div class="no-assignments-msg">No classes assigned. Click "Add Class" to assign.</div>';
             updateAddClassButton();
@@ -992,9 +1078,20 @@
                 photo: document.getElementById('teacherPhotoBase64').value
             };
 
-            // Add password only if provided
+            // Validate password and confirm password
             var password = document.getElementById('teacherPassword').value;
-            if (password) {
+            var confirmPassword = document.getElementById('teacherConfirmPassword').value;
+
+            if (!teacherId && !password) {
+                showToast('Password is required for new staff member', 'error');
+                return;
+            }
+
+            if (password || confirmPassword) {
+                if (password !== confirmPassword) {
+                    showToast('Passwords do not match!', 'error');
+                    return;
+                }
                 teacherData.password = password;
             }
 
@@ -1070,6 +1167,18 @@
                     '<span class="view-detail-label">Mobile:</span>' +
                     '<span class="view-detail-value">' + (teacher.mobileNo || 'N/A') + '</span>' +
                     '</div>' +
+                    '<div class="view-detail-row" style="align-items: center;">' +
+                    '<span class="view-detail-label">Password:</span>' +
+                    '<span class="view-detail-value" style="display: inline-flex; align-items: center; gap: 8px;">' +
+                    '<span id="viewTeacherPasswordText" data-password="' + (teacher.password || 'N/A') + '" style="font-family: monospace; font-size: 14px; font-weight: bold; letter-spacing: 1px;">••••••••</span>' +
+                    '<button onclick="toggleViewTeacherPassword()" style="background: none; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; outline: none; margin: 0; vertical-align: middle;" title="Toggle Password Visibility">' +
+                    '<svg id="teacherPasswordEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4338CA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;">' +
+                    '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>' +
+                    '<line x1="1" y1="1" x2="23" y2="23"></line>' +
+                    '</svg>' +
+                    '</button>' +
+                    '</span>' +
+                    '</div>' +
                     '<div class="view-detail-row">' +
                     '<span class="view-detail-label">Classes:</span>' +
                     '<span class="view-detail-value">' + classDisplay + '</span>' +
@@ -1097,6 +1206,25 @@
         function closeViewModal() {
             document.getElementById('viewTeacherModal').classList.remove('show');
         }
+
+        window.toggleViewTeacherPassword = function () {
+            var pwdSpan = document.getElementById('viewTeacherPasswordText');
+            var eyeIcon = document.getElementById('teacherPasswordEyeIcon');
+            if (!pwdSpan || !eyeIcon) return;
+            
+            var isMasked = pwdSpan.textContent === '••••••••';
+            var actualPassword = pwdSpan.getAttribute('data-password') || 'N/A';
+            
+            if (isMasked) {
+                pwdSpan.textContent = actualPassword;
+                // Show open eye icon
+                eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            } else {
+                pwdSpan.textContent = '••••••••';
+                // Show slashed eye icon
+                eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            }
+        };
 
         async function editTeacher(id) {
             var token = localStorage.getItem('schoolToken');

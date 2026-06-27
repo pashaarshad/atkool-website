@@ -189,7 +189,6 @@
             <a href="exams.html" class="school-sidebar-item">EXAMS</a>
             <div class="school-sidebar-item" onclick="logout()">LOGOUT</div>
         </div>
-        </div>
 
         <div class="school-content">
             <button class="btn-history" onclick="viewHistory()">View History</button>
@@ -209,6 +208,25 @@
                     <label class="form-label">Select Teacher</label>
                     <select class="form-select" id="targetTeacher">
                         <option value="">Loading teachers...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="classSelectGroup" style="display: none;">
+                    <label class="form-label">Select Class</label>
+                    <select class="form-select" id="targetClass">
+                        <option value="All">All Classes</option>
+                        <option value="1">Class 1</option>
+                        <option value="2">Class 2</option>
+                        <option value="3">Class 3</option>
+                        <option value="4">Class 4</option>
+                        <option value="5">Class 5</option>
+                        <option value="6">Class 6</option>
+                        <option value="7">Class 7</option>
+                        <option value="8">Class 8</option>
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                        <option value="11">Class 11</option>
+                        <option value="12">Class 12</option>
                     </select>
                 </div>
 
@@ -312,6 +330,7 @@
             var heading = document.getElementById('heading').value;
             var message = document.getElementById('message').value;
             var targetTeacherId = null;
+            var className = '';
 
             if (sendTo === 'SpecificTeacher') {
                 targetTeacherId = document.getElementById('targetTeacher').value;
@@ -319,6 +338,10 @@
                     showToast('Please select a teacher', 'error');
                     return;
                 }
+            }
+
+            if (sendTo === 'SpecificTeacher' || sendTo === 'Students') {
+                className = document.getElementById('targetClass').value;
             }
 
             if (!heading || !message) {
@@ -333,7 +356,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({ sendTo, heading, message, targetTeacherId })
+                    body: JSON.stringify({ sendTo, heading, message, targetTeacherId, className })
                 });
 
                 if (response.ok) {
@@ -342,6 +365,7 @@
                     document.getElementById('headingCount').textContent = '0';
                     document.getElementById('messageCount').textContent = '0';
                     document.getElementById('teacherSelectGroup').style.display = 'none';
+                    document.getElementById('classSelectGroup').style.display = 'none';
                 } else {
                     var data = await response.json();
                     showToast(data.message || 'Failed to send message', 'error');
@@ -354,11 +378,19 @@
         function toggleTeacherSelect() {
             var sendTo = document.getElementById('sendTo').value;
             var teacherGroup = document.getElementById('teacherSelectGroup');
+            var classGroup = document.getElementById('classSelectGroup');
+
             if (sendTo === 'SpecificTeacher') {
                 teacherGroup.style.display = 'block';
                 loadTeachers();
             } else {
                 teacherGroup.style.display = 'none';
+            }
+
+            if (sendTo === 'SpecificTeacher' || sendTo === 'Students') {
+                classGroup.style.display = 'block';
+            } else {
+                classGroup.style.display = 'none';
             }
         }
 
@@ -406,13 +438,20 @@
                         var date = new Date(m.createdAt).toLocaleDateString('en-IN', {
                             day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
                         });
+                        var sendToLabel = m.sendTo;
+                        if (m.sendTo === 'SpecificTeacher') {
+                            sendToLabel = 'Specific Teacher';
+                        }
+                        if (m.className) {
+                            sendToLabel += ' (' + (m.className === 'All' ? 'All Classes' : 'Class ' + m.className) + ')';
+                        }
                         return '<div class="message-item">' +
                             '<div class="message-item-header">' +
                             '<span class="message-heading">' + m.heading + '</span>' +
                             '<span class="message-date">' + date + '</span>' +
                             '</div>' +
                             '<div class="message-body">' + m.message + '</div>' +
-                            '<div class="message-sendto">Sent to: ' + m.sendTo + '</div>' +
+                            '<div class="message-sendto">Sent to: ' + sendToLabel + '</div>' +
                             '</div>';
                     }).join('');
                 }

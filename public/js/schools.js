@@ -147,31 +147,36 @@ function setupEventListeners() {
     if (schoolImagesInput) {
         schoolImagesInput.addEventListener('change', function () {
             var files = Array.from(this.files);
-            if (files.length > 6) {
-                showToast('Maximum 6 images allowed', 'error');
+            if (schoolImagesBase64.length + files.length > 6) {
+                showToast('Maximum 6 images allowed. You already have ' + schoolImagesBase64.length + ' images.', 'error');
                 this.value = '';
                 return;
             }
 
-            schoolImagesBase64 = [];
-            var preview = document.getElementById('schoolImagesPreview');
-            preview.innerHTML = '';
-
+            var loadedCount = 0;
             files.forEach(function (file) {
                 var reader = new FileReader();
                 reader.onload = function (e) {
                     var base64 = e.target.result;
                     schoolImagesBase64.push(base64);
-                    preview.innerHTML += '<img src="' + base64 + '" style="width:50px;height:50px;border-radius:4px;object-fit:cover;border:1px solid #ddd;">';
+                    loadedCount++;
+                    if (loadedCount === files.length) {
+                        renderSchoolImagesPreview();
+                        showToast(files.length + ' images added successfully!', 'success');
+                    }
                 };
                 reader.readAsDataURL(file);
             });
+            this.value = '';
         });
     }
 
     // Setup Password Toggle
     var toggleSchoolPassword = document.getElementById('toggleSchoolPassword');
     var schoolPassword = document.getElementById('schoolPassword');
+    var toggleSchoolConfirmPassword = document.getElementById('toggleSchoolConfirmPassword');
+    var schoolConfirmPassword = document.getElementById('schoolConfirmPassword');
+    
     var eyeOpenSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
     var eyeClosedSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
@@ -185,6 +190,50 @@ function setupEventListeners() {
                 toggleSchoolPassword.innerHTML = eyeOpenSvg;
             }
         });
+    }
+
+    if (toggleSchoolConfirmPassword && schoolConfirmPassword) {
+        toggleSchoolConfirmPassword.addEventListener('click', function () {
+            if (schoolConfirmPassword.type === 'password') {
+                schoolConfirmPassword.type = 'text';
+                toggleSchoolConfirmPassword.innerHTML = eyeClosedSvg;
+            } else {
+                schoolConfirmPassword.type = 'password';
+                toggleSchoolConfirmPassword.innerHTML = eyeOpenSvg;
+            }
+        });
+    }
+
+    // Real-time password match border check & warning text
+    var feedbackDiv = document.getElementById('schoolPasswordFeedback');
+
+    function checkSchoolPasswordMatch() {
+        if (!schoolPassword || !schoolConfirmPassword || !feedbackDiv) return;
+        var password = schoolPassword.value;
+        var confirmPassword = schoolConfirmPassword.value;
+
+        if (!confirmPassword) {
+            schoolConfirmPassword.style.borderColor = '';
+            feedbackDiv.style.display = 'none';
+            return;
+        }
+
+        if (password === confirmPassword) {
+            schoolConfirmPassword.style.borderColor = '#10b981'; // Green matching
+            feedbackDiv.style.color = '#10b981';
+            feedbackDiv.textContent = 'Passwords match!';
+            feedbackDiv.style.display = 'block';
+        } else {
+            schoolConfirmPassword.style.borderColor = '#ef4444'; // Red mismatching
+            feedbackDiv.style.color = '#ef4444';
+            feedbackDiv.textContent = 'Passwords do not match!';
+            feedbackDiv.style.display = 'block';
+        }
+    }
+
+    if (schoolPassword && schoolConfirmPassword) {
+        schoolPassword.addEventListener('input', checkSchoolPasswordMatch);
+        schoolConfirmPassword.addEventListener('input', checkSchoolPasswordMatch);
     }
 }
 
@@ -257,6 +306,7 @@ async function loadSchools() {
 function openModal(school) {
     var modal = document.getElementById('schoolModal');
     var modalTitle = document.getElementById('modalTitle');
+    var eyeOpenSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
 
     if (school) {
         modalTitle.textContent = 'Edit School';
@@ -270,7 +320,17 @@ function openModal(school) {
         document.getElementById('schoolCity').value = school.city;
         document.getElementById('schoolZipCode').value = school.zipCode || '';
         document.getElementById('schoolGstNo').value = school.gstNo || '';
+        
         document.getElementById('schoolPassword').value = school.password || '';
+        document.getElementById('schoolConfirmPassword').value = school.password || '';
+        document.getElementById('schoolConfirmPassword').style.borderColor = '';
+        document.getElementById('schoolPasswordFeedback').style.display = 'none';
+        
+        document.getElementById('schoolPassword').type = 'password';
+        document.getElementById('schoolConfirmPassword').type = 'password';
+        document.getElementById('toggleSchoolPassword').innerHTML = eyeOpenSvg;
+        document.getElementById('toggleSchoolConfirmPassword').innerHTML = eyeOpenSvg;
+
         document.getElementById('schoolTeachers').value = school.teachers;
         document.getElementById('schoolStudents').value = school.students;
         document.getElementById('schoolStatus').value = school.status;
@@ -280,8 +340,7 @@ function openModal(school) {
         document.getElementById('schoolLogoFile').value = '';
         
         schoolImagesBase64 = school.schoolImages || [];
-        var preview = document.getElementById('schoolImagesPreview');
-        preview.innerHTML = schoolImagesBase64.map(img => '<img src="' + img + '" style="width:50px;height:50px;border-radius:4px;object-fit:cover;border:1px solid #ddd;">').join('');
+        renderSchoolImagesPreview();
         document.getElementById('schoolImagesInput').value = '';
     } else {
         modalTitle.textContent = 'Add School';
@@ -289,13 +348,48 @@ function openModal(school) {
         document.getElementById('schoolId').value = '';
         schoolLogoBase64 = '';
         document.getElementById('schoolLogoPreview').innerHTML = '';
+        
+        document.getElementById('schoolConfirmPassword').value = '';
+        document.getElementById('schoolConfirmPassword').style.borderColor = '';
+        document.getElementById('schoolPasswordFeedback').style.display = 'none';
+
+        document.getElementById('schoolPassword').type = 'password';
+        document.getElementById('schoolConfirmPassword').type = 'password';
+        document.getElementById('toggleSchoolPassword').innerHTML = eyeOpenSvg;
+        document.getElementById('toggleSchoolConfirmPassword').innerHTML = eyeOpenSvg;
+
         schoolImagesBase64 = [];
-        document.getElementById('schoolImagesPreview').innerHTML = '';
+        renderSchoolImagesPreview();
     }
 
 
     modal.classList.add('show');
 }
+
+function renderSchoolImagesPreview() {
+    var preview = document.getElementById('schoolImagesPreview');
+    if (!preview) return;
+    preview.innerHTML = '';
+
+    schoolImagesBase64.forEach(function (base64, index) {
+        var previewDiv = document.createElement('div');
+        previewDiv.style.position = 'relative';
+        previewDiv.style.width = '60px';
+        previewDiv.style.height = '60px';
+
+        previewDiv.innerHTML = `
+            <img src="${base64}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
+            <button type="button" class="remove-image-btn" onclick="removeSchoolImage(${index})" style="position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #ef4444; color: #fff; border: none; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1;">×</button>
+        `;
+        preview.appendChild(previewDiv);
+    });
+}
+
+window.removeSchoolImage = function (index) {
+    schoolImagesBase64.splice(index, 1);
+    renderSchoolImagesPreview();
+    showToast('Image removed', 'info');
+};
 
 function closeModal() {
     var modal = document.getElementById('schoolModal');
@@ -310,6 +404,14 @@ function closeViewModal() {
 async function saveSchool() {
     var token = localStorage.getItem('adminToken');
     var schoolId = document.getElementById('schoolId').value;
+
+    var password = document.getElementById('schoolPassword').value;
+    var confirmPassword = document.getElementById('schoolConfirmPassword').value;
+
+    if (password !== confirmPassword) {
+        showToast('Passwords do not match!', 'error');
+        return;
+    }
 
     var schoolData = {
         name: document.getElementById('schoolName').value,

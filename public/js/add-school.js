@@ -171,16 +171,29 @@ document.addEventListener('DOMContentLoaded', function () {
     function checkPasswordMatch() {
         var password = passwordInput.value;
         var confirmPassword = confirmPasswordInput.value;
+        var feedbackRow = document.getElementById('passwordFeedbackRow');
+        var feedbackDiv = document.getElementById('passwordFeedback');
 
         if (!confirmPassword) {
-            confirmPasswordInput.style.borderColor = '#e2e8f0';
+            confirmPasswordInput.style.borderColor = '';
+            if (feedbackRow) feedbackRow.style.display = 'none';
             return;
         }
 
         if (password === confirmPassword) {
             confirmPasswordInput.style.borderColor = '#10b981'; // Green matching
+            if (feedbackDiv) {
+                feedbackDiv.style.color = '#10b981';
+                feedbackDiv.textContent = 'Passwords match!';
+            }
+            if (feedbackRow) feedbackRow.style.display = 'flex';
         } else {
             confirmPasswordInput.style.borderColor = '#ef4444'; // Red mismatching
+            if (feedbackDiv) {
+                feedbackDiv.style.color = '#ef4444';
+                feedbackDiv.textContent = 'Passwords do not match!';
+            }
+            if (feedbackRow) feedbackRow.style.display = 'flex';
         }
     }
 
