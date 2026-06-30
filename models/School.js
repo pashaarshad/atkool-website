@@ -69,6 +69,16 @@ const schoolSchema = new mongoose.Schema({
         default: ''
     },
 
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    activationOtp: {
+        code: { type: String },
+        expiresAt: { type: Date }
+    },
+
     deleteOtp: {
         code: { type: String },
         expiresAt: { type: Date }

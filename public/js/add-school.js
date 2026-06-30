@@ -38,6 +38,8 @@ function showToast(message, type) {
 var logoBase64 = '';
 var gstFileBase64 = '';
 var schoolImagesBase64 = [];
+var tempVerificationToken = '';
+var emailVerifiedSignature = '';
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -46,6 +48,10 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.href = '/';
         return;
     }
+
+    // Attach OTP click event listeners
+    document.getElementById('btnSendOtp').addEventListener('click', sendEmailOtp);
+    document.getElementById('btnVerifyOtp').addEventListener('click', verifyEmailOtp);
 
     var addSchoolForm = document.getElementById('addSchoolForm');
 
@@ -255,6 +261,11 @@ async function saveSchool() {
         return;
     }
 
+    if (!emailVerifiedSignature) {
+        showToast('Please verify the school email address first!', 'error');
+        return;
+    }
+
     var schoolData = {
         name: document.getElementById('schoolName').value,
         ownerName: document.getElementById('ownerName').value,
@@ -269,6 +280,7 @@ async function saveSchool() {
         logo: logoBase64,
         gstFile: gstFileBase64,
         schoolImages: schoolImagesBase64,
+        verificationSignature: emailVerifiedSignature,
 
         teachers: 0,
         students: 0,
@@ -298,5 +310,105 @@ async function saveSchool() {
     } catch (error) {
         console.error('Save school error:', error);
         showToast('Error creating school', 'error');
+    }
+}
+
+async function sendEmailOtp() {
+    var email = document.getElementById('email').value.trim();
+    if (!email) {
+        showToast('Please enter a Gmail address first.', 'error');
+        return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast('Please enter a valid Gmail address.', 'error');
+        return;
+    }
+
+    var btn = document.getElementById('btnSendOtp');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    var token = localStorage.getItem('adminToken');
+
+    try {
+        var response = await fetch('/api/schools/send-email-otp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ email: email })
+        });
+
+        var data = await response.json();
+        if (response.ok) {
+            tempVerificationToken = data.token;
+            document.getElementById('email').disabled = true;
+            document.getElementById('otpVerificationRow').style.display = 'flex';
+            showToast('Verification OTP sent successfully!', 'success');
+        } else {
+            showToast(data.message || 'Failed to send OTP', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Verify';
+        }
+    } catch (error) {
+        console.error('Send OTP error:', error);
+        showToast('Error sending verification OTP', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Verify';
+    }
+}
+
+async function verifyEmailOtp() {
+    var otp = document.getElementById('emailOtp').value.trim();
+    var email = document.getElementById('email').value.trim();
+    if (!otp || otp.length !== 6) {
+        showToast('Please enter a 6-digit verification code.', 'error');
+        return;
+    }
+
+    var btn = document.getElementById('btnVerifyOtp');
+    btn.disabled = true;
+    btn.textContent = 'Verifying...';
+
+    var token = localStorage.getItem('adminToken');
+
+    try {
+        var response = await fetch('/api/schools/verify-email-otp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                email: email,
+                otp: otp,
+                token: tempVerificationToken
+            })
+        });
+
+        var data = await response.json();
+        if (response.ok) {
+            emailVerifiedSignature = data.signature;
+            document.getElementById('otpVerificationRow').style.display = 'none';
+            
+            var statusRow = document.getElementById('otpStatusRow');
+            var statusMsg = document.getElementById('otpStatusMessage');
+            statusRow.style.display = 'flex';
+            statusMsg.style.color = '#10b981';
+            statusMsg.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Email Verified Successfully';
+            
+            document.getElementById('btnSendOtp').style.display = 'none';
+            showToast('Email verified successfully!', 'success');
+        } else {
+            showToast(data.message || 'OTP verification failed', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Confirm';
+        }
+    } catch (error) {
+        console.error('Verify OTP error:', error);
+        showToast('Error verifying OTP', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Confirm';
     }
 }

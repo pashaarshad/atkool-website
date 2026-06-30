@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const School = require('../models/School');
 const Subscription = require('../models/Subscription');
 const auth = require('../middleware/auth');
-const { sendDeleteOTP } = require('../utils/mailer');
+const { sendDeleteOTP, sendActivationOTP } = require('../utils/mailer');
 
 router.get('/', auth, async (req, res) => {
     try {
@@ -57,9 +58,90 @@ router.get('/:id', auth, async (req, res) => {
     }
 });
 
+// Send Email OTP for School Creation (initiated by Super Admin)
+router.post('/send-email-otp', auth, async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email address is required' });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: 'Invalid email format' });
+        }
+
+        // Check if school already exists
+        const existingEmail = await School.findOne({ email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'A school with this email already exists' });
+        }
+
+        // Generate and send OTP
+        const { sendActivationOTP } = require('../utils/mailer');
+        const { otp, expiresAt } = await sendActivationOTP('School Registration', email);
+
+        // Sign token containing email and code
+        const token = jwt.sign(
+            { email, code: otp },
+            process.env.JWT_SECRET || 'super_admin_secret_key_2024',
+            { expiresIn: '10m' } // 10 minutes validation
+        );
+
+        res.json({
+            message: 'OTP sent successfully to the school email address.',
+            token
+        });
+    } catch (error) {
+        console.error('Send email OTP error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Verify Email OTP and return signature
+router.post('/verify-email-otp', auth, async (req, res) => {
+    try {
+        const { email, otp, token } = req.body;
+
+        if (!email || !otp || !token) {
+            return res.status(400).json({ message: 'Email, OTP, and token are required' });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_admin_secret_key_2024');
+        } catch (err) {
+            return res.status(400).json({ message: 'Verification session has expired or is invalid. Please resend OTP.' });
+        }
+
+        if (decoded.email.toLowerCase() !== email.toLowerCase()) {
+            return res.status(400).json({ message: 'Email mismatch. Please start verification again.' });
+        }
+
+        if (decoded.code !== otp) {
+            return res.status(400).json({ message: 'Invalid OTP code. Please try again.' });
+        }
+
+        // Generate verified signature token
+        const signature = jwt.sign(
+            { email, verified: true },
+            process.env.JWT_SECRET || 'super_admin_secret_key_2024',
+            { expiresIn: '20m' } // Signature valid for 20 minutes to complete registration
+        );
+
+        res.json({
+            message: 'Email verified successfully!',
+            signature
+        });
+    } catch (error) {
+        console.error('Verify email OTP error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 router.post('/', auth, async (req, res) => {
     try {
-        const { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo, schoolImages } = req.body;
+        const { name, ownerName, teachers, students, city, state, zipCode, status, amount, mobileNo, email, address, gstNo, gstFile, password, logo, schoolImages, verificationSignature } = req.body;
 
         if (!name || !city) {
             return res.status(400).json({ message: 'Name and city are required' });
@@ -75,6 +157,20 @@ router.post('/', auth, async (req, res) => {
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return res.status(400).json({ message: 'Invalid Gmail/email format' });
+        }
+
+        // Verify email verification signature
+        if (!verificationSignature) {
+            return res.status(400).json({ message: 'Please verify the school email address first.' });
+        }
+
+        try {
+            const decodedSig = jwt.verify(verificationSignature, process.env.JWT_SECRET || 'super_admin_secret_key_2024');
+            if (decodedSig.email.toLowerCase() !== email.toLowerCase() || !decodedSig.verified) {
+                return res.status(400).json({ message: 'Email verification signature is invalid or mismatched.' });
+            }
+        } catch (err) {
+            return res.status(400).json({ message: 'Email verification session has expired. Please verify again.' });
         }
 
         const existingEmail = await School.findOne({ email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } });
@@ -104,10 +200,14 @@ router.post('/', auth, async (req, res) => {
             gstFile,
             password,
             logo,
-            schoolImages
+            schoolImages,
+            isEmailVerified: true // Already verified in front-end
         });
 
-        res.status(201).json(school);
+        res.status(201).json({
+            message: 'School account created successfully!',
+            school
+        });
     } catch (error) {
         console.error('Create school error:', error);
         res.status(500).json({ message: 'Server error' });

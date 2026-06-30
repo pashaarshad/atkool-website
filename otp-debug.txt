@@ -4,3 +4,9 @@ School ID: test-12345
 OTP Code: 844009
 Expires At: 26/6/2026, 7:34:06 am
 -------------------------------------------
+[2026-06-30T08:37:00.764Z] School Delete OTP generated:
+School Name: AP Programming
+School ID: 6a437980ed2cc25cbab6efbb
+OTP Code: 526128
+Expires At: 30/6/2026, 2:12:00 pm
+-------------------------------------------

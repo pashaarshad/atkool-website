@@ -39,7 +39,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <div class="school-login-container">
-        <div class="school-login-box">
+        <div class="school-login-box" id="loginBox">
             <div class="school-login-header">
                 <img src="/logo.jpeg" alt="ATKool" style="width:90px;height:90px;border-radius:16px;margin:0 auto 15px;display:block;box-shadow:0 4px 15px rgba(67,56,202,.15)">
                 <h1>School Admin Login</h1>
@@ -57,6 +57,26 @@
                     <input type="password" id="password" placeholder="Enter password" required>
                 </div>
                 <button type="submit" class="btn-login">Login</button>
+            </form>
+        </div>
+
+        <div class="school-login-box" id="otpBox" style="display: none;">
+            <div class="school-login-header">
+                <img src="/logo.jpeg" alt="ATKool" style="width:90px;height:90px;border-radius:16px;margin:0 auto 15px;display:block;box-shadow:0 4px 15px rgba(67,56,202,.15)">
+                <h1 style="color:#ea580c;">🔐 Verify Your Email</h1>
+                <p style="margin-top: 8px; font-weight: 500; line-height: 1.5;">An activation OTP code was sent to <strong id="verificationEmailText" style="color: #4338CA;">your email</strong>. Enter the OTP code to verify and activate your account.</p>
+            </div>
+
+            <form class="school-login-form" id="otpForm">
+                <div class="form-group">
+                    <label for="otpCode" style="color:#ea580c; text-align:center; display:block;">6-Digit Verification Code</label>
+                    <input type="text" id="otpCode" placeholder="000000" maxlength="6" pattern="\d{6}" required style="text-align:center;font-size:24px;letter-spacing:6px;font-weight:700;">
+                </div>
+                <button type="submit" class="btn-login" style="background:linear-gradient(135deg,#ea580c,#d97706);box-shadow:0 4px 15px rgba(234,88,12,0.3);">Verify & Activate Account</button>
+                <div style="margin-top:20px;text-align:center;font-size:13px;font-weight:600;">
+                    <a href="#" onclick="resendActivationOtp(event)" style="color:#4338CA;text-decoration:none;margin-right:15px;">Resend OTP</a>
+                    <a href="#" onclick="showLoginBox(event)" style="color:#64748b;text-decoration:none;">Back to Login</a>
+                </div>
             </form>
         </div>
     </div>
@@ -125,6 +145,15 @@
 
                 var data = await response.json();
 
+                if (response.status === 202 || data.message === 'OTP_VERIFICATION_REQUIRED') {
+                    activeVerificationSchoolId = data.schoolId;
+                    document.getElementById('verificationEmailText').textContent = data.email;
+                    document.getElementById('loginBox').style.display = 'none';
+                    document.getElementById('otpBox').style.display = 'block';
+                    showToast('First-time activation required. OTP sent to your registered Gmail address.', 'info');
+                    return;
+                }
+
                 if (response.ok) {
                     localStorage.setItem('schoolToken', data.token);
                     localStorage.setItem('schoolData', JSON.stringify(data.school));
@@ -140,6 +169,78 @@
                 showToast('Error connecting to server', 'error');
             }
         });
+
+        var activeVerificationSchoolId = '';
+
+        document.getElementById('otpForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            var otp = document.getElementById('otpCode').value.trim();
+            if (!/^\d{6}$/.test(otp)) {
+                showToast('Please enter a 6-digit verification code', 'error');
+                return;
+            }
+
+            try {
+                var response = await fetch('/api/school-auth/verify-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        schoolId: activeVerificationSchoolId,
+                        otp: otp
+                    })
+                });
+
+                var data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('schoolToken', data.token);
+                    localStorage.setItem('schoolData', JSON.stringify(data.school));
+                    showToast('Verification successful! Account activated.', 'success');
+                    setTimeout(function () {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                } else {
+                    showToast(data.message || 'Verification failed', 'error');
+                }
+            } catch (error) {
+                console.error('Verify OTP error:', error);
+                showToast('Error connecting to server', 'error');
+            }
+        });
+
+        async function resendActivationOtp(e) {
+            if (e) e.preventDefault();
+            try {
+                var response = await fetch('/api/school-auth/resend-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        schoolId: activeVerificationSchoolId
+                    })
+                });
+
+                var data = await response.json();
+
+                if (response.ok) {
+                    showToast('A new OTP has been sent successfully.', 'success');
+                } else {
+                    showToast(data.message || 'Failed to resend OTP', 'error');
+                }
+            } catch (error) {
+                console.error('Resend OTP error:', error);
+                showToast('Error connecting to server', 'error');
+            }
+        }
+
+        function showLoginBox(e) {
+            if (e) e.preventDefault();
+            document.getElementById('otpBox').style.display = 'none';
+            document.getElementById('loginBox').style.display = 'block';
+        }
 
         if (localStorage.getItem('schoolToken')) {
             window.location.href = 'dashboard.html';
