@@ -345,6 +345,7 @@ async function sendEmailOtp() {
             tempVerificationToken = data.token;
             document.getElementById('email').disabled = true;
             document.getElementById('otpVerificationRow').style.display = 'flex';
+            btn.textContent = 'Sent';
             showToast('Verification OTP sent successfully!', 'success');
         } else {
             showToast(data.message || 'Failed to send OTP', 'error');
