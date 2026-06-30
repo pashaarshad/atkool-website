@@ -129,6 +129,9 @@ router.get('/payments', schoolAuth, async (req, res) => {
             .populate('feeStructureId')
             .sort({ createdAt: -1 });
 
+        // Filter out records with null studentId (deleted students)
+        payments = payments.filter(p => p.studentId != null);
+
         // Filter in memory for className and search name
         if (className || search) {
             payments = payments.filter(p => {
@@ -215,6 +218,80 @@ router.put('/payments/:id/mode', schoolAuth, async (req, res) => {
         res.json({ message: 'Payment mode updated to ' + paymentMode, payment });
     } catch (error) {
         console.error('Update payment mode error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Manually record a payment of any amount towards student fee
+router.post('/payments/:id/collect', schoolAuth, async (req, res) => {
+    try {
+        const { amount } = req.body;
+        const paymentAmount = parseFloat(amount);
+
+        if (isNaN(paymentAmount) || paymentAmount <= 0) {
+            return res.status(400).json({ message: 'A valid payment amount greater than 0 is required' });
+        }
+
+        const payment = await FeePayment.findOne({ _id: req.params.id, schoolId: req.schoolId })
+            .populate('feeStructureId');
+
+        if (!payment) {
+            return res.status(404).json({ message: 'Fee record not found' });
+        }
+
+        let remainingPayment = paymentAmount;
+
+        // Distribute the payment across installments in order
+        for (let inst of payment.installments) {
+            if (remainingPayment <= 0) break;
+
+            if (inst.status === 'Paid') continue;
+
+            const instTarget = inst.amount;
+            const instPaid = inst.submittedAmount || 0;
+            const instRemaining = instTarget - instPaid;
+
+            if (instRemaining <= 0) {
+                inst.status = 'Paid';
+                inst.paidDate = new Date();
+                inst.verifiedBy = 'School Admin';
+                continue;
+            }
+
+            if (remainingPayment >= instRemaining) {
+                inst.submittedAmount = instTarget;
+                inst.status = 'Paid';
+                inst.paidDate = new Date();
+                inst.verifiedBy = 'School Admin';
+                remainingPayment -= instRemaining;
+            } else {
+                inst.submittedAmount = instPaid + remainingPayment;
+                inst.status = 'Unpaid';
+                remainingPayment = 0;
+            }
+        }
+
+        // Recalculate total amount paid and status
+        let totalPaid = 0;
+        let allPaid = true;
+        payment.installments.forEach(inst => {
+            totalPaid += (inst.submittedAmount || 0);
+            if (inst.status !== 'Paid') {
+                allPaid = false;
+            }
+        });
+
+        payment.amountPaid = totalPaid;
+        payment.status = allPaid ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
+
+        await payment.save();
+
+        res.json({ 
+            message: `Recorded payment of ₹${paymentAmount.toLocaleString()} successfully!`, 
+            payment 
+        });
+    } catch (error) {
+        console.error('Collect fee payment error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

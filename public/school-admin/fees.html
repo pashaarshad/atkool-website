@@ -391,11 +391,11 @@
                                 <th>Student</th>
                                 <th>Class</th>
                                 <th>Fee Name</th>
-                                <th>Total Amount</th>
-                                <th>Paid</th>
+                                <th>Due Amount</th>
+                                <th>Paid Amount</th>
                                 <th>Mode</th>
                                 <th>Status</th>
-                                <th>Actions</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="ledgerTableBody">
@@ -436,39 +436,84 @@
         </div>
     </div>
 
-    <!-- Change Mode Modal -->
+    <!-- Action Modal -->
     <div class="modal-overlay" id="modeModal">
-        <div class="modal">
-            <h2>Change Payment Mode</h2>
-            <p id="modeModalMsg">Select how this fee should be collected:</p>
-
-            <div class="mode-selector">
-                <div class="mode-card selected" onclick="selectMode('Full')" id="modeCard_Full">
-                    <h4>Full</h4>
-                    <p>Single payment</p>
-                </div>
-                <div class="mode-card" onclick="selectMode('3 Installments')" id="modeCard_3">
-                    <h4>3 Installments</h4>
-                    <p>Split into 3 equal parts</p>
-                </div>
-                <div class="mode-card" onclick="selectMode('Customized')" id="modeCard_Custom">
-                    <h4>Customized</h4>
-                    <p>Define custom splits</p>
+        <div class="modal" style="max-width: 600px; width: 95%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+                <h2 style="margin:0; font-size:20px; font-weight:800; color:#0F172A;">Fee Payment Action</h2>
+                <button onclick="closeModeModal()" style="border:none; background:none; font-size:24px; font-weight:700; cursor:pointer; color:#64748b; line-height:1;">&times;</button>
+            </div>
+            
+            <!-- Student & Fee Summary -->
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:18px;">
+                <div style="font-size:14px; font-weight:700; color:#0F172A;" id="modalStudentName">-</div>
+                <div style="font-size:12px; color:#64748b; font-weight:600; margin-top:2px;" id="modalFeeName">-</div>
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:12px; padding-top:10px; border-top:1px solid #e2e8f0; text-align:center;">
+                    <div>
+                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Total Fee</div>
+                        <div id="modalTotalAmount" style="font-weight:700; color:#0F172A; font-size:15px;">₹0</div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Paid</div>
+                        <div id="modalAmountPaid" style="font-weight:700; color:#059669; font-size:15px;">₹0</div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Remaining</div>
+                        <div id="modalRemainingAmount" style="font-weight:700; color:#dc2626; font-size:15px;">₹0</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="custom-installments" id="customInstallmentsSection">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                    <label style="font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;">Custom Installments</label>
-                    <span style="font-size:12px;color:#64748b;">Total: ₹<span id="customTotal">0</span> / ₹<span id="customTarget">0</span></span>
+            <!-- Installment Status List -->
+            <div style="margin-bottom:18px;">
+                <h3 style="font-size:12px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Installment Breakdown</h3>
+                <div id="modalInstallmentsList" style="display:flex; flex-direction:column; gap:8px; max-height:160px; overflow-y:auto; padding:2px;">
+                    <!-- Dynamically populated -->
                 </div>
-                <div id="customInstallmentsList"></div>
-                <button type="button" class="btn-add-inst" onclick="addCustomInstallment()">+ Add Installment</button>
             </div>
 
-            <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="closeModeModal()">Cancel</button>
-                <button type="button" class="btn-save" onclick="confirmModeChange()">Apply Mode</button>
+            <!-- Collect Manual Payment -->
+            <div style="background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px; padding:16px; margin-bottom:18px;">
+                <h3 style="font-size:12px; font-weight:800; color:#166534; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Record New Payment</h3>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <div style="position:relative; flex:1;">
+                        <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#64748b; font-weight:600; font-size:14px;">₹</span>
+                        <input type="number" id="collectAmountInput" placeholder="Enter amount to pay" style="width:100%; padding:10px 12px 10px 24px; border:2px solid #cbd5e1; border-radius:8px; font-size:14px; outline:none;" onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#cbd5e1'">
+                    </div>
+                    <button type="button" class="btn-save" style="background:linear-gradient(135deg,#10b981,#059669); margin:0; padding:10px 18px;" onclick="submitManualPayment()">Record Payment</button>
+                </div>
+            </div>
+
+            <div style="border-top:1px solid #f1f5f9; padding-top:16px;">
+                <h3 style="font-size:12px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">Change Fee Mode Structure</h3>
+                <div class="mode-selector" style="margin-bottom:12px;">
+                    <div class="mode-card selected" onclick="selectMode('Full')" id="modeCard_Full" style="padding:10px;">
+                        <h4>Full</h4>
+                        <p style="font-size:9px;">Single payment</p>
+                    </div>
+                    <div class="mode-card" onclick="selectMode('3 Installments')" id="modeCard_3" style="padding:10px;">
+                        <h4>3 Installments</h4>
+                        <p style="font-size:9px;">3 equal parts</p>
+                    </div>
+                    <div class="mode-card" onclick="selectMode('Customized')" id="modeCard_Custom" style="padding:10px;">
+                        <h4>Customized</h4>
+                        <p style="font-size:9px;">Custom splits</p>
+                    </div>
+                </div>
+
+                <div class="custom-installments" id="customInstallmentsSection" style="margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                        <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;">Custom Installments</label>
+                        <span style="font-size:11px;color:#64748b;">Total: ₹<span id="customTotal">0</span> / ₹<span id="customTarget">0</span></span>
+                    </div>
+                    <div id="customInstallmentsList"></div>
+                    <button type="button" class="btn-add-inst" onclick="addCustomInstallment()">+ Add Installment</button>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" class="btn-cancel" onclick="closeModeModal()">Close</button>
+                    <button type="button" class="btn-save" onclick="confirmModeChange()">Apply Mode Settings</button>
+                </div>
             </div>
         </div>
     </div>
@@ -509,6 +554,7 @@
         var activePaymentId = '';
         var activeModeSelection = 'Full';
         var activeTotalAmount = 0;
+        var currentPayments = [];
 
         function showToast(message, type) {
             var container = document.getElementById('toastContainer');
@@ -649,6 +695,7 @@
             try {
                 var response = await fetch('/api/school-fees/payments?' + params.toString(), { headers: { 'Authorization': 'Bearer ' + token } });
                 var data = await response.json();
+                currentPayments = data;
 
                 // Calculate stats
                 var total = 0, collected = 0, pending = 0, partialCount = 0;
@@ -691,11 +738,11 @@
                         '<td><strong>' + (student.name || 'N/A') + '</strong><br><span style="font-size:11px;color:#94a3b8;">' + (student.studentId || '') + '</span></td>' +
                         '<td>' + (student.className || '-') + '-' + (student.section || 'A') + '</td>' +
                         '<td>' + (structure.feeName || 'N/A') + '</td>' +
-                        '<td>&#8377;' + totalAmt.toLocaleString() + '</td>' +
+                        '<td>&#8377;' + (totalAmt - (p.amountPaid || 0)).toLocaleString() + '</td>' +
                         '<td>&#8377;' + (p.amountPaid || 0).toLocaleString() + '</td>' +
                         '<td>' + modeBadge + '</td>' +
                         '<td>' + statusBadge + '</td>' +
-                        '<td><button class="btn-mode" onclick="openModeModal(\'' + p._id + '\', ' + totalAmt + ', \'' + (p.paymentMode || 'Full') + '\')">Change Mode</button></td>' +
+                        '<td><button class="btn-mode" onclick="openModeModal(\'' + p._id + '\')">Action</button></td>' +
                         '</tr>';
 
                     // Expandable installment detail row
@@ -708,10 +755,11 @@
                         installments.forEach(function(inst) {
                             var isPaid = inst.status === 'Paid';
                             var paidDate = inst.paidDate ? new Date(inst.paidDate).toLocaleDateString() : '';
+                            var paidAmt = inst.submittedAmount || 0;
                             instHtml += '<div class="installment-item ' + (isPaid ? 'paid' : 'unpaid') + '">' +
                                 '<div class="inst-info">' +
                                 '<div class="inst-label">' + inst.label + '</div>' +
-                                '<div class="inst-amount">₹' + inst.amount.toLocaleString() + '</div>' +
+                                '<div class="inst-amount">Paid: ₹' + paidAmt.toLocaleString() + ' / ₹' + inst.amount.toLocaleString() + '</div>' +
                                 (isPaid ? '<div class="inst-date">Verified on ' + paidDate + '</div>' : '') +
                                 '</div>' +
                                 '<div class="inst-actions">' +
@@ -786,22 +834,55 @@
             } catch (error) { showToast('Server error', 'error'); }
         }
 
-        // ===== CHANGE MODE MODAL =====
-        function openModeModal(paymentId, totalAmount, currentMode) {
+        // ===== ACTION MODAL (FEES & MANUAL PAYMENT) =====
+        function openModeModal(paymentId) {
+            var p = currentPayments.find(function(item) { return item._id === paymentId; });
+            if (!p) return;
+
             activePaymentId = paymentId;
-            activeTotalAmount = totalAmount;
-            activeModeSelection = currentMode || 'Full';
+            var structure = p.feeStructureId || {};
+            activeTotalAmount = p.totalAmount || structure.amount || 0;
+            activeModeSelection = p.paymentMode || 'Full';
 
-            document.getElementById('customTarget').textContent = totalAmount.toLocaleString();
-            document.getElementById('modeModalMsg').textContent = 'Total fee: ₹' + totalAmount.toLocaleString() + '. Choose collection mode:';
+            // Set modal values
+            document.getElementById('modalStudentName').textContent = p.studentId ? p.studentId.name : 'N/A';
+            document.getElementById('modalFeeName').textContent = structure.feeName || 'N/A';
+            document.getElementById('modalTotalAmount').textContent = '₹' + activeTotalAmount.toLocaleString();
+            document.getElementById('modalAmountPaid').textContent = '₹' + (p.amountPaid || 0).toLocaleString();
+            document.getElementById('modalRemainingAmount').textContent = '₹' + (activeTotalAmount - (p.amountPaid || 0)).toLocaleString();
 
-            // Reset mode cards
+            // Clear collect payment input
+            document.getElementById('collectAmountInput').value = '';
+
+            // Render current installments list
+            var modalInstBody = document.getElementById('modalInstallmentsList');
+            var installments = p.installments || [];
+            if (installments.length === 0) {
+                modalInstBody.innerHTML = '<div style="font-size:12px; color:#94a3b8; text-align:center; padding:10px;">No installments configured.</div>';
+            } else {
+                modalInstBody.innerHTML = installments.map(function(inst) {
+                    var isPaid = inst.status === 'Paid';
+                    var statusColor = isPaid ? '#059669' : (inst.status === 'Verification Pending' ? '#d97706' : '#dc2626');
+                    var paidAmount = inst.submittedAmount || 0;
+                    return '<div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; font-size:13px;">' +
+                        '<div>' +
+                        '<div style="font-weight:700; color:#0F172A;">' + inst.label + '</div>' +
+                        '<div style="font-size:11px; color:#64748b; margin-top:2px;">Paid: ₹' + paidAmount.toLocaleString() + ' / ₹' + inst.amount.toLocaleString() + '</div>' +
+                        '</div>' +
+                        '<span class="status-badge" style="background:none; padding:0; color:' + statusColor + '; font-weight:700;">' + inst.status + '</span>' +
+                        '</div>';
+                }).join('');
+            }
+
+            document.getElementById('customTarget').textContent = activeTotalAmount.toLocaleString();
+
+            // Reset mode cards selection state
             document.querySelectorAll('.mode-card').forEach(function(c) { c.classList.remove('selected'); });
             if (activeModeSelection === 'Full') document.getElementById('modeCard_Full').classList.add('selected');
             else if (activeModeSelection === '3 Installments') document.getElementById('modeCard_3').classList.add('selected');
             else document.getElementById('modeCard_Custom').classList.add('selected');
 
-            // Show/hide custom section
+            // Show/hide custom installments section
             if (activeModeSelection === 'Customized') {
                 document.getElementById('customInstallmentsSection').classList.add('show');
                 initCustomInstallments();
@@ -862,6 +943,32 @@
                 el.style.color = '#059669';
             } else {
                 el.style.color = '#dc2626';
+            }
+        }
+
+        async function submitManualPayment() {
+            var amount = parseFloat(document.getElementById('collectAmountInput').value);
+            if (isNaN(amount) || amount <= 0) {
+                showToast('Please enter a valid amount greater than 0', 'error');
+                return;
+            }
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/school-fees/payments/' + activePaymentId + '/collect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ amount: amount })
+                });
+                var data = await response.json();
+                if (response.ok) {
+                    showToast(data.message || 'Payment recorded successfully!', 'success');
+                    closeModeModal();
+                    loadLedger();
+                } else {
+                    showToast(data.message || 'Error recording payment', 'error');
+                }
+            } catch (error) {
+                showToast('Server error', 'error');
             }
         }
 
