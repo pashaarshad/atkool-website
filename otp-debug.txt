@@ -40,3 +40,45 @@ School Email: arshadpashaintern@gmail.com
 OTP Code: 723076
 Expires At: 30/6/2026, 3:06:35 pm
 -------------------------------------------
+[2026-06-30T18:35:51.321Z] School Activation OTP generated:
+School Name: xyz
+School Email: xyz@gmail.com
+OTP Code: 370301
+Expires At: 1/7/2026, 12:20:51 am
+-------------------------------------------
+[2026-06-30T18:36:46.988Z] School Activation OTP generated:
+School Name: AP Programming
+School Email: arshad65pasha@gmail.com
+OTP Code: 266238
+Expires At: 1/7/2026, 12:21:46 am
+-------------------------------------------
+[2026-06-30T18:37:13.367Z] School Activation OTP generated:
+School Name: AP Programming
+School Email: arshad65pasha@gmail.com
+OTP Code: 396983
+Expires At: 1/7/2026, 12:22:13 am
+-------------------------------------------
+[2026-06-30T18:37:14.097Z] School Activation OTP generated:
+School Name: AP Programming
+School Email: arshad65pasha@gmail.com
+OTP Code: 390337
+Expires At: 1/7/2026, 12:22:14 am
+-------------------------------------------
+[2026-06-30T18:37:14.203Z] School Activation OTP generated:
+School Name: AP Programming
+School Email: arshad65pasha@gmail.com
+OTP Code: 934410
+Expires At: 1/7/2026, 12:22:14 am
+-------------------------------------------
+[2026-06-30T18:37:14.413Z] School Activation OTP generated:
+School Name: AP Programming
+School Email: arshad65pasha@gmail.com
+OTP Code: 196856
+Expires At: 1/7/2026, 12:22:14 am
+-------------------------------------------
+[2026-06-30T18:38:55.879Z] School Activation OTP generated:
+School Name: xyz
+School Email: xyz@gmail.com
+OTP Code: 429765
+Expires At: 1/7/2026, 12:23:55 am
+-------------------------------------------

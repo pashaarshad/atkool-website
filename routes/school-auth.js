@@ -34,23 +34,6 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
-        if (school.isEmailVerified === false) {
-            const { sendActivationOTP } = require('../utils/mailer');
-            const { otp, expiresAt } = await sendActivationOTP(school.name, school.email);
-
-            school.activationOtp = {
-                code: otp,
-                expiresAt: expiresAt
-            };
-            await school.save();
-
-            return res.status(202).json({
-                message: 'OTP_VERIFICATION_REQUIRED',
-                schoolId: school._id,
-                email: school.email
-            });
-        }
-
         const token = jwt.sign(
             { schoolId: school._id, email: school.email, type: 'school' },
             process.env.JWT_SECRET || 'super_admin_secret_key_2024',
@@ -338,95 +321,6 @@ router.post('/reject-student/:studentId', async (req, res) => {
         res.json({ message: 'Student rejected', student });
     } catch (error) {
         console.error('Reject student error:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
-// Verify School Email OTP and Activate Account
-router.post('/verify-otp', async (req, res) => {
-    try {
-        const { schoolId, otp } = req.body;
-
-        if (!schoolId || !otp) {
-            return res.status(400).json({ message: 'School ID and OTP code are required' });
-        }
-
-        const school = await School.findById(schoolId);
-        if (!school) {
-            return res.status(404).json({ message: 'School not found' });
-        }
-
-        if (school.isEmailVerified) {
-            return res.status(400).json({ message: 'Email address is already verified' });
-        }
-
-        if (!school.activationOtp || !school.activationOtp.code || school.activationOtp.code !== otp) {
-            return res.status(400).json({ message: 'Invalid OTP code' });
-        }
-
-        if (new Date() > new Date(school.activationOtp.expiresAt)) {
-            return res.status(400).json({ message: 'OTP code has expired' });
-        }
-
-        // Verify and activate
-        school.isEmailVerified = true;
-        school.status = 'Unpaid'; // Or leave it as configured, but setting status to active/unpaid allows them to access dashboard
-        school.activationOtp = { code: '', expiresAt: null };
-        await school.save();
-
-        // Generate JWT token
-        const token = jwt.sign(
-            { schoolId: school._id, email: school.email, type: 'school' },
-            process.env.JWT_SECRET || 'super_admin_secret_key_2024',
-            { expiresIn: '24h' }
-        );
-
-        res.json({
-            message: 'Email address verified and account activated successfully!',
-            token,
-            school: {
-                id: school._id,
-                name: school.name,
-                email: school.email,
-                logo: school.logo
-            }
-        });
-    } catch (error) {
-        console.error('Verify OTP error:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-});
-
-// Resend School Activation OTP
-router.post('/resend-otp', async (req, res) => {
-    try {
-        const { schoolId } = req.body;
-
-        if (!schoolId) {
-            return res.status(400).json({ message: 'School ID is required' });
-        }
-
-        const school = await School.findById(schoolId);
-        if (!school) {
-            return res.status(404).json({ message: 'School not found' });
-        }
-
-        if (school.isEmailVerified) {
-            return res.status(400).json({ message: 'Email is already verified' });
-        }
-
-        const { sendActivationOTP } = require('../utils/mailer');
-        const { otp, expiresAt } = await sendActivationOTP(school.name, school.email);
-
-        school.activationOtp = {
-            code: otp,
-            expiresAt: expiresAt
-        };
-        await school.save();
-
-        res.json({ message: 'A new activation OTP has been sent to your registered Gmail.' });
-    } catch (error) {
-        console.error('Resend OTP error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
