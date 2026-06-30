@@ -225,58 +225,13 @@ router.get('/parent/conversations', parentAuth, async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        // Find all teachers related to this student's class and section
-        const orConditions = [
-            {
-                isClassTeacher: true,
-                'classTeacherFor.className': student.className,
-                'classTeacherFor.section': student.section || 'A'
-            },
-            {
-                'classAssignments': {
-                    $elemMatch: {
-                        className: student.className,
-                        section: student.section || 'A'
-                    }
-                }
-            }
-        ];
-
-        if (student.teacherId) {
-            orConditions.push({ _id: student.teacherId });
-        }
-
         let teachers = await Teacher.find({
             schoolId: req.schoolId,
-            $or: orConditions
+            status: { $ne: 'Inactive' }
         }).select('name email mobileNo subject photo className classAssignments isClassTeacher classTeacherFor');
 
-        // Fallback: if no teachers found for this class/section, try showing class teachers matching just the className
         if (teachers.length === 0) {
-            teachers = await Teacher.find({
-                schoolId: req.schoolId,
-                $or: [
-                    {
-                        isClassTeacher: true,
-                        'classTeacherFor.className': student.className
-                    },
-                    {
-                        'classAssignments.className': student.className
-                    }
-                ]
-            }).select('name email mobileNo subject photo className classAssignments isClassTeacher classTeacherFor');
-        }
-
-        // Second fallback: show any active teacher in the school
-        if (teachers.length === 0) {
-            teachers = await Teacher.find({
-                schoolId: req.schoolId,
-                status: 'Active'
-            }).select('name email mobileNo subject photo className classAssignments isClassTeacher classTeacherFor');
-        }
-
-        if (teachers.length === 0) {
-            return res.json({ conversations: [], message: 'No teachers assigned to your class yet.' });
+            return res.json({ conversations: [], message: 'No active teachers found in the school.' });
         }
 
         // Map teachers to conversation objects with last message and unread count

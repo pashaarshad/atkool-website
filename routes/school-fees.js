@@ -45,7 +45,7 @@ router.get('/structures', schoolAuth, async (req, res) => {
 // Configure a new fee structure
 router.post('/structures', schoolAuth, async (req, res) => {
     try {
-        const { feeName, amount, className, dueDate } = req.body;
+        const { feeName, amount, className, dueDate, feeType, allocationType, specificStudentIds } = req.body;
 
         if (!feeName || !amount || !className || !dueDate) {
             return res.status(400).json({ message: 'All fields are required' });
@@ -56,18 +56,32 @@ router.post('/structures', schoolAuth, async (req, res) => {
             feeName,
             amount: parseFloat(amount),
             className,
-            dueDate: new Date(dueDate)
+            dueDate: new Date(dueDate),
+            feeType: feeType || 'School Fee',
+            allocationType: allocationType || 'Class'
         });
 
         // Query students that this fee structure applies to
         let studentQuery = { schoolId: req.schoolId, approvalStatus: 'Approved' };
-        if (className !== 'All') {
+
+        if (allocationType === 'Class' && className !== 'All') {
             studentQuery.className = className;
+        } else if (allocationType === 'Van Users' || feeType === 'Van Fee') {
+            studentQuery.vanId = { $ne: null };
+        } else if (allocationType === 'Specific Students') {
+            if (!specificStudentIds || specificStudentIds.trim() === '') {
+                return res.status(400).json({ message: 'At least one Student ID is required for Specific Students allocation' });
+            }
+            const ids = specificStudentIds.split(',').map(id => id.trim()).filter(id => id.length > 0);
+            studentQuery.$or = [
+                { studentId: { $in: ids } },
+                { rollNo: { $in: ids } }
+            ];
         }
 
         const students = await Student.find(studentQuery);
         
-        // Auto-allocate this fee as unpaid (Full mode by default) to all target students
+        // Auto-allocate this fee as unpaid to all target students
         const paymentPromises = students.map(student => {
             return FeePayment.create({
                 studentId: student._id,
@@ -77,12 +91,7 @@ router.post('/structures', schoolAuth, async (req, res) => {
                 totalAmount: parseFloat(amount),
                 amountPaid: 0,
                 status: 'Unpaid',
-                installments: [{
-                    installmentNumber: 1,
-                    label: 'Full Payment',
-                    amount: parseFloat(amount),
-                    status: 'Unpaid'
-                }]
+                installments: []
             });
         });
 
@@ -239,50 +248,28 @@ router.post('/payments/:id/collect', schoolAuth, async (req, res) => {
             return res.status(404).json({ message: 'Fee record not found' });
         }
 
-        let remainingPayment = paymentAmount;
+        const count = payment.installments.length + 1;
 
-        // Distribute the payment across installments in order
-        for (let inst of payment.installments) {
-            if (remainingPayment <= 0) break;
-
-            if (inst.status === 'Paid') continue;
-
-            const instTarget = inst.amount;
-            const instPaid = inst.submittedAmount || 0;
-            const instRemaining = instTarget - instPaid;
-
-            if (instRemaining <= 0) {
-                inst.status = 'Paid';
-                inst.paidDate = new Date();
-                inst.verifiedBy = 'School Admin';
-                continue;
-            }
-
-            if (remainingPayment >= instRemaining) {
-                inst.submittedAmount = instTarget;
-                inst.status = 'Paid';
-                inst.paidDate = new Date();
-                inst.verifiedBy = 'School Admin';
-                remainingPayment -= instRemaining;
-            } else {
-                inst.submittedAmount = instPaid + remainingPayment;
-                inst.status = 'Unpaid';
-                remainingPayment = 0;
-            }
-        }
+        payment.installments.push({
+            installmentNumber: count,
+            label: `Payment #${count} (Manual)`,
+            amount: paymentAmount,
+            status: 'Paid',
+            paidDate: new Date(),
+            verifiedBy: 'School Admin',
+            submittedAmount: paymentAmount
+        });
 
         // Recalculate total amount paid and status
         let totalPaid = 0;
-        let allPaid = true;
         payment.installments.forEach(inst => {
-            totalPaid += (inst.submittedAmount || 0);
-            if (inst.status !== 'Paid') {
-                allPaid = false;
+            if (inst.status === 'Paid') {
+                totalPaid += (inst.submittedAmount || inst.amount || 0);
             }
         });
 
         payment.amountPaid = totalPaid;
-        payment.status = allPaid ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
+        payment.status = (totalPaid >= payment.totalAmount) ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
 
         await payment.save();
 
@@ -321,17 +308,14 @@ router.put('/payments/:id/verify/:installmentId', schoolAuth, async (req, res) =
 
         // Recalculate total paid and overall status
         let totalPaid = 0;
-        let allPaid = true;
         payment.installments.forEach(inst => {
             if (inst.status === 'Paid') {
-                totalPaid += (inst.submittedAmount || inst.amount);
-            } else {
-                allPaid = false;
+                totalPaid += (inst.submittedAmount || inst.amount || 0);
             }
         });
 
         payment.amountPaid = totalPaid;
-        payment.status = allPaid ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
+        payment.status = (totalPaid >= payment.totalAmount) ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
 
         await payment.save();
 
@@ -366,17 +350,14 @@ router.put('/payments/:id/unverify/:installmentId', schoolAuth, async (req, res)
 
         // Recalculate
         let totalPaid = 0;
-        let allPaid = true;
         payment.installments.forEach(inst => {
             if (inst.status === 'Paid') {
-                totalPaid += (inst.submittedAmount || inst.amount);
-            } else {
-                allPaid = false;
+                totalPaid += (inst.submittedAmount || inst.amount || 0);
             }
         });
 
         payment.amountPaid = totalPaid;
-        payment.status = allPaid ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
+        payment.status = (totalPaid >= payment.totalAmount) ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
 
         await payment.save();
 
@@ -498,22 +479,73 @@ router.put('/payments/:id/reject/:installmentId', schoolAuth, async (req, res) =
 
         // Recalculate overall status
         let totalPaid = 0;
-        let allPaid = true;
         payment.installments.forEach(inst => {
             if (inst.status === 'Paid') {
-                totalPaid += (inst.submittedAmount || inst.amount);
-            } else {
-                allPaid = false;
+                totalPaid += (inst.submittedAmount || inst.amount || 0);
             }
         });
 
         payment.amountPaid = totalPaid;
-        payment.status = allPaid ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
+        payment.status = (totalPaid >= payment.totalAmount) ? 'Paid' : (totalPaid > 0 ? 'Partial' : 'Unpaid');
 
         await payment.save();
         res.json({ message: 'Payment verification rejected', payment });
     } catch (error) {
         console.error('Reject installment error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Export attendance data to Excel (.xlsx)
+router.get('/attendance/export', schoolAuth, async (req, res) => {
+    try {
+        const XLSX = require('xlsx');
+        const Attendance = require('../models/Attendance');
+        const { className } = req.query;
+
+        let query = { schoolId: req.schoolId };
+        if (className && className !== 'All' && className !== '') {
+            query.className = className;
+        }
+
+        const records = await Attendance.find(query)
+            .populate('studentId', 'name studentId rollNo')
+            .populate('teacherId', 'name')
+            .sort({ date: -1 });
+
+        const data = records.map(r => ({
+            'Date': r.date ? new Date(r.date).toLocaleDateString() : 'N/A',
+            'Student Name': r.studentId ? r.studentId.name : 'N/A',
+            'Student ID/Roll No': r.studentId ? (r.studentId.studentId || r.studentId.rollNo) : 'N/A',
+            'Class': r.className || 'N/A',
+            'Section': r.section || 'A',
+            'Status': r.status === 'present' ? 'Present' : 'Absent',
+            'Marked By': r.teacherId ? r.teacherId.name : 'System'
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
+
+        // Set column widths
+        const wscols = [
+            { wch: 12 }, // Date
+            { wch: 22 }, // Student Name
+            { wch: 20 }, // Student ID
+            { wch: 10 }, // Class
+            { wch: 10 }, // Section
+            { wch: 12 }, // Status
+            { wch: 20 }  // Marked By
+        ];
+        worksheet['!cols'] = wscols;
+
+        const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=attendance_report_${className || 'All'}.xlsx`);
+        res.send(buffer);
+    } catch (error) {
+        console.error('Export attendance error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

@@ -22,6 +22,16 @@ const feeStructureSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    feeType: {
+        type: String,
+        enum: ['School Fee', 'Van Fee', 'Extra Fee'],
+        default: 'School Fee'
+    },
+    allocationType: {
+        type: String,
+        enum: ['All', 'Class', 'Van Users', 'Specific Students'],
+        default: 'Class'
+    },
     createdAt: {
         type: Date,
         default: Date.now

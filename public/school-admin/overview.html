@@ -910,8 +910,29 @@
             <!-- Charts Row 1 -->
             <div class="charts-row">
                 <div class="chart-container-card">
-                    <div class="chart-header">
+                    <div class="chart-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                         <div class="chart-title">Attendance Analytics (Last 7 Days)</div>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <select id="exportClassSelect" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; font-weight:600; outline:none; background:#fff; cursor:pointer;">
+                                <option value="All">Entire School</option>
+                                <option value="1">Class 1</option>
+                                <option value="2">Class 2</option>
+                                <option value="3">Class 3</option>
+                                <option value="4">Class 4</option>
+                                <option value="5">Class 5</option>
+                                <option value="6">Class 6</option>
+                                <option value="7">Class 7</option>
+                                <option value="8">Class 8</option>
+                                <option value="9">Class 9</option>
+                                <option value="10">Class 10</option>
+                                <option value="11">Class 11</option>
+                                <option value="12">Class 12</option>
+                            </select>
+                            <button onclick="exportAttendance()" style="background:#10b981; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="width:14px; height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
+                                Export (.xlsx)
+                            </button>
+                        </div>
                     </div>
                     <div class="chart-body" style="height: 250px;">
                         <canvas id="attendanceChart"></canvas>
@@ -1255,6 +1276,33 @@
             } catch (error) {
                 console.error('Load class bar chart error:', error);
             }
+        }
+
+        function exportAttendance() {
+            var token = localStorage.getItem('schoolToken');
+            var className = document.getElementById('exportClassSelect').value;
+            var url = '/api/school-fees/attendance/export?className=' + className;
+
+            fetch(url, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function(res) {
+                if (!res.ok) throw new Error('Export failed');
+                return res.blob();
+            })
+            .then(function(blob) {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'attendance_report_' + className + '.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(function(err) {
+                alert('Failed to export attendance. Please try again.');
+            });
         }
 
         function logout() {

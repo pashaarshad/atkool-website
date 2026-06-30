@@ -17,24 +17,20 @@ function getBaseUrl(req) {
 router.post('/login', async (req, res) => {
     try {
         const { username, email, mobileNo, password } = req.body;
+        const loginId = username || email || mobileNo;
 
-        if ((!username && !email && !mobileNo) || !password) {
-            return res.status(400).json({ message: 'Username, email, or phone number and password are required' });
+        if (!loginId || !password) {
+            return res.status(400).json({ message: 'Email/Mobile and password are required' });
         }
 
-        let query = {};
-        if (email) {
-            query.email = { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') };
-        } else if (mobileNo) {
-            query.$or = [{ mobileNo: mobileNo }, { parentMobile: mobileNo }];
-        } else if (username) {
-            query.$or = [
-                { parentUsername: { $regex: new RegExp('^' + username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } },
-                { email: { $regex: new RegExp('^' + username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } },
-                { parentMobile: username },
-                { mobileNo: username }
-            ];
-        }
+        const query = {
+            $or: [
+                { email: { $regex: new RegExp('^' + String(loginId).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } },
+                { parentUsername: { $regex: new RegExp('^' + String(loginId).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } },
+                { parentMobile: String(loginId) },
+                { mobileNo: String(loginId) }
+            ]
+        };
 
         const student = await Student.findOne(query);
 
@@ -119,7 +115,9 @@ router.get('/me', async (req, res) => {
             return res.status(401).json({ message: 'Invalid token type' });
         }
 
-        const student = await Student.findById(decoded.studentId).populate('teacherId', 'name');
+        const student = await Student.findById(decoded.studentId)
+            .populate('teacherId', 'name')
+            .populate('vanId');
         if (!student) {
             return res.status(404).json({ message: 'Student not found' });
         }

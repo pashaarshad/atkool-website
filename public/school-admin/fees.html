@@ -310,6 +310,23 @@
                                 <input type="number" id="feeAmount" required placeholder="e.g. 30000">
                             </div>
                             <div class="form-group">
+                                <label>Fee Type *</label>
+                                <select id="feeType" required>
+                                    <option value="School Fee">School Fee</option>
+                                    <option value="Van Fee">Van Fee</option>
+                                    <option value="Extra Fee">Extra Fee</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Allocation Target *</label>
+                                <select id="feeAllocationType" required onchange="toggleAllocationFields()">
+                                    <option value="All">All Students</option>
+                                    <option value="Class">Specific Class</option>
+                                    <option value="Van Users">Van Users</option>
+                                    <option value="Specific Students">Specific Student IDs</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="feeClassContainer" style="display:none;">
                                 <label>Applicable Class *</label>
                                 <select id="feeClass" required>
                                     <option value="All">All Classes</option>
@@ -331,8 +348,12 @@
                                 <label>Due Date *</label>
                                 <input type="date" id="feeDueDate" required>
                             </div>
+                            <div class="form-group" id="specificStudentsContainer" style="display:none; grid-column: span 2;">
+                                <label>Specific Student IDs (Comma-separated) *</label>
+                                <textarea id="specificStudentIds" placeholder="e.g. S001, S002, S003" style="width:100%; height:60px; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit; box-sizing:border-box;"></textarea>
+                            </div>
                         </div>
-                        <button type="submit" class="btn-save">Create Fee Structure</button>
+                        <button type="submit" class="btn-save" style="margin-top:15px;">Create Fee Structure</button>
                     </form>
                 </div>
 
@@ -464,10 +485,10 @@
                 </div>
             </div>
 
-            <!-- Installment Status List -->
+            <!-- Transaction History List -->
             <div style="margin-bottom:18px;">
-                <h3 style="font-size:12px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Installment Breakdown</h3>
-                <div id="modalInstallmentsList" style="display:flex; flex-direction:column; gap:8px; max-height:160px; overflow-y:auto; padding:2px;">
+                <h3 style="font-size:12px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Payment Transaction History</h3>
+                <div id="modalInstallmentsList" style="display:flex; flex-direction:column; gap:8px; max-height:180px; overflow-y:auto; padding:2px;">
                     <!-- Dynamically populated -->
                 </div>
             </div>
@@ -484,36 +505,8 @@
                 </div>
             </div>
 
-            <div style="border-top:1px solid #f1f5f9; padding-top:16px;">
-                <h3 style="font-size:12px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">Change Fee Mode Structure</h3>
-                <div class="mode-selector" style="margin-bottom:12px;">
-                    <div class="mode-card selected" onclick="selectMode('Full')" id="modeCard_Full" style="padding:10px;">
-                        <h4>Full</h4>
-                        <p style="font-size:9px;">Single payment</p>
-                    </div>
-                    <div class="mode-card" onclick="selectMode('3 Installments')" id="modeCard_3" style="padding:10px;">
-                        <h4>3 Installments</h4>
-                        <p style="font-size:9px;">3 equal parts</p>
-                    </div>
-                    <div class="mode-card" onclick="selectMode('Customized')" id="modeCard_Custom" style="padding:10px;">
-                        <h4>Customized</h4>
-                        <p style="font-size:9px;">Custom splits</p>
-                    </div>
-                </div>
-
-                <div class="custom-installments" id="customInstallmentsSection" style="margin-bottom:12px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                        <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;">Custom Installments</label>
-                        <span style="font-size:11px;color:#64748b;">Total: ₹<span id="customTotal">0</span> / ₹<span id="customTarget">0</span></span>
-                    </div>
-                    <div id="customInstallmentsList"></div>
-                    <button type="button" class="btn-add-inst" onclick="addCustomInstallment()">+ Add Installment</button>
-                </div>
-
-                <div style="display:flex; justify-content:flex-end; gap:8px;">
-                    <button type="button" class="btn-cancel" onclick="closeModeModal()">Close</button>
-                    <button type="button" class="btn-save" onclick="confirmModeChange()">Apply Mode Settings</button>
-                </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid #f1f5f9; padding-top:14px;">
+                <button type="button" class="btn-cancel" onclick="closeModeModal()">Close</button>
             </div>
         </div>
     </div>
@@ -637,23 +630,53 @@
             }
         }
 
+        function toggleAllocationFields() {
+            var allocType = document.getElementById('feeAllocationType').value;
+            var classField = document.getElementById('feeClassContainer');
+            var specField = document.getElementById('specificStudentsContainer');
+
+            if (allocType === 'Class') {
+                classField.style.display = 'block';
+                specField.style.display = 'none';
+            } else if (allocType === 'Specific Students') {
+                classField.style.display = 'none';
+                specField.style.display = 'block';
+            } else {
+                classField.style.display = 'none';
+                specField.style.display = 'none';
+            }
+        }
+
         async function saveFeeStructure(e) {
             e.preventDefault();
             var token = localStorage.getItem('schoolToken');
             var feeName = document.getElementById('feeName').value;
             var amount = document.getElementById('feeAmount').value;
-            var className = document.getElementById('feeClass').value;
+            var className = document.getElementById('feeAllocationType').value === 'Class' ? document.getElementById('feeClass').value : 'All';
             var dueDate = document.getElementById('feeDueDate').value;
+            var feeType = document.getElementById('feeType').value;
+            var allocationType = document.getElementById('feeAllocationType').value;
+            var specificStudentIds = document.getElementById('specificStudentIds').value;
+
             try {
                 var response = await fetch('/api/school-fees/structures', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ feeName: feeName, amount: amount, className: className, dueDate: dueDate })
+                    body: JSON.stringify({ 
+                        feeName: feeName, 
+                        amount: amount, 
+                        className: className, 
+                        dueDate: dueDate,
+                        feeType: feeType,
+                        allocationType: allocationType,
+                        specificStudentIds: specificStudentIds
+                    })
                 });
                 var data = await response.json();
                 if (response.ok) {
                     showToast('Fee structure created and allocated!', 'success');
                     document.getElementById('feeStructureForm').reset();
+                    toggleAllocationFields(); // reset visibility
                     loadStructures();
                     loadLedger();
                 } else {
@@ -854,40 +877,30 @@
             // Clear collect payment input
             document.getElementById('collectAmountInput').value = '';
 
-            // Render current installments list
+            // Render current installments list (transaction history)
             var modalInstBody = document.getElementById('modalInstallmentsList');
             var installments = p.installments || [];
             if (installments.length === 0) {
-                modalInstBody.innerHTML = '<div style="font-size:12px; color:#94a3b8; text-align:center; padding:10px;">No installments configured.</div>';
+                modalInstBody.innerHTML = '<div style="font-size:12px; color:#94a3b8; text-align:center; padding:10px;">No payments recorded yet.</div>';
             } else {
                 modalInstBody.innerHTML = installments.map(function(inst) {
                     var isPaid = inst.status === 'Paid';
                     var statusColor = isPaid ? '#059669' : (inst.status === 'Verification Pending' ? '#d97706' : '#dc2626');
-                    var paidAmount = inst.submittedAmount || 0;
-                    return '<div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; font-size:13px;">' +
+                    var paidAmount = inst.submittedAmount || inst.amount || 0;
+                    
+                    var dateStr = inst.paidDate ? new Date(inst.paidDate).toLocaleDateString() : (inst.submittedDate ? new Date(inst.submittedDate).toLocaleDateString() : '');
+                    var dateHtml = dateStr ? '<span style="font-size:10px;color:#94a3b8;margin-left:8px;">(' + dateStr + ')</span>' : '';
+
+                    return '<div style="display:flex; flex-direction:column; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; font-size:13px;">' +
+                        '<div style="display:flex; justify-content:space-between; align-items:center;">' +
                         '<div>' +
-                        '<div style="font-weight:700; color:#0F172A;">' + inst.label + '</div>' +
-                        '<div style="font-size:11px; color:#64748b; margin-top:2px;">Paid: ₹' + paidAmount.toLocaleString() + ' / ₹' + inst.amount.toLocaleString() + '</div>' +
+                        '<div style="font-weight:700; color:#0F172A;">' + inst.label + ' ' + dateHtml + '</div>' +
+                        '<div style="font-size:11px; color:#64748b; margin-top:2px;">Amount: ₹' + paidAmount.toLocaleString() + '</div>' +
                         '</div>' +
                         '<span class="status-badge" style="background:none; padding:0; color:' + statusColor + '; font-weight:700;">' + inst.status + '</span>' +
+                        '</div>' +
                         '</div>';
                 }).join('');
-            }
-
-            document.getElementById('customTarget').textContent = activeTotalAmount.toLocaleString();
-
-            // Reset mode cards selection state
-            document.querySelectorAll('.mode-card').forEach(function(c) { c.classList.remove('selected'); });
-            if (activeModeSelection === 'Full') document.getElementById('modeCard_Full').classList.add('selected');
-            else if (activeModeSelection === '3 Installments') document.getElementById('modeCard_3').classList.add('selected');
-            else document.getElementById('modeCard_Custom').classList.add('selected');
-
-            // Show/hide custom installments section
-            if (activeModeSelection === 'Customized') {
-                document.getElementById('customInstallmentsSection').classList.add('show');
-                initCustomInstallments();
-            } else {
-                document.getElementById('customInstallmentsSection').classList.remove('show');
             }
 
             document.getElementById('modeModal').classList.add('show');

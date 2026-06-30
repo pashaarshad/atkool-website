@@ -100,4 +100,48 @@ router.post('/payments/:id/submit-verification/:installmentId', parentAuth, asyn
     }
 });
 
+// Parent submits payment proof for a custom amount (new ledger-based flow)
+router.post('/payments/:id/submit-proof', parentAuth, async (req, res) => {
+    try {
+        const { screenshot, utrNumber, transactionId, amount } = req.body;
+        const paymentAmount = parseFloat(amount);
+
+        if (isNaN(paymentAmount) || paymentAmount <= 0) {
+            return res.status(400).json({ message: 'A valid payment amount greater than 0 is required' });
+        }
+
+        if (!screenshot) {
+            return res.status(400).json({ message: 'Payment screenshot proof is required' });
+        }
+
+        const payment = await FeePayment.findOne({ _id: req.params.id, studentId: req.studentId });
+        if (!payment) {
+            return res.status(404).json({ message: 'Fee record not found or unauthorized' });
+        }
+
+        const count = payment.installments.length + 1;
+        payment.installments.push({
+            installmentNumber: count,
+            label: `Payment #${count}`,
+            amount: paymentAmount,
+            submittedAmount: paymentAmount,
+            status: 'Verification Pending',
+            screenshot: screenshot,
+            utrNumber: utrNumber || '',
+            transactionId: transactionId || '',
+            submittedDate: new Date()
+        });
+
+        await payment.save();
+
+        res.json({ 
+            message: 'Payment proof submitted successfully. Verification is pending with school admin.',
+            payment 
+        });
+    } catch (error) {
+        console.error('Submit custom payment proof error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router;

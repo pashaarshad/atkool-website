@@ -725,6 +725,11 @@
                     ? '<div style="text-align:center;margin-bottom:16px;"><img src="' + s.photo + '" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #4338CA;"></div>'
                     : '';
 
+                var vanInfoHtml = s.vanId
+                    ? '<div style="font-weight:700;color:#64748b;">Assigned Van</div><div>' + s.vanId.vehicleNumber + ' (' + s.vanId.driverName + ', ' + s.vanId.driverContact + ')</div>' +
+                      '<div style="font-weight:700;color:#64748b;">Pickup Point</div><div>' + (s.pickupPoint || 'N/A') + '</div>'
+                    : '<div style="font-weight:700;color:#64748b;">Assigned Van</div><div>No van assigned</div>';
+
                 document.getElementById('viewStudentTitle').textContent = s.name;
                 document.getElementById('viewStudentContent').innerHTML = photoHtml +
                     '<div style="display:grid;grid-template-columns:140px 1fr;gap:8px 16px;font-size:14px;">' +
@@ -738,6 +743,7 @@
                     '<div style="font-weight:700;color:#64748b;">Guardian Mobile</div><div>' + (s.guardianMobile || 'N/A') + '</div>' +
                     '<div style="font-weight:700;color:#64748b;">Status</div><div>' + (s.status || 'Active') + '</div>' +
                     '<div style="font-weight:700;color:#64748b;">Password</div><div style="font-family:monospace;background:#f1f5f9;padding:4px 8px;border-radius:4px;">' + (s.parentPassword || 'Test@123') + '</div>' +
+                    vanInfoHtml +
                     '</div>';
 
                 document.getElementById('viewStudentModal').classList.add('show');

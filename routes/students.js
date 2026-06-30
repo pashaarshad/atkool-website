@@ -109,7 +109,8 @@ router.get('/', schoolAuth, async (req, res) => {
 router.get('/:id', schoolAuth, async (req, res) => {
     try {
         const student = await Student.findOne({ _id: req.params.id, schoolId: req.schoolId })
-            .populate('teacherId', 'name');
+            .populate('teacherId', 'name')
+            .populate('vanId');
         if (!student) {
             return res.status(404).json({ message: 'Student not found' });
         }
