@@ -82,3 +82,27 @@ School Email: xyz@gmail.com
 OTP Code: 429765
 Expires At: 1/7/2026, 12:23:55 am
 -------------------------------------------
+[2026-06-30T18:48:22.971Z] School Activation OTP generated:
+School Name: xyz
+School Email: xyz@gmail.com
+OTP Code: 199105
+Expires At: 1/7/2026, 12:33:22 am
+-------------------------------------------
+[2026-06-30T18:48:30.257Z] School Activation OTP generated:
+School Name: xyz
+School Email: xyz@gmail.com
+OTP Code: 813160
+Expires At: 1/7/2026, 12:33:30 am
+-------------------------------------------
+[2026-06-30T18:48:41.203Z] School Activation OTP generated:
+School Name: xyz
+School Email: xyz@gmail.com
+OTP Code: 448154
+Expires At: 1/7/2026, 12:33:41 am
+-------------------------------------------
+[2026-06-30T18:48:52.857Z] School Activation OTP generated:
+School Name: xyz
+School Email: xyz@gmail.com
+OTP Code: 743895
+Expires At: 1/7/2026, 12:33:52 am
+-------------------------------------------
