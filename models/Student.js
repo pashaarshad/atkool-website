@@ -29,12 +29,10 @@ const studentSchema = new mongoose.Schema({
         default: 'A'
     },
     email: {
-        type: String,
-        sparse: true
+        type: String
     },
     mobileNo: {
-        type: String,
-        sparse: true
+        type: String
     },
     parentName: {
         type: String

@@ -11,15 +11,13 @@ const teacherSchema = new mongoose.Schema({
         required: true
     },
     email: {
-        type: String,
-        sparse: true
+        type: String
     },
     password: {
         type: String
     },
     mobileNo: {
-        type: String,
-        sparse: true
+        type: String
     },
     role: {
         type: String,
