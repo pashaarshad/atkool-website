@@ -4,7 +4,7 @@ const teacherDataStr = localStorage.getItem('teacherData');
 if (!token || !teacherDataStr) { window.location.href = '/teacher-login.html'; }
 const teacherData = JSON.parse(teacherDataStr);
 document.getElementById('welcomeText').innerText = `Welcome, ${teacherData.name || 'Teacher'}!`;
-const options = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 document.getElementById('dateText').innerText = new Date().toLocaleDateString('en-US', options);
 
 function logout() {
@@ -28,18 +28,18 @@ function showToast(msg, type = 'success') {
 
 // ============ SIDEBAR ============
 const menuItems = [
-    { id:'dashboard', label:'Overview', icon:'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
-    { id:'students', label:'My Classes', icon:'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
-    { id:'attendance', label:'Take Attendance', icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
-    { id:'history', label:'Attendance History', icon:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-    { id:'chat', label:'Chat', icon:'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
-    { id:'add-student', label:'Add Student', icon:'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
-    { id:'requests', label:'Student Requests', icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
-    { id:'events', label:'School Events', icon:'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-    { id:'exams', label:'Upcoming Exams', icon:'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-    { id:'leaves', label:'Leave Management', icon:'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z' },
-    { id:'homework', label:'Homework', icon:'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
-    { id:'marks-entry', label:'Marks Entry', icon:'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' }
+    { id: 'dashboard', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+    { id: 'students', label: 'My Classes', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+    { id: 'attendance', label: 'Take Attendance', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
+    { id: 'history', label: 'Attendance History', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { id: 'chat', label: 'Chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
+    { id: 'add-student', label: 'Add Student', icon: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z' },
+    { id: 'requests', label: 'Student Requests', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
+    { id: 'events', label: 'School Events', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+    { id: 'exams', label: 'Upcoming Exams', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+    { id: 'leaves', label: 'Leave Management', icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z' },
+    { id: 'homework', label: 'Homework', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
+    { id: 'marks-entry', label: 'Marks Entry', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' }
 ];
 
 const sidebar = document.getElementById('sidebarMenu');
@@ -63,7 +63,7 @@ async function updateChatBadge() {
         } else {
             badge.style.display = 'none';
         }
-    } catch(e) {}
+    } catch (e) { }
 }
 updateChatBadge();
 setInterval(updateChatBadge, 30000); // Refresh every 30 seconds
@@ -73,15 +73,15 @@ function loadView(view, el) {
     if (el) el.classList.add('active');
     const c = document.getElementById('mainContent');
     c.innerHTML = '<div class="loader">Loading...</div>';
-    const views = { 
-        dashboard: loadDashboard, 
-        students: loadStudents, 
-        attendance: loadAttendance, 
-        history: loadHistory, 
-        chat: loadChat, 
-        'add-student': loadAddStudent, 
-        requests: loadRequests, 
-        events: loadEvents, 
+    const views = {
+        dashboard: loadDashboard,
+        students: loadStudents,
+        attendance: loadAttendance,
+        history: loadHistory,
+        chat: loadChat,
+        'add-student': loadAddStudent,
+        requests: loadRequests,
+        events: loadEvents,
         exams: loadExams,
         leaves: loadLeaves,
         homework: loadHomework,
@@ -155,7 +155,7 @@ async function loadStudents() {
             'linear-gradient(135deg,#06b6d4,#0891b2)'
         ];
         const colorIndex = Math.abs((cls.className || '').charCodeAt(0) + (cls.section || 'A').charCodeAt(0)) % gradients.length;
-        
+
         return `
             <div class="class-card" onclick="loadClassStudents('${cls.className}','${cls.section}')" style="
                 background:#fff; border:2px solid #e2e8f0; border-radius:20px; padding:28px; cursor:pointer; 
@@ -241,7 +241,7 @@ async function loadClassStudents(className, section) {
                     </thead>
                     <tbody>
                     ${students.map((s, i) => {
-                        return `
+                return `
                         <tr style="border-bottom:1px solid #f1f5f9;">
                             <td style="padding:16px 24px; font-size:14px; color:#475569; font-weight:600;">${i + 1}</td>
                             <td style="padding:16px 24px; font-size:14px; color:#475569;">${s.rollNo || s.studentId || '-'}</td>
@@ -271,7 +271,7 @@ async function loadClassStudents(className, section) {
                             </td>
                         </tr>
                         `;
-                    }).join('')}
+            }).join('')}
                     </tbody>
                 </table>
             </div>`}
@@ -493,7 +493,7 @@ async function loadAttendance() {
             'linear-gradient(135deg,#06b6d4,#0891b2)'
         ];
         const colorIndex = Math.abs((cls.className || '').charCodeAt(0) + (cls.section || 'A').charCodeAt(0)) % gradients.length;
-        
+
         return `
             <div class="class-card" onclick="loadAttendanceForClass('${cls.className}','${cls.section}')" style="
                 background:#fff; border:2px solid #e2e8f0; border-radius:20px; padding:28px; cursor:pointer; 
@@ -527,7 +527,7 @@ async function loadAttendance() {
                     </div>
                     <div>
                         <div style="font-size:22px;font-weight:800;color:#0F172A">Take Attendance</div>
-                        <div style="font-size:13px;color:#64748b;font-weight:600">Select a class to mark attendance for ${new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' })}</div>
+                        <div style="font-size:13px;color:#64748b;font-weight:600">Select a class to mark attendance for ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</div>
                     </div>
                 </div>
             </div>
@@ -564,7 +564,7 @@ async function loadAttendanceForClass(className, section) {
                 </button>
                 <div>
                     <div style="font-size:18px;font-weight:800;color:#0F172A">Class ${escapeHTML(className)} - Section ${escapeHTML(section)}</div>
-                    <div style="font-size:12px;color:#64748b;font-weight:600">${new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' })}</div>
+                    <div style="font-size:12px;color:#64748b;font-weight:600">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</div>
                 </div>
             </div>
             
@@ -578,7 +578,7 @@ async function loadAttendanceForClass(className, section) {
                 </div>
                 <div id="studentAttList">
                     ${students.length === 0 ? '<div class="empty-state"><p>No students in this class to mark attendance for.</p></div>' :
-                    students.map((s, i) => `
+            students.map((s, i) => `
                         <div class="student-attendance-row">
                             <div style="width:32px;height:32px;background:rgba(107,78,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;font-weight:700;color:#6B4EFF;font-size:13px">${i + 1}</div>
                             <div class="student-info"><div class="student-name">${s.name}</div><div class="student-meta">Roll: ${s.rollNo || '-'} | Class: ${s.className}-${s.section || 'A'}</div></div>
@@ -676,7 +676,7 @@ let chatPollInterval = null;
 async function loadChat() {
     const c = document.getElementById('mainContent');
     c.innerHTML = '<div class="loader">Loading conversations...</div>';
-    
+
     const conversations = await fetchAPI('/api/chat/teacher/conversations');
     if (!conversations) return;
 
@@ -698,7 +698,7 @@ async function loadChat() {
         const lastMsgText = lastMsg ? (lastMsg.senderType === 'teacher' ? 'You: ' : '') + (lastMsg.message.length > 40 ? lastMsg.message.substring(0, 40) + '...' : lastMsg.message) : 'No messages yet';
         const lastTime = lastMsg ? formatChatTime(new Date(lastMsg.createdAt)) : '';
         const unreadBadge = conv.unreadCount > 0 ? `<span style="background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:10px;min-width:20px;text-align:center">${conv.unreadCount}</span>` : '';
-        
+
         return `
             <div class="conv-item" onclick="loadChatConversation('${s._id}','${s.name}','${s.parentName || 'Parent'}')" style="
                 display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:all .2s;
@@ -737,10 +737,10 @@ async function loadChat() {
 
     updateChatBadge();
 }
-
+//test
 async function loadChatConversation(studentId, studentName, parentName) {
     if (chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
-    
+
     const c = document.getElementById('mainContent');
     c.innerHTML = '<div class="loader">Loading chat...</div>';
 
@@ -749,7 +749,7 @@ async function loadChatConversation(studentId, studentName, parentName) {
 
     const messagesHtml = messages.map(msg => {
         const isMe = msg.senderType === 'teacher';
-        const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+        const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         return `
             <div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:8px">
                 <div style="
@@ -804,13 +804,13 @@ async function loadChatConversation(studentId, studentName, parentName) {
         if (!newMessages) return;
         const container = document.getElementById('chatMessages');
         if (!container) { clearInterval(chatPollInterval); return; }
-        
+
         const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
-        
+
         if (newMessages.length > 0) {
             container.innerHTML = newMessages.map(msg => {
                 const isMe = msg.senderType === 'teacher';
-                const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+                const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                 return `<div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:8px">
                     <div style="max-width:70%;padding:12px 16px;border-radius:${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};background:${isMe ? 'linear-gradient(135deg,#4338CA,#6366f1)' : '#f1f5f9'};color:${isMe ? '#fff' : '#1e293b'};font-size:14px;line-height:1.5;box-shadow:0 2px 8px ${isMe ? 'rgba(67,56,202,.2)' : 'rgba(0,0,0,.04)'};">
                         <div>${msg.message}</div>
@@ -819,7 +819,7 @@ async function loadChatConversation(studentId, studentName, parentName) {
                 </div>`;
             }).join('');
         }
-        
+
         if (wasAtBottom) container.scrollTop = container.scrollHeight;
         updateChatBadge();
     }, 5000);
@@ -836,8 +836,8 @@ function downloadBase64File(base64Data, filename) {
 
 function renderTeacherChatMessage(msg) {
     const isMe = msg.senderType === 'teacher';
-    const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-    
+    const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
     let contentHtml = '';
     if (msg.messageType === 'image') {
         contentHtml = `<img src="${msg.message}" style="max-width:100%; max-height:200px; border-radius:8px; display:block; margin-bottom:4px; cursor:pointer;" onclick="window.open('${msg.message}', '_blank')">`;
@@ -899,7 +899,7 @@ async function handleTeacherChatFileSelected(event, studentId) {
     showToast('Uploading attachment...', 'info');
 
     const reader = new FileReader();
-    reader.onload = async function(e) {
+    reader.onload = async function (e) {
         const base64Data = e.target.result;
         const messageType = file.type.startsWith('image/') ? 'image' : 'file';
 
@@ -931,7 +931,7 @@ async function handleTeacherChatFileSelected(event, studentId) {
 
 async function loadChatConversation(studentId, studentName, parentName) {
     if (chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
-    
+
     const c = document.getElementById('mainContent');
     c.innerHTML = '<div class="loader">Loading chat...</div>';
 
@@ -984,9 +984,9 @@ async function loadChatConversation(studentId, studentName, parentName) {
         if (!newMessages) return;
         const container = document.getElementById('chatMessages');
         if (!container) { clearInterval(chatPollInterval); return; }
-        
+
         const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
-        
+
         if (newMessages.length > 0) {
             container.innerHTML = newMessages.map(msg => renderTeacherChatMessage(msg)).join('');
         }
@@ -1023,9 +1023,9 @@ function formatChatTime(date) {
     const diff = now - date;
     if (diff < 60000) return 'Just now';
     if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
-    if (diff < 86400000) return date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-    if (diff < 604800000) return date.toLocaleDateString('en-US', { weekday:'short' });
-    return date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    if (diff < 86400000) return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    if (diff < 604800000) return date.toLocaleDateString('en-US', { weekday: 'short' });
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 // ============ ADD STUDENT ============
@@ -1055,7 +1055,7 @@ function stopTeacherStudentWebcam() {
     const btn = document.getElementById('btnStartTeacherStudentCamera');
     if (btn) btn.style.display = 'inline-block';
     if (teacherStudentLocalStream) {
-        teacherStudentLocalStream.getTracks().forEach(function(track) { track.stop(); });
+        teacherStudentLocalStream.getTracks().forEach(function (track) { track.stop(); });
         teacherStudentLocalStream = null;
     }
     if (video) video.srcObject = null;
@@ -1106,7 +1106,7 @@ async function loadAddStudent() {
             Class ${escapeHTML(cls.className)} - Section ${escapeHTML(cls.section || 'A')}
         </option>
     `).join('');
-    
+
     // Fetch vans
     let vanOptions = '<option value="">-- No Van Assigned --</option>';
     try {
@@ -1224,11 +1224,11 @@ async function loadAddStudent() {
     // Attach file input change listener
     const fileInput = document.getElementById('teacherStudentPhotoFile');
     if (fileInput) {
-        fileInput.addEventListener('change', function() {
+        fileInput.addEventListener('change', function () {
             const file = this.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 document.getElementById('teacherStudentPhotoBase64').value = e.target.result;
                 document.getElementById('teacherStudentPhotoPreview').src = e.target.result;
                 document.getElementById('teacherStudentPhotoPreviewContainer').style.display = 'flex';
@@ -1241,7 +1241,7 @@ async function loadAddStudent() {
 async function submitStudent(e) {
     e.preventDefault();
     const btn = document.getElementById('addStudentBtn');
-    
+
     const classVal = document.getElementById('addStudentClassSelect').value;
     if (!classVal) {
         showToast('Please select a class.', 'error');
@@ -1335,7 +1335,7 @@ async function loadEvents() {
     if (!events) return;
     c.innerHTML = `<div class="card"><div class="card-header">School Events <span class="badge">${events.length}</span></div>
         ${events.length === 0 ? '<div class="empty-state"><p>No upcoming events.</p></div>' :
-        events.map(e => `<div style="padding:16px;border:1px solid #eee;border-radius:12px;margin-bottom:12px">
+            events.map(e => `<div style="padding:16px;border:1px solid #eee;border-radius:12px;margin-bottom:12px">
             <div style="font-weight:700;font-size:16px;color:#1a1a1a">${e.eventName || e.name || 'Event'}</div>
             <div style="color:#666;font-size:13px;margin-top:4px">${e.description || ''}</div>
             <div style="display:flex;gap:12px;margin-top:8px;font-size:12px;color:#888">
@@ -1352,7 +1352,7 @@ async function loadExams() {
     if (!exams) return;
     c.innerHTML = `<div class="card"><div class="card-header">Upcoming Exams <span class="badge">${exams.length}</span></div>
         ${exams.length === 0 ? '<div class="empty-state"><p>No upcoming exams.</p></div>' :
-        `<table><thead><tr><th>Exam</th><th>Subject</th><th>Class</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody>
+            `<table><thead><tr><th>Exam</th><th>Subject</th><th>Class</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody>
         ${exams.map(e => `<tr><td><strong>${e.examName || 'Exam'}</strong></td><td>${e.subject || '-'}</td><td>${e.className || '-'}</td><td>${e.examDate ? new Date(e.examDate).toLocaleDateString() : '-'}</td><td>${e.startTime || '-'} - ${e.endTime || '-'}</td><td><span class="badge badge-blue">${e.status || 'Scheduled'}</span></td></tr>`).join('')}
         </tbody></table>`}</div>`;
 }
@@ -1360,7 +1360,7 @@ async function loadExams() {
 // ============ UTILS ============
 function todayStr() {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 // ============ LEAVE MANAGEMENT ============
@@ -1431,13 +1431,13 @@ async function loadLeaves() {
                     </thead>
                     <tbody>
                         ${list.map(l => {
-                            const start = new Date(l.startDate);
-                            const end = new Date(l.endDate);
-                            const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
-                            let badgeClass = 'badge-orange';
-                            if (l.status === 'Approved') badgeClass = 'badge-green';
-                            if (l.status === 'Rejected') badgeClass = 'badge-red';
-                            return `
+        const start = new Date(l.startDate);
+        const end = new Date(l.endDate);
+        const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+        let badgeClass = 'badge-orange';
+        if (l.status === 'Approved') badgeClass = 'badge-green';
+        if (l.status === 'Rejected') badgeClass = 'badge-red';
+        return `
                                 <tr>
                                     <td><strong>${l.leaveType}</strong></td>
                                     <td>${start.toLocaleDateString()} - ${end.toLocaleDateString()}</td>
@@ -1446,7 +1446,7 @@ async function loadLeaves() {
                                     <td><span class="badge ${badgeClass}">${l.status}</span></td>
                                 </tr>
                             `;
-                        }).join('')}
+    }).join('')}
                     </tbody>
                 </table>
                 `}
@@ -1460,7 +1460,7 @@ async function submitLeaveRequest(e) {
     const form = document.getElementById('leaveRequestForm');
     const btn = document.getElementById('applyLeaveBtn');
     btn.disabled = true; btn.textContent = 'Submitting...';
-    
+
     const fd = new FormData(form);
     const body = {};
     fd.forEach((v, k) => body[k] = v);
@@ -1678,8 +1678,8 @@ async function loadMarkSheet() {
             <thead><tr><th>Roll</th><th>Student</th><th>Marks</th><th>Grade</th><th>Remarks</th></tr></thead>
             <tbody id="marksRows">
                 ${rows.map(item => {
-                    const result = item.result || {};
-                    return `
+        const result = item.result || {};
+        return `
                         <tr data-student-id="${item.student._id}">
                             <td>${escapeHTML(item.student.rollNo || '-')}</td>
                             <td><strong>${escapeHTML(item.student.name)}</strong></td>
@@ -1687,7 +1687,7 @@ async function loadMarkSheet() {
                             <td><input class="grade-input" value="${escapeHTML(result.grade || '')}" style="width:80px;padding:8px;border:1px solid #ddd;border-radius:8px"></td>
                             <td><input class="remarks-input" value="${escapeHTML(result.remarks || '')}" style="width:220px;padding:8px;border:1px solid #ddd;border-radius:8px"></td>
                         </tr>`;
-                }).join('')}
+    }).join('')}
             </tbody>
         </table>
         <div style="display:flex;justify-content:flex-end;margin-top:18px">
