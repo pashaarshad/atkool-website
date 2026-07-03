@@ -559,13 +559,17 @@ async function loadAttendanceForClass(className, section) {
 
     c.innerHTML = `
         <div class="card" style="padding:0; overflow:hidden;">
-            <div style="background:#fff; padding:16px 24px; display:flex; align-items:center; gap:14px; border-bottom:2px solid #f1f5f9">
+            <div style="background:#fff; padding:16px 24px; display:flex; align-items:center; gap:14px; border-bottom:2px solid #f1f5f9; flex-wrap: wrap;">
                 <button onclick="loadAttendance()" style="background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;transition:.2s;display:flex;align-items:center;justify-content:center" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
                     <svg fill="none" stroke="#64748b" viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
                 <div>
                     <div style="font-size:18px;font-weight:800;color:#0F172A">Class ${escapeHTML(className)} - Section ${escapeHTML(section)}</div>
                     <div style="font-size:12px;color:#64748b;font-weight:600">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                </div>
+                <div style="margin-left: auto; display: flex; gap: 8px;">
+                    <button class="btn btn-outline" onclick="exportCurrentAttendanceExcel('${escapeHTML(className)}', '${escapeHTML(section)}')" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; border: 1.5px solid #10b981; color: #10b981; cursor: pointer; font-weight: 700; background: transparent; display:flex; align-items:center; gap:6px;">📈 Export Excel</button>
+                    <button class="btn btn-outline" onclick="exportCurrentAttendancePDF('${escapeHTML(className)}', '${escapeHTML(section)}')" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; border: 1.5px solid #ef4444; color: #ef4444; cursor: pointer; font-weight: 700; background: transparent; display:flex; align-items:center; gap:6px;">📄 Export PDF</button>
                 </div>
             </div>
             
@@ -655,9 +659,11 @@ async function fetchHistory() {
     container.innerHTML = '<div class="loader">Loading...</div>';
     const data = await fetchAPI(`/api/teacher/attendance?date=${date}`);
     if (!data || data.length === 0) {
+        currentHistoryData = [];
         container.innerHTML = '<div class="empty-state"><p>No attendance records for this date.</p></div>';
         return;
     }
+    currentHistoryData = data;
     const present = data.filter(a => a.status === 'present').length;
     const absent = data.filter(a => a.status === 'absent').length;
     container.innerHTML = `
@@ -665,6 +671,13 @@ async function fetchHistory() {
             <div class="summary-item" style="background:#28A745;border-radius:10px"><div class="count">${present}</div><div class="text">Present</div></div>
             <div class="summary-item" style="background:#DC3545;border-radius:10px"><div class="count">${absent}</div><div class="text">Absent</div></div>
             <div class="summary-item" style="background:#007BFF;border-radius:10px"><div class="count">${data.length}</div><div class="text">Total</div></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h4 style="margin:0; font-size:14px; font-weight:700; color:#334155;">Records for ${date}</h4>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-outline" onclick="exportHistoryAttendanceExcel()" style="padding: 6px 14px; font-size: 12px; border-radius: 8px; border: 1.5px solid #10b981; color: #10b981; cursor: pointer; font-weight: 700; background: transparent; display:flex; align-items:center; gap:6px;">📈 Export Excel</button>
+                <button class="btn btn-outline" onclick="exportHistoryAttendancePDF()" style="padding: 6px 14px; font-size: 12px; border-radius: 8px; border: 1.5px solid #ef4444; color: #ef4444; cursor: pointer; font-weight: 700; background: transparent; display:flex; align-items:center; gap:6px;">📄 Export PDF</button>
+            </div>
         </div>
         <table><thead><tr><th>#</th><th>Student</th><th>Class</th><th>Status</th></tr></thead><tbody>
         ${data.map((a, i) => `<tr><td>${i + 1}</td><td><strong>${a.studentId?.name || 'N/A'}</strong></td><td>${a.className || ''} ${a.section || ''}</td><td><span class="badge ${a.status === 'present' ? 'badge-green' : 'badge-red'}">${a.status}</span></td></tr>`).join('')}
@@ -1890,4 +1903,155 @@ function verifyEditPin(onSuccess) {
     input.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') { checkPin(); }
     });
+}
+
+let currentHistoryData = [];
+
+function exportToCSV(filename, headers, rows) {
+    var csvContent = "\ufeff"; // BOM for Excel encoding support
+    csvContent += headers.join(",") + "\n";
+    rows.forEach(function(row) {
+        var formattedRow = row.map(function(val) {
+            var str = String(val === null || val === undefined ? '' : val);
+            str = str.replace(/"/g, '""');
+            return '"' + str + '"';
+        });
+        csvContent += formattedRow.join(",") + "\n";
+    });
+
+    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    var url = window.URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+function exportToPDF(filename, title, subtitle, summaryText, headers, rows) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // 1. Draw Title Header
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(67, 56, 202); // indigo primary color
+    doc.text(title, 14, 20);
+
+    // 2. Draw Subtitle
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139); // slate secondary color
+    doc.text(subtitle, 14, 27);
+
+    // 3. Draw Summary Metric Info
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42); // dark slate text
+    doc.text(summaryText, 14, 38);
+
+    // Draw line separator
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.5);
+    doc.line(14, 43, 196, 43);
+
+    // 4. Generate AutoTable
+    doc.autoTable({
+        startY: 48,
+        head: [headers],
+        body: rows,
+        theme: 'striped',
+        headStyles: {
+            fillColor: [67, 56, 202],
+            textColor: [255, 255, 255],
+            fontSize: 10,
+            fontStyle: 'bold'
+        },
+        bodyStyles: {
+            fontSize: 9
+        },
+        alternateRowStyles: {
+            fillColor: [248, 250, 252]
+        },
+        didParseCell: function(data) {
+            // Apply custom styling for Status column
+            if (data.section === 'body' && data.column.index === headers.length - 1) {
+                const status = String(data.cell.raw).toLowerCase().trim();
+                if (status === 'present') {
+                    data.cell.styles.textColor = [16, 185, 129]; // emerald green
+                    data.cell.styles.fontStyle = 'bold';
+                } else if (status === 'absent') {
+                    data.cell.styles.textColor = [239, 68, 68]; // crimson red
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        }
+    });
+
+    // Save PDF
+    doc.save(filename);
+}
+
+function exportCurrentAttendanceExcel(className, section) {
+    const filename = `attendance_${className}_${section}_${todayStr()}.csv`;
+    const headers = ['S.No.', 'Roll No / Student ID', 'Student Name', 'Attendance Status'];
+    const rows = currentClassStudents.map((s, index) => [
+        index + 1,
+        s.rollNo || s.studentId || 'N/A',
+        s.name,
+        attendanceMap[s._id] || 'present'
+    ]);
+    exportToCSV(filename, headers, rows);
+}
+
+function exportCurrentAttendancePDF(className, section) {
+    const filename = `attendance_${className}_${section}_${todayStr()}.pdf`;
+    const title = `ATKool Class Attendance`;
+    const subtitle = `Class: ${className} - Section: ${section} | Date: ${new Date().toLocaleDateString()}`;
+    const pCount = Object.values(attendanceMap).filter(v => v === 'present').length;
+    const aCount = Object.values(attendanceMap).filter(v => v === 'absent').length;
+    const summaryText = `Summary: Total Students: ${currentClassStudents.length} | Present: ${pCount} | Absent: ${aCount}`;
+    const headers = ['S.No.', 'Roll No / Student ID', 'Student Name', 'Status'];
+    const rows = currentClassStudents.map((s, index) => [
+        index + 1,
+        s.rollNo || s.studentId || 'N/A',
+        s.name,
+        attendanceMap[s._id] || 'present'
+    ]);
+    exportToPDF(filename, title, subtitle, summaryText, headers, rows);
+}
+
+function exportHistoryAttendanceExcel() {
+    const date = document.getElementById('historyDate').value;
+    const filename = `attendance_history_${date}.csv`;
+    const headers = ['S.No.', 'Roll No / Student ID', 'Student Name', 'Class / Section', 'Attendance Status'];
+    const rows = currentHistoryData.map((a, index) => [
+        index + 1,
+        a.studentId?.rollNo || a.studentId?.studentId || 'N/A',
+        a.studentId?.name || 'N/A',
+        `${a.className || ''}-${a.section || ''}`,
+        a.status
+    ]);
+    exportToCSV(filename, headers, rows);
+}
+
+function exportHistoryAttendancePDF() {
+    const date = document.getElementById('historyDate').value;
+    const filename = `attendance_history_${date}.pdf`;
+    const title = `ATKool Attendance History`;
+    const subtitle = `Date: ${date}`;
+    const pCount = currentHistoryData.filter(a => a.status === 'present').length;
+    const aCount = currentHistoryData.filter(a => a.status === 'absent').length;
+    const summaryText = `Summary: Total Records: ${currentHistoryData.length} | Present: ${pCount} | Absent: ${aCount}`;
+    const headers = ['S.No.', 'Roll No / Student ID', 'Student Name', 'Class / Section', 'Status'];
+    const rows = currentHistoryData.map((a, index) => [
+        index + 1,
+        a.studentId?.rollNo || a.studentId?.studentId || 'N/A',
+        a.studentId?.name || 'N/A',
+        `${a.className || ''}-${a.section || ''}`,
+        a.status
+    ]);
+    exportToPDF(filename, title, subtitle, summaryText, headers, rows);
 }
