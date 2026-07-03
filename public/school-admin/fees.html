@@ -159,6 +159,8 @@
 
     </style>
     <link rel="stylesheet" href="../css/school-admin-layout.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
@@ -833,6 +835,7 @@
                 if (response.ok) {
                     showToast(data.message || 'Installment verified!', 'success');
                     loadLedger();
+                    sendAutomatedChatReceipt(paymentId, installmentId);
                 } else {
                     showToast(data.message || 'Error', 'error');
                 }
@@ -891,13 +894,18 @@
                     var dateStr = inst.paidDate ? new Date(inst.paidDate).toLocaleDateString() : (inst.submittedDate ? new Date(inst.submittedDate).toLocaleDateString() : '');
                     var dateHtml = dateStr ? '<span style="font-size:10px;color:#94a3b8;margin-left:8px;">(' + dateStr + ')</span>' : '';
 
-                    return '<div style="display:flex; flex-direction:column; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; font-size:13px;">' +
+                    var receiptBtnHtml = isPaid ? '<div style="margin-top:4px;"><button type="button" onclick="downloadFeeReceipt(\'' + p._id + '\', \'' + inst._id + '\')" style="padding:2px 6px; font-size:10px; border-radius:4px; border:1px solid #4338ca; color:#4338ca; background:transparent; cursor:pointer; font-weight:700;">📄 Receipt</button></div>' : '';
+
+                    return '<div style="display:flex; flex-direction:column; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; font-size:13px; margin-bottom:8px;">' +
                         '<div style="display:flex; justify-content:space-between; align-items:center;">' +
                         '<div>' +
                         '<div style="font-weight:700; color:#0F172A;">' + inst.label + ' ' + dateHtml + '</div>' +
                         '<div style="font-size:11px; color:#64748b; margin-top:2px;">Amount: ₹' + paidAmount.toLocaleString() + '</div>' +
                         '</div>' +
+                        '<div style="text-align:right;">' +
                         '<span class="status-badge" style="background:none; padding:0; color:' + statusColor + '; font-weight:700;">' + inst.status + '</span>' +
+                        receiptBtnHtml +
+                        '</div>' +
                         '</div>' +
                         '</div>';
                 }).join('');
@@ -977,6 +985,12 @@
                     showToast(data.message || 'Payment recorded successfully!', 'success');
                     closeModeModal();
                     loadLedger();
+                    if (data.payment && data.payment.installments && data.payment.installments.length > 0) {
+                        var newInst = data.payment.installments[data.payment.installments.length - 1];
+                        if (newInst) {
+                            sendAutomatedChatReceipt(data.payment._id, newInst._id, data.payment);
+                        }
+                    }
                 } else {
                     showToast(data.message || 'Error recording payment', 'error');
                 }
@@ -1174,6 +1188,7 @@
                     showToast('Payment verified successfully!', 'success');
                     loadPendingVerifications();
                     loadLedger();
+                    sendAutomatedChatReceipt(paymentId, installmentId);
                 } else {
                     showToast(data.message || 'Error verifying payment', 'error');
                 }
@@ -1235,6 +1250,358 @@
             localStorage.removeItem('schoolToken');
             localStorage.removeItem('schoolData');
             window.location.href = 'index.html';
+        }
+
+        function downloadFeeReceipt(paymentId, installmentId) {
+            var paymentsArray = (typeof currentPayments !== 'undefined') ? currentPayments : [];
+            var payment = paymentsArray.find(function(p) { return p._id === paymentId; });
+            if (!payment) {
+                alert('Payment record not found.');
+                return;
+            }
+
+            var inst = (payment.installments || []).find(function(i) { return i._id === installmentId; });
+            if (!inst) {
+                alert('Installment details not found.');
+                return;
+            }
+
+            var school = payment.schoolId || {};
+            var student = payment.studentId || {};
+            var structure = payment.feeStructureId || {};
+
+            var schoolName = school.name || 'ATKool Partner School';
+            var schoolAddress = school.address || school.city || 'N/A';
+            var studentName = student.name || 'N/A';
+            var studentIdVal = student.studentId || student.rollNo || 'N/A';
+            var studentClass = student.className ? (student.className + ' - ' + (student.section || 'A')) : 'N/A';
+            var receiptNo = inst.transactionId || inst._id || 'N/A';
+            var paymentDate = inst.paidDate ? new Date(inst.paidDate).toLocaleDateString() : (inst.submittedDate ? new Date(inst.submittedDate).toLocaleDateString() : new Date().toLocaleDateString());
+            var paidAmount = inst.submittedAmount || inst.amount || 0;
+            
+            var totalAmount = payment.totalAmount || structure.amount || 0;
+            var totalPaidSoFar = payment.amountPaid || 0;
+            var balanceRemaining = totalAmount - totalPaidSoFar;
+            if (balanceRemaining < 0) balanceRemaining = 0;
+
+            var paymentMode = payment.paymentMode || 'Online/UPI';
+            if (inst.utrNumber) {
+                paymentMode += ' (UTR: ' + inst.utrNumber + ')';
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Border Frame
+            doc.setDrawColor(67, 56, 202);
+            doc.setLineWidth(1);
+            doc.rect(10, 10, 190, 277);
+
+            // Header Band (Indigo)
+            doc.setFillColor(67, 56, 202);
+            doc.rect(10, 10, 190, 32, "F");
+
+            // School Name in Header
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(22);
+            doc.setTextColor(255, 255, 255);
+            doc.text(schoolName.toUpperCase(), 15, 24);
+
+            // School Subtitle/Address
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(schoolAddress, 15, 32);
+
+            // Document Title
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(14);
+            doc.setTextColor(67, 56, 202);
+            doc.text("FEE PAYMENT RECEIPT", 14, 52);
+
+            // Line under title
+            doc.setDrawColor(226, 232, 240);
+            doc.line(14, 56, 196, 56);
+
+            // Receipt details Grid
+            doc.setFontSize(10);
+            doc.setTextColor(71, 85, 105);
+            
+            doc.text("Receipt Number:", 14, 65);
+            doc.text("Payment Date:", 14, 72);
+            doc.text("Payment Mode:", 14, 79);
+
+            doc.setFont("Helvetica", "bold");
+            doc.setTextColor(15, 23, 42);
+            doc.text(String(receiptNo), 48, 65);
+            doc.text(String(paymentDate), 48, 72);
+            doc.text(String(paymentMode), 48, 79);
+
+            doc.setFont("Helvetica", "normal");
+            doc.setTextColor(71, 85, 105);
+            doc.text("Student Name:", 120, 65);
+            doc.text("Student ID:", 120, 72);
+            doc.text("Class / Section:", 120, 79);
+
+            doc.setFont("Helvetica", "bold");
+            doc.setTextColor(15, 23, 42);
+            doc.text(String(studentName), 150, 65);
+            doc.text(String(studentIdVal), 150, 72);
+            doc.text(String(studentClass), 150, 79);
+
+            doc.setDrawColor(226, 232, 240);
+            doc.line(14, 86, 196, 86);
+
+            var tableHeaders = ["Description", "Quantity", "Unit Price", "Total Amount"];
+            var tableRows = [
+                [structure.feeName || "School Fee installment", "1", "INR " + paidAmount.toLocaleString(), "INR " + paidAmount.toLocaleString()]
+            ];
+
+            doc.autoTable({
+                startY: 92,
+                head: [tableHeaders],
+                body: tableRows,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [67, 56, 202],
+                    textColor: [255, 255, 255],
+                    fontSize: 10,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 9,
+                    textColor: [15, 23, 42]
+                },
+                margin: { left: 14, right: 14 }
+            });
+
+            var finalY = doc.previousAutoTable.finalY + 15;
+
+            doc.setFont("Helvetica", "normal");
+            doc.setTextColor(71, 85, 105);
+            doc.text("Total Paid Amount:", 120, finalY);
+            doc.text("Remaining Balance:", 120, finalY + 8);
+
+            doc.setFont("Helvetica", "bold");
+            doc.setTextColor(15, 23, 42);
+            doc.text("INR " + paidAmount.toLocaleString(), 165, finalY);
+            doc.setTextColor(239, 68, 68);
+            doc.text("INR " + balanceRemaining.toLocaleString(), 165, finalY + 8);
+
+            var sigY = finalY + 35;
+            
+            doc.setDrawColor(67, 56, 202);
+            doc.setLineWidth(0.5);
+            doc.rect(14, sigY - 10, 35, 25);
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(8);
+            doc.setTextColor(67, 56, 202);
+            doc.text("OFFICIAL SEAL", 18, sigY + 2);
+            doc.text("ATKOOL VERIFIED", 16, sigY + 7);
+
+            doc.setDrawColor(71, 85, 105);
+            doc.line(135, sigY + 10, 190, sigY + 10);
+            doc.setFontSize(9);
+            doc.setTextColor(71, 85, 105);
+            doc.text("Authorized Signatory", 148, sigY + 15);
+
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            doc.text("Notes: This is a computer-generated fee receipt. No physical signature is required.", 14, 265);
+
+            doc.save("Receipt_" + receiptNo.substring(0, 10) + ".pdf");
+        }
+
+        async function sendAutomatedChatReceipt(paymentId, installmentId, paymentObj) {
+            try {
+                var token = localStorage.getItem('schoolToken');
+                
+                var payment = paymentObj;
+                if (!payment) {
+                    if (typeof currentPayments !== 'undefined') {
+                        payment = currentPayments.find(function(p) { return p._id === paymentId; });
+                    }
+                }
+                
+                if (!payment) {
+                    var response = await fetch('/api/school-fees/payments/' + paymentId, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (response.ok) {
+                        payment = await response.json();
+                    }
+                }
+                
+                if (!payment) return;
+                
+                var inst = (payment.installments || []).find(function(i) { return i._id === installmentId; });
+                if (!inst) return;
+
+                var school = payment.schoolId || {};
+                var student = payment.studentId || {};
+                var structure = payment.feeStructureId || {};
+
+                var schoolName = school.name || 'ATKool Partner School';
+                var schoolAddress = school.address || school.city || 'N/A';
+                var studentName = student.name || 'N/A';
+                var studentIdVal = student.studentId || student.rollNo || 'N/A';
+                var studentClass = student.className ? (student.className + ' - ' + (student.section || 'A')) : 'N/A';
+                var receiptNo = inst.transactionId || inst._id || 'N/A';
+                var paymentDate = inst.paidDate ? new Date(inst.paidDate).toLocaleString() : (inst.submittedDate ? new Date(inst.submittedDate).toLocaleString() : new Date().toLocaleString());
+                var paidAmount = inst.submittedAmount || inst.amount || 0;
+                
+                var totalAmount = payment.totalAmount || structure.amount || 0;
+                var totalPaidSoFar = payment.amountPaid || 0;
+                var balanceRemaining = totalAmount - totalPaidSoFar;
+                if (balanceRemaining < 0) balanceRemaining = 0;
+
+                var paymentMode = payment.paymentMode || 'Online/UPI';
+                if (inst.utrNumber) {
+                    paymentMode += ' (UTR: ' + inst.utrNumber + ')';
+                }
+
+                // Draw on HTML5 Canvas
+                const canvas = document.createElement('canvas');
+                canvas.width = 600;
+                canvas.height = 800;
+                const ctx = canvas.getContext('2d');
+
+                // White background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Indigo Border
+                ctx.strokeStyle = '#4338ca';
+                ctx.lineWidth = 6;
+                ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+
+                // Header Band (Indigo)
+                ctx.fillStyle = '#4338ca';
+                ctx.fillRect(13, 13, canvas.width - 26, 90);
+
+                // School Name
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 24px Helvetica';
+                ctx.fillText(schoolName.toUpperCase(), 30, 50);
+
+                // School Address
+                ctx.font = 'normal 12px Helvetica';
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillText(schoolAddress, 30, 75);
+
+                // Document Title
+                ctx.fillStyle = '#4338ca';
+                ctx.font = 'bold 18px Helvetica';
+                ctx.fillText("OFFICIAL FEE RECEIPT", 30, 140);
+
+                // Thin Separator line
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(30, 155);
+                ctx.lineTo(canvas.width - 30, 155);
+                ctx.stroke();
+
+                // Details Grid
+                ctx.font = 'normal 12px Helvetica';
+                ctx.fillStyle = '#64748b';
+                ctx.fillText("Receipt Number:", 30, 185);
+                ctx.fillText("Payment Date:", 30, 210);
+                ctx.fillText("Payment Mode:", 30, 235);
+
+                ctx.font = 'bold 12px Helvetica';
+                ctx.fillStyle = '#0f172a';
+                ctx.fillText(String(receiptNo).substring(0, 18), 140, 185);
+                ctx.fillText(String(paymentDate), 140, 210);
+                ctx.fillText(String(paymentMode), 140, 235);
+
+                ctx.font = 'normal 12px Helvetica';
+                ctx.fillStyle = '#64748b';
+                ctx.fillText("Student Name:", 330, 185);
+                ctx.fillText("Student ID:", 330, 210);
+                ctx.fillText("Class / Section:", 330, 235);
+
+                ctx.font = 'bold 12px Helvetica';
+                ctx.fillStyle = '#0f172a';
+                ctx.fillText(String(studentName), 430, 185);
+                ctx.fillText(String(studentIdVal), 430, 210);
+                ctx.fillText(String(studentClass), 430, 235);
+
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.beginPath();
+                ctx.moveTo(30, 260);
+                ctx.lineTo(canvas.width - 30, 260);
+                ctx.stroke();
+
+                // Invoice Table Headers
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(30, 280, canvas.width - 60, 30);
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.strokeRect(30, 280, canvas.width - 60, 30);
+
+                ctx.font = 'bold 11px Helvetica';
+                ctx.fillStyle = '#475569';
+                ctx.fillText("Particulars", 45, 300);
+                ctx.fillText("Qty", 350, 300);
+                ctx.fillText("Amount", 450, 300);
+
+                // Invoice Row
+                ctx.strokeRect(30, 310, canvas.width - 60, 45);
+                ctx.font = 'bold 12px Helvetica';
+                ctx.fillStyle = '#0f172a';
+                ctx.fillText(structure.feeName || "School Fee installment", 45, 338);
+                ctx.font = 'normal 12px Helvetica';
+                ctx.fillText("1", 355, 338);
+                ctx.fillText("₹" + paidAmount.toLocaleString(), 450, 338);
+
+                ctx.font = 'normal 12px Helvetica';
+                ctx.fillStyle = '#475569';
+                ctx.fillText("Total Paid Amount:", 320, 395);
+                ctx.fillText("Remaining Balance:", 320, 420);
+
+                ctx.font = 'bold 13px Helvetica';
+                ctx.fillStyle = '#10b981';
+                ctx.fillText("₹" + paidAmount.toLocaleString(), 460, 395);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillText("₹" + balanceRemaining.toLocaleString(), 460, 420);
+
+                // Draw Official Paid Stamp
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(140, 460, 45, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                ctx.fillStyle = '#10b981';
+                ctx.font = 'bold 11px Helvetica';
+                ctx.fillText("PAID & VERIFIED", 100, 458);
+                
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(125, 478);
+                ctx.lineTo(135, 488);
+                ctx.lineTo(155, 468);
+                ctx.stroke();
+
+                // Footer terms
+                ctx.font = 'italic 10px Helvetica';
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText("This is a system-generated verified fee receipt sent automatically via ATKool Connect.", 30, 750);
+
+                var base64Image = canvas.toDataURL('image/png');
+
+                await fetch('/api/chat/system/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({
+                        studentId: student._id || student,
+                        message: base64Image,
+                        messageType: 'image'
+                    })
+                });
+            } catch (e) {
+                console.error('Error sending automated chat receipt:', e);
+            }
         }
     </script>
 </body>

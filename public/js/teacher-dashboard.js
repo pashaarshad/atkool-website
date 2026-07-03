@@ -709,7 +709,18 @@ async function loadChat() {
     const convListHtml = conversations.map(conv => {
         const s = conv.student;
         const lastMsg = conv.lastMessage;
-        const lastMsgText = lastMsg ? (lastMsg.senderType === 'teacher' ? 'You: ' : '') + (lastMsg.message.length > 40 ? lastMsg.message.substring(0, 40) + '...' : lastMsg.message) : 'No messages yet';
+        
+        let lastMsgText = 'No messages yet';
+        if (lastMsg) {
+            const prefix = lastMsg.senderType === 'teacher' ? 'You: ' : '';
+            if (lastMsg.messageType === 'image') {
+                lastMsgText = prefix + '📷 Sent an image';
+            } else if (lastMsg.messageType === 'file') {
+                lastMsgText = prefix + '📄 Sent a document';
+            } else {
+                lastMsgText = prefix + (lastMsg.message.length > 40 ? lastMsg.message.substring(0, 40) + '...' : lastMsg.message);
+            }
+        }
         const lastTime = lastMsg ? formatChatTime(new Date(lastMsg.createdAt)) : '';
         const unreadBadge = conv.unreadCount > 0 ? `<span style="background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:10px;min-width:20px;text-align:center">${conv.unreadCount}</span>` : '';
 
@@ -761,22 +772,7 @@ async function loadChatConversation(studentId, studentName, parentName) {
     const messages = await fetchAPI(`/api/chat/teacher/messages/${studentId}`);
     if (!messages) return;
 
-    const messagesHtml = messages.map(msg => {
-        const isMe = msg.senderType === 'teacher';
-        const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        return `
-            <div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:8px">
-                <div style="
-                    max-width:70%;padding:12px 16px;border-radius:${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};
-                    background:${isMe ? 'linear-gradient(135deg,#4338CA,#6366f1)' : '#f1f5f9'};
-                    color:${isMe ? '#fff' : '#1e293b'};font-size:14px;line-height:1.5;
-                    box-shadow:0 2px 8px ${isMe ? 'rgba(67,56,202,.2)' : 'rgba(0,0,0,.04)'};
-                ">
-                    <div>${msg.message}</div>
-                    <div style="font-size:10px;margin-top:4px;opacity:.7;text-align:${isMe ? 'right' : 'left'}">${time}${isMe && msg.isRead ? ' ✓✓' : ''}</div>
-                </div>
-            </div>`;
-    }).join('');
+    const messagesHtml = messages.map(msg => renderTeacherChatMessage(msg)).join('');
 
     c.innerHTML = `
         <div style="display:flex;flex-direction:column;height:calc(100vh - 140px);">
@@ -801,6 +797,10 @@ async function loadChatConversation(studentId, studentName, parentName) {
             
             <!-- Input Area -->
             <div style="background:#fff;border-radius:0 0 16px 16px;padding:16px 24px;display:flex;gap:12px;align-items:center;border:1px solid #e2e8f0;border-top:2px solid #f1f5f9">
+                <input type="file" id="chatAttachmentInput" style="display:none;" onchange="handleTeacherChatFileSelected(event, '${studentId}')">
+                <button onclick="document.getElementById('chatAttachmentInput').click()" style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'" title="Send Document or Image">
+                    <svg fill="none" stroke="#475569" viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                </button>
                 <input type="text" id="chatInput" placeholder="Type a message..." style="flex:1;padding:12px 18px;border:2px solid #e2e8f0;border-radius:24px;font-size:14px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor='#4338CA'" onblur="this.style.borderColor='#e2e8f0'" onkeypress="if(event.key==='Enter')sendTeacherMessage('${studentId}')">
                 <button onclick="sendTeacherMessage('${studentId}')" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;box-shadow:0 4px 12px rgba(67,56,202,.3)" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
                     <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
@@ -822,16 +822,7 @@ async function loadChatConversation(studentId, studentName, parentName) {
         const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
 
         if (newMessages.length > 0) {
-            container.innerHTML = newMessages.map(msg => {
-                const isMe = msg.senderType === 'teacher';
-                const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                return `<div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:8px">
-                    <div style="max-width:70%;padding:12px 16px;border-radius:${isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};background:${isMe ? 'linear-gradient(135deg,#4338CA,#6366f1)' : '#f1f5f9'};color:${isMe ? '#fff' : '#1e293b'};font-size:14px;line-height:1.5;box-shadow:0 2px 8px ${isMe ? 'rgba(67,56,202,.2)' : 'rgba(0,0,0,.04)'};">
-                        <div>${msg.message}</div>
-                        <div style="font-size:10px;margin-top:4px;opacity:.7;text-align:${isMe ? 'right' : 'left'}">${time}${isMe && msg.isRead ? ' ✓✓' : ''}</div>
-                    </div>
-                </div>`;
-            }).join('');
+            container.innerHTML = newMessages.map(msg => renderTeacherChatMessage(msg)).join('');
         }
 
         if (wasAtBottom) container.scrollTop = container.scrollHeight;

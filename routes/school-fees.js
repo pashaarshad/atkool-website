@@ -136,6 +136,7 @@ router.get('/payments', schoolAuth, async (req, res) => {
         let payments = await FeePayment.find(matchQuery)
             .populate('studentId')
             .populate('feeStructureId')
+            .populate('schoolId')
             .sort({ createdAt: -1 });
 
         // Filter out records with null studentId (deleted students)

@@ -127,6 +127,8 @@
             .profile-grid { grid-template-columns:1fr; }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
@@ -1034,7 +1036,10 @@
                                 let statusBadgeHtml = '';
                                 if (isPaid) {
                                     const paidDateStr = inst.paidDate ? new Date(inst.paidDate).toLocaleDateString() : '';
-                                    statusBadgeHtml = `<span class="status-badge status-paid">Verified Paid</span>${paidDateStr ? `<br><span style="font-size:10px; color:#94a3b8;">on ${paidDateStr}</span>` : ''}`;
+                                    statusBadgeHtml = `<span class="status-badge status-paid">Verified Paid</span>${paidDateStr ? `<br><span style="font-size:10px; color:#94a3b8;">on ${paidDateStr}</span>` : ''}
+                                        <div style="margin-top:6px;">
+                                            <button type="button" class="btn btn-outline" onclick="downloadFeeReceipt('${f._id}', '${inst._id}')" style="padding: 4px 10px; font-size: 11px; border-radius: 6px; border: 1.5px solid #4338ca; color: #4338ca; background:transparent; cursor:pointer; font-weight:700;">📄 Receipt</button>
+                                        </div>`;
                                 } else if (isPending) {
                                     statusBadgeHtml = `<span class="status-badge status-pending" style="background:#fef3c7; color:#d97706;">Pending Verification</span>`;
                                 } else {
@@ -1078,6 +1083,63 @@
                         </tr>`;
                     });
 
+                    html += `</tbody></table>`;
+                }
+                html += `</div>`;
+
+                // Collect paid receipts
+                var paidReceipts = [];
+                fees.forEach(f => {
+                    var structure = f.feeStructureId || {};
+                    (f.installments || []).forEach(inst => {
+                        if (inst.status === 'Paid') {
+                            paidReceipts.push({
+                                paymentId: f._id,
+                                installmentId: inst._id,
+                                feeName: structure.feeName || 'School Fee',
+                                label: inst.label || 'Installment',
+                                amount: inst.submittedAmount || inst.amount || 0,
+                                date: inst.paidDate ? new Date(inst.paidDate).toLocaleDateString() : (inst.submittedDate ? new Date(inst.submittedDate).toLocaleDateString() : 'N/A'),
+                                receiptNo: inst.transactionId || inst.utrNumber || inst._id
+                            });
+                        }
+                    });
+                });
+
+                html += `
+                    <div class="card" style="margin-top:24px;">
+                        <div class="card-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="stroke:#10b981; width:22px; height:22px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            Fee Receipts
+                        </div>`;
+                
+                if (paidReceipts.length === 0) {
+                    html += '<div style="text-align:center;padding:30px;color:#64748b;font-weight:600">0 Receipts Available</div>';
+                } else {
+                    html += `<table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr>
+                                <th>Receipt No</th>
+                                <th>Fee Particulars</th>
+                                <th>Paid Date</th>
+                                <th>Amount</th>
+                                <th style="text-align:right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                    
+                    paidReceipts.forEach(r => {
+                        html += `<tr>
+                            <td><span style="font-family:monospace; font-size:11px; font-weight:700; color:#475569;">${r.receiptNo.substring(0, 12)}...</span></td>
+                            <td><strong>${r.feeName}</strong><br><span style="font-size:11px; color:#64748b;">${r.label}</span></td>
+                            <td>${r.date}</td>
+                            <td style="font-weight:800; color:#059669;">₹${r.amount.toLocaleString()}</td>
+                            <td style="text-align:right;">
+                                <button class="btn btn-outline" onclick="downloadFeeReceipt('${r.paymentId}', '${r.installmentId}')" style="padding: 6px 14px; font-size: 12px; border-radius: 8px; border: 1.5px solid #4338ca; color: #4338ca; background:transparent; cursor:pointer; font-weight:700;">📄 Download Receipt</button>
+                            </td>
+                        </tr>`;
+                    });
+                    
                     html += `</tbody></table>`;
                 }
                 html += `</div>`;
@@ -1748,6 +1810,165 @@
         // Load default view
         fetchFreshProfile();
         loadView('dashboard');
+
+        function downloadFeeReceipt(paymentId, installmentId) {
+            var paymentsArray = (typeof fees !== 'undefined') ? fees : [];
+            var payment = paymentsArray.find(function(p) { return p._id === paymentId; });
+            if (!payment) {
+                alert('Payment record not found.');
+                return;
+            }
+
+            var inst = (payment.installments || []).find(function(i) { return i._id === installmentId; });
+            if (!inst) {
+                alert('Installment details not found.');
+                return;
+            }
+
+            var school = payment.schoolId || {};
+            var student = payment.studentId || {};
+            var structure = payment.feeStructureId || {};
+
+            var schoolName = school.name || 'ATKool Partner School';
+            var schoolAddress = school.address || school.city || 'N/A';
+            var studentName = student.name || 'N/A';
+            var studentIdVal = student.studentId || student.rollNo || 'N/A';
+            var studentClass = student.className ? (student.className + ' - ' + (student.section || 'A')) : 'N/A';
+            var receiptNo = inst.transactionId || inst._id || 'N/A';
+            var paymentDate = inst.paidDate ? new Date(inst.paidDate).toLocaleDateString() : (inst.submittedDate ? new Date(inst.submittedDate).toLocaleDateString() : new Date().toLocaleDateString());
+            var paidAmount = inst.submittedAmount || inst.amount || 0;
+            
+            var totalAmount = payment.totalAmount || structure.amount || 0;
+            var totalPaidSoFar = payment.amountPaid || 0;
+            var balanceRemaining = totalAmount - totalPaidSoFar;
+            if (balanceRemaining < 0) balanceRemaining = 0;
+
+            var paymentMode = payment.paymentMode || 'Online/UPI';
+            if (inst.utrNumber) {
+                paymentMode += ' (UTR: ' + inst.utrNumber + ')';
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Border Frame
+            doc.setDrawColor(67, 56, 202);
+            doc.setLineWidth(1);
+            doc.rect(10, 10, 190, 277);
+
+            // Header Band (Indigo)
+            doc.setFillColor(67, 56, 202);
+            doc.rect(10, 10, 190, 32, "F");
+
+            // School Name in Header
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(22);
+            doc.setTextColor(255, 255, 255);
+            doc.text(schoolName.toUpperCase(), 15, 24);
+
+            // School Subtitle/Address
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(schoolAddress, 15, 32);
+
+            // Document Title
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(14);
+            doc.setTextColor(67, 56, 202);
+            doc.text("FEE PAYMENT RECEIPT", 14, 52);
+
+            // Line under title
+            doc.setDrawColor(226, 232, 240);
+            doc.line(14, 56, 196, 56);
+
+            // Receipt details Grid
+            doc.setFontSize(10);
+            doc.setTextColor(71, 85, 105);
+            
+            doc.text("Receipt Number:", 14, 65);
+            doc.text("Payment Date:", 14, 72);
+            doc.text("Payment Mode:", 14, 79);
+
+            doc.setFont("Helvetica", "bold");
+            doc.setTextColor(15, 23, 42);
+            doc.text(String(receiptNo), 48, 65);
+            doc.text(String(paymentDate), 48, 72);
+            doc.text(String(paymentMode), 48, 79);
+
+            doc.setFont("Helvetica", "normal");
+            doc.setTextColor(71, 85, 105);
+            doc.text("Student Name:", 120, 65);
+            doc.text("Student ID:", 120, 72);
+            doc.text("Class / Section:", 120, 79);
+
+            doc.setFont("Helvetica", "bold");
+            doc.setTextColor(15, 23, 42);
+            doc.text(String(studentName), 150, 65);
+            doc.text(String(studentIdVal), 150, 72);
+            doc.text(String(studentClass), 150, 79);
+
+            doc.setDrawColor(226, 232, 240);
+            doc.line(14, 86, 196, 86);
+
+            var tableHeaders = ["Description", "Quantity", "Unit Price", "Total Amount"];
+            var tableRows = [
+                [structure.feeName || "School Fee installment", "1", "INR " + paidAmount.toLocaleString(), "INR " + paidAmount.toLocaleString()]
+            ];
+
+            doc.autoTable({
+                startY: 92,
+                head: [tableHeaders],
+                body: tableRows,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [67, 56, 202],
+                    textColor: [255, 255, 255],
+                    fontSize: 10,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 9,
+                    textColor: [15, 23, 42]
+                },
+                margin: { left: 14, right: 14 }
+            });
+
+            var finalY = doc.previousAutoTable.finalY + 15;
+
+            doc.setFont("Helvetica", "normal");
+            doc.setTextColor(71, 85, 105);
+            doc.text("Total Paid Amount:", 120, finalY);
+            doc.text("Remaining Balance:", 120, finalY + 8);
+
+            doc.setFont("Helvetica", "bold");
+            doc.setTextColor(15, 23, 42);
+            doc.text("INR " + paidAmount.toLocaleString(), 165, finalY);
+            doc.setTextColor(239, 68, 68);
+            doc.text("INR " + balanceRemaining.toLocaleString(), 165, finalY + 8);
+
+            var sigY = finalY + 35;
+            
+            doc.setDrawColor(67, 56, 202);
+            doc.setLineWidth(0.5);
+            doc.rect(14, sigY - 10, 35, 25);
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(8);
+            doc.setTextColor(67, 56, 202);
+            doc.text("OFFICIAL SEAL", 18, sigY + 2);
+            doc.text("ATKOOL VERIFIED", 16, sigY + 7);
+
+            doc.setDrawColor(71, 85, 105);
+            doc.line(135, sigY + 10, 190, sigY + 10);
+            doc.setFontSize(9);
+            doc.setTextColor(71, 85, 105);
+            doc.text("Authorized Signatory", 148, sigY + 15);
+
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            doc.text("Notes: This is a computer-generated fee receipt. No physical signature is required.", 14, 265);
+
+            doc.save("Receipt_" + receiptNo.substring(0, 10) + ".pdf");
+        }
     </script>
 <script src="/js/pwa.js"></script>
 </body>

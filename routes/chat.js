@@ -42,6 +42,23 @@ function parentAuth(req, res, next) {
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid token' });
+}
+
+function schoolAuth(req, res, next) {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_admin_secret_key_2024');
+        if (decoded.type !== 'school') {
+            return res.status(401).json({ message: 'Invalid token type' });
+        }
+        req.schoolId = decoded.schoolId;
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid token' });
     }
 }
 
@@ -110,6 +127,7 @@ router.get('/teacher/conversations', teacherAuth, async (req, res) => {
                 },
                 lastMessage: lastMessage ? {
                     message: lastMessage.message,
+                    messageType: lastMessage.messageType || 'text',
                     senderType: lastMessage.senderType,
                     createdAt: lastMessage.createdAt
                 } : null,
@@ -367,6 +385,47 @@ router.get('/parent/unread-count', parentAuth, async (req, res) => {
         res.json({ count });
     } catch (error) {
         console.error('Get parent unread count error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// System/School Admin sends a chat message automatically (e.g., fee receipts)
+router.post('/system/send', schoolAuth, async (req, res) => {
+    try {
+        const { studentId, message, messageType } = req.body;
+
+        if (!studentId || !message) {
+            return res.status(400).json({ message: 'Student ID and message are required' });
+        }
+
+        // Find student and get their assigned teacher
+        const student = await Student.findOne({ _id: studentId, schoolId: req.schoolId });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        // Use assigned teacherId, or find the first active teacher in the school
+        let teacherId = student.teacherId;
+        if (!teacherId) {
+            const activeTeacher = await Teacher.findOne({ schoolId: req.schoolId, status: 'Active' });
+            if (!activeTeacher) {
+                return res.status(400).json({ message: 'No active teacher found in the school to send the chat message' });
+            }
+            teacherId = activeTeacher._id;
+        }
+
+        const chatMessage = await ChatMessage.create({
+            schoolId: req.schoolId,
+            studentId: studentId,
+            teacherId: teacherId,
+            senderType: 'teacher',
+            message: message,
+            messageType: messageType || 'image'
+        });
+
+        res.status(201).json(chatMessage);
+    } catch (error) {
+        console.error('System send chat message error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });

@@ -31,6 +31,8 @@ router.get('/', parentAuth, async (req, res) => {
     try {
         const payments = await FeePayment.find({ studentId: req.studentId })
             .populate('feeStructureId')
+            .populate('studentId')
+            .populate('schoolId')
             .sort({ createdAt: -1 });
         res.json(payments);
     } catch (error) {
