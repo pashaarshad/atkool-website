@@ -55,50 +55,90 @@ Token: ${token}
         console.error('Failed to write email verification debug file:', err);
     }
 
-    const smtpHost = process.env.SMTP_HOST;
-    const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    const smtpFrom = process.env.SMTP_FROM || 'no-reply@atkool.com';
+    const subject = 'ATKool Email Verification Required';
+    const text = `Hello ${user.name},\n\nPlease verify your ATKool account by opening this link:\n${verificationLink}\n\nThis link is valid for 24 hours.`;
+    const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #faf5ff;">
+            <h2 style="color: #4338ca; border-bottom: 2px solid #4338ca; padding-bottom: 10px;">Verify Your ATKool Account</h2>
+            <p>Hello ${user.name},</p>
+            <p>Your ATKool account is almost ready. Please verify your email address to continue.</p>
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${verificationLink}" style="background-color: #4338ca; color: #ffffff; text-decoration: none; border-radius: 8px; padding: 12px 30px; font-size: 16px; font-weight: bold; display: inline-block;">
+                    Verify Email Address
+                </a>
+            </div>
+            <p style="font-size: 12px; color: #6b7280; text-align: center;">If the button does not work, copy this link into your browser:<br><a href="${verificationLink}">${verificationLink}</a></p>
+            <p style="color: #ef4444; font-weight: bold; font-size: 13px;">This verification link expires in 24 hours.</p>
+        </div>
+    `;
 
-    if (smtpHost && smtpUser && smtpPass) {
+    // 1. Try sending via Resend API first
+    const resendApiKey = process.env.RESEND_API_KEY;
+    let sentViaResend = false;
+    if (resendApiKey) {
         try {
-            const transporter = nodemailer.createTransport({
-                host: smtpHost,
-                port: smtpPort,
-                secure: smtpPort === 465,
-                auth: {
-                    user: smtpUser,
-                    pass: smtpPass
-                }
+            const fromEmail = process.env.SMTP_FROM || "ATKool <support@atkool.com>";
+            const response = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${resendApiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: fromEmail,
+                    to: userEmail,
+                    subject: subject,
+                    text: text,
+                    html: html
+                })
             });
 
-            await transporter.sendMail({
-                from: smtpFrom,
-                to: userEmail,
-                subject: 'ATKool Email Verification Required',
-                text: `Hello ${user.name},\n\nPlease verify your ATKool account by opening this link:\n${verificationLink}\n\nThis link is valid for 24 hours.`,
-                html: `
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #faf5ff;">
-                        <h2 style="color: #4338ca; border-bottom: 2px solid #4338ca; padding-bottom: 10px;">Verify Your ATKool Account</h2>
-                        <p>Hello ${user.name},</p>
-                        <p>Your ATKool account is almost ready. Please verify your email address to continue.</p>
-                        <div style="text-align: center; margin: 30px 0;">
-                            <a href="${verificationLink}" style="background-color: #4338ca; color: #ffffff; text-decoration: none; border-radius: 8px; padding: 12px 30px; font-size: 16px; font-weight: bold; display: inline-block;">
-                                Verify Email Address
-                            </a>
-                        </div>
-                        <p style="font-size: 12px; color: #6b7280; text-align: center;">If the button does not work, copy this link into your browser:<br><a href="${verificationLink}">${verificationLink}</a></p>
-                        <p style="color: #ef4444; font-weight: bold; font-size: 13px;">This verification link expires in 24 hours.</p>
-                    </div>
-                `
-            });
-            console.log(`Verification email successfully sent to ${userEmail}`);
+            const data = await response.json();
+            if (response.ok) {
+                console.log(`Verification email successfully sent via Resend API to ${userEmail}. ID: ${data.id}`);
+                sentViaResend = true;
+            } else {
+                console.error('Resend API error:', data);
+            }
         } catch (error) {
-            console.error('Error sending SMTP verification email:', error);
+            console.error('Exception sending verification via Resend API:', error);
         }
-    } else {
-        console.log('SMTP not fully configured. Skipping real verification email send (using local email-debug.txt file).');
+    }
+
+    // 2. Fallback: SMTP
+    if (!sentViaResend) {
+        const smtpHost = process.env.SMTP_HOST;
+        const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+        const smtpUser = process.env.SMTP_USER;
+        const smtpPass = process.env.SMTP_PASS;
+        const smtpFrom = process.env.SMTP_FROM || 'no-reply@atkool.com';
+
+        if (smtpHost && smtpUser && smtpPass) {
+            try {
+                const transporter = nodemailer.createTransport({
+                    host: smtpHost,
+                    port: smtpPort,
+                    secure: smtpPort === 465,
+                    auth: {
+                        user: smtpUser,
+                        pass: smtpPass
+                    }
+                });
+
+                await transporter.sendMail({
+                    from: smtpFrom,
+                    to: userEmail,
+                    subject: subject,
+                    text: text,
+                    html: html
+                });
+                console.log(`Verification email successfully sent to ${userEmail} via SMTP`);
+            } catch (error) {
+                console.error('Error sending SMTP verification email:', error);
+            }
+        } else {
+            console.log('SMTP not fully configured. Skipping SMTP fallback email send.');
+        }
     }
 
     return {
