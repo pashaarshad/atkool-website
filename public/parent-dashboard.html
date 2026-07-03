@@ -946,9 +946,10 @@
                 let totalPending = 0;
 
                 fees.forEach(f => {
-                    totalAmount += f.totalAmount || 0;
+                    const amt = Math.max(f.totalAmount || 0, f.amountPaid || 0);
+                    totalAmount += amt;
                     totalPaid += f.amountPaid || 0;
-                    totalPending += ((f.totalAmount || 0) - (f.amountPaid || 0));
+                    totalPending += Math.max(0, amt - (f.amountPaid || 0));
                 });
 
                 let html = `

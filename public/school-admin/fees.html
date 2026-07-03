@@ -726,9 +726,10 @@
                 var total = 0, collected = 0, pending = 0, partialCount = 0;
                 data.forEach(function(p) {
                     var amt = p.totalAmount || (p.feeStructureId ? p.feeStructureId.amount : 0);
+                    amt = Math.max(amt, p.amountPaid || 0);
                     total += amt;
                     collected += (p.amountPaid || 0);
-                    pending += (amt - (p.amountPaid || 0));
+                    pending += Math.max(0, amt - (p.amountPaid || 0));
                     if (p.status === 'Partial') partialCount++;
                 });
 
