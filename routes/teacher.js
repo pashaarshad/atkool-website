@@ -152,6 +152,69 @@ router.post('/students', teacherAuth, async (req, res) => {
     }
 });
 
+// Update student by teacher (limited to assigned classes/sections)
+router.put('/students/:id', teacherAuth, async (req, res) => {
+    try {
+        const { name, className, section, rollNo, studentId, email, mobileNo, parentName, parentMobile, guardianMobile, vanId, pickupPoint, address, photo } = req.body;
+
+        const student = await Student.findOne({ _id: req.params.id, schoolId: req.schoolId });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        const teacher = await Teacher.findById(req.teacherId);
+        if (!teacher) {
+            return res.status(404).json({ message: 'Teacher not found' });
+        }
+
+        // Verify if teacher is allowed to edit this student's class/section
+        const targetClass = className || student.className;
+        const targetSection = section || student.section;
+
+        const classes = [];
+        if (teacher.classAssignments && teacher.classAssignments.length > 0) {
+            teacher.classAssignments.forEach(c => {
+                classes.push({ className: c.className, section: c.section });
+            });
+        }
+        if (teacher.isClassTeacher && teacher.classTeacherFor && teacher.classTeacherFor.className) {
+            classes.push({
+                className: teacher.classTeacherFor.className,
+                section: teacher.classTeacherFor.section
+            });
+        }
+
+        const isAssigned = classes.some(c => c.className === targetClass && c.section === (targetSection || 'A'));
+        if (!isAssigned) {
+            return res.status(403).json({ 
+                message: `Access denied: you can only edit students in your assigned classes.` 
+            });
+        }
+
+        // Update fields
+        if (name) student.name = name;
+        if (className) student.className = className;
+        if (section) student.section = section;
+        if (rollNo || studentId) student.rollNo = rollNo || studentId;
+        if (studentId) student.studentId = studentId;
+        if (email) student.email = email;
+        if (mobileNo) student.mobileNo = mobileNo;
+        if (parentName) student.parentName = parentName;
+        if (parentMobile) student.parentMobile = parentMobile;
+        if (guardianMobile) student.guardianMobile = guardianMobile;
+        student.vanId = vanId || null;
+        if (pickupPoint !== undefined) student.pickupPoint = pickupPoint;
+        if (address !== undefined) student.address = address;
+        if (photo) student.photo = photo;
+
+        await student.save();
+        res.json({ message: 'Student updated successfully', student });
+    } catch (error) {
+        console.error('Update student error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Get teacher's student requests (all statuses - Pending, Approved, Rejected)
 router.get('/my-requests', teacherAuth, async (req, res) => {
     try {

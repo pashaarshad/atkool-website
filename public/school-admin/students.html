@@ -420,6 +420,7 @@
 
     <script>
         var viewIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+        var editIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
         var deleteIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
 
         // State
@@ -707,6 +708,7 @@
                     '<td><span class="status-badge ' + statusClass + '">' + (s.status || 'Active') + '</span></td>' +
                     '<td>' +
                     '<button class="action-btn" onclick="viewStudent(\'' + s._id + '\')" title="View">' + viewIcon + '</button>' +
+                    '<button class="action-btn" onclick="editStudent(\'' + s._id + '\')" title="Edit">' + editIcon + '</button>' +
                     '<button class="action-btn" onclick="deleteStudent(\'' + s._id + '\')" title="Delete">' + deleteIcon + '</button>' +
                     '</td>' +
                     '</tr>';
@@ -744,12 +746,94 @@
                     '<div style="font-weight:700;color:#64748b;">Status</div><div>' + (s.status || 'Active') + '</div>' +
                     '<div style="font-weight:700;color:#64748b;">Password</div><div style="font-family:monospace;background:#f1f5f9;padding:4px 8px;border-radius:4px;">' + (s.parentPassword || 'Test@123') + '</div>' +
                     vanInfoHtml +
+                    '</div>' +
+                    '<div style="text-align: center; margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px;">' +
+                    '<button type="button" onclick="closeViewStudentModal(); editStudent(\'' + s._id + '\')" style="padding: 10px 24px; font-weight: 700; background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform=\'scale(1.03)\'" onmouseout="this.style.transform=\'\'">Edit Student Information</button>' +
                     '</div>';
 
                 document.getElementById('viewStudentModal').classList.add('show');
             } catch (error) {
                 showToast('Error loading student details', 'error');
             }
+        }
+
+        var editingStudentId = null;
+
+        async function editStudent(id) {
+            verifyEditPin(async function() {
+                var token = localStorage.getItem('schoolToken');
+                try {
+                    var response = await fetch('/api/students/' + id, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    var student = await response.json();
+                    
+                    // Open the modal in edit mode
+                    editingStudentId = student._id;
+                    document.querySelector('#addStudentModal h2').textContent = 'Edit Student';
+                    document.getElementById('saveStudentBtn').textContent = 'Save Student';
+                    
+                    // Fill teachers list and select teacher
+                    var teachersResponse = await fetch('/api/teachers', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    allTeachers = await teachersResponse.json();
+                    var activeTeachers = allTeachers.filter(function(t) { return t.role === 'Teacher'; });
+                    document.getElementById('addTeacherSelect').innerHTML = '<option value="">-- Select Teacher --</option>' +
+                        activeTeachers.map(function(t) {
+                            return '<option value="' + t._id + '">' + t.name + '</option>';
+                        }).join('');
+                    
+                    // Select teacher
+                    document.getElementById('addTeacherSelect').value = student.teacherId ? (student.teacherId._id || student.teacherId) : '';
+                    onTeacherChange();
+                    
+                    // Fill class and section
+                    document.getElementById('addClassSelect').value = student.className || '';
+                    onClassChange();
+                    document.getElementById('addSectionSelect').value = student.section || '';
+                    
+                    // Fill other fields
+                    document.getElementById('addStudentName').value = student.name || '';
+                    document.getElementById('addStudentEmail').value = student.email || '';
+                    document.getElementById('addStudentId').value = student.studentId || student.rollNo || '';
+                    document.getElementById('addMobileNo').value = student.mobileNo || '';
+                    document.getElementById('addParentName').value = student.parentName || '';
+                    document.getElementById('addParentMobile').value = student.parentMobile || '';
+                    document.getElementById('addGuardianMobile').value = student.guardianMobile || '';
+                    document.getElementById('addPickupPoint').value = student.pickupPoint || '';
+                    
+                    // Load vans list
+                    try {
+                        var vanRes = await fetch('/api/school-vans', {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        });
+                        if (vanRes.ok) {
+                            var vans = await vanRes.json();
+                            var vanOptions = '<option value="">-- No Van Assigned --</option>' + vans.map(function(v) {
+                                return '<option value="' + v._id + '">' + v.vehicleNumber + ' (' + v.driverName + ')</option>';
+                            }).join('');
+                            document.getElementById('addVanSelect').innerHTML = vanOptions;
+                        }
+                    } catch (err) { console.error("Error loading vans:", err); }
+                    
+                    document.getElementById('addVanSelect').value = student.vanId ? (student.vanId._id || student.vanId) : '';
+                    
+                    // Photo preview
+                    if (student.photo) {
+                        document.getElementById('studentPhotoBase64').value = student.photo;
+                        document.getElementById('studentPhotoPreview').src = student.photo;
+                        document.getElementById('studentPhotoPreviewContainer').style.display = 'flex';
+                    } else {
+                        removeStudentPhoto();
+                    }
+                    
+                    // Show modal
+                    document.getElementById('addStudentModal').classList.add('show');
+                } catch (error) {
+                    showToast('Error loading student details', 'error');
+                }
+            });
         }
 
         function closeViewStudentModal() {
@@ -849,6 +933,10 @@
         });
 
         async function openAddStudentModal() {
+            editingStudentId = null;
+            document.querySelector('#addStudentModal h2').textContent = 'Add Student';
+            document.getElementById('saveStudentBtn').textContent = 'Add Student';
+
             var token = localStorage.getItem('schoolToken');
             var select = document.getElementById('addTeacherSelect');
             select.innerHTML = '<option value="">Loading teachers...</option>';
@@ -965,9 +1053,12 @@
             btn.textContent = 'Saving...';
 
             var token = localStorage.getItem('schoolToken');
+            var url = editingStudentId ? '/api/students/' + editingStudentId : '/api/students';
+            var method = editingStudentId ? 'PUT' : 'POST';
+
             try {
-                var response = await fetch('/api/students', {
-                    method: 'POST',
+                var response = await fetch(url, {
+                    method: method,
                     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: name,
@@ -988,12 +1079,13 @@
                 });
                 var data = await response.json();
                 if (response.ok) {
-                    showToast('Student added successfully!', 'success');
+                    showToast(editingStudentId ? 'Student updated successfully!' : 'Student added successfully!', 'success');
                     closeAddStudentModal();
                     loadClasses();
                     if (showingAll) loadAllStudents();
+                    else if (selectedClass && selectedSection) loadStudents(selectedClass, selectedSection);
                 } else {
-                    showToast(data.message || 'Error adding student', 'error');
+                    showToast(data.message || 'Error saving student', 'error');
                 }
             } catch(e) {
                 showToast('Error adding student', 'error');
@@ -1012,6 +1104,103 @@
             localStorage.removeItem('schoolToken');
             localStorage.removeItem('schoolData');
             window.location.href = 'index.html';
+        }
+
+        function verifyEditPin(onSuccess) {
+            if (!document.getElementById('editPinStyle')) {
+                var style = document.createElement('style');
+                style.id = 'editPinStyle';
+                style.textContent = `
+                    .pin-modal-overlay {
+                        position: fixed;
+                        top: 0; left: 0; width: 100%; height: 100%;
+                        background: rgba(15, 23, 42, 0.6);
+                        backdrop-filter: blur(8px);
+                        z-index: 999999;
+                        display: flex; align-items: center; justify-content: center;
+                        opacity: 0; transition: opacity 0.3s ease;
+                    }
+                    .pin-modal-overlay.show { opacity: 1; }
+                    .pin-modal {
+                        background: rgba(255, 255, 255, 0.95);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        border-radius: 20px;
+                        padding: 30px;
+                        width: 90%; max-width: 360px;
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+                        text-align: center;
+                        transform: scale(0.9); transition: transform 0.3s ease;
+                    }
+                    .pin-modal-overlay.show .pin-modal { transform: scale(1); }
+                    .pin-modal-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
+                    .pin-modal-text { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+                    .pin-input {
+                        width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px;
+                        font-size: 20px; font-weight: 700; text-align: center; letter-spacing: 4px;
+                        margin-bottom: 20px; outline: none; transition: border-color 0.2s;
+                    }
+                    .pin-input:focus { border-color: #4338ca; }
+                    .pin-modal-actions { display: flex; gap: 10px; }
+                    .pin-btn {
+                        flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700;
+                        cursor: pointer; border: none; transition: all 0.2s;
+                    }
+                    .pin-btn-cancel { background: #f1f5f9; color: #475569; }
+                    .pin-btn-cancel:hover { background: #e2e8f0; }
+                    .pin-btn-confirm { background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; }
+                    .pin-btn-confirm:hover { transform: translateY(-1px); }
+                    .pin-error-msg { color: #ef4444; font-size: 12px; font-weight: 600; margin-top: -12px; margin-bottom: 12px; display: none; }
+                `;
+                document.head.appendChild(style);
+            }
+
+            var overlay = document.createElement('div');
+            overlay.className = 'pin-modal-overlay';
+            overlay.innerHTML = `
+                <div class="pin-modal">
+                    <div class="pin-modal-title">🔐 Verification Required</div>
+                    <div class="pin-modal-text">Enter the 4-digit PIN code to enable editing.</div>
+                    <input type="password" class="pin-input" placeholder="••••" maxlength="5">
+                    <div class="pin-error-msg" id="pinErrorMsg">Incorrect PIN code!</div>
+                    <div class="pin-modal-actions">
+                        <button type="button" class="pin-btn pin-btn-cancel" id="pinCancelBtn">Cancel</button>
+                        <button type="button" class="pin-btn pin-btn-confirm" id="pinConfirmBtn">Confirm</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            overlay.offsetHeight;
+            overlay.classList.add('show');
+
+            var input = overlay.querySelector('.pin-input');
+            input.focus();
+
+            var errorMsg = overlay.querySelector('#pinErrorMsg');
+
+            function cleanup() {
+                overlay.classList.remove('show');
+                setTimeout(function() { overlay.remove(); }, 300);
+            }
+
+            function checkPin() {
+                var val = input.value.trim();
+                if (val === '2424' || val === '24-24') {
+                    cleanup();
+                    onSuccess();
+                } else {
+                    errorMsg.style.display = 'block';
+                    input.value = '';
+                    input.focus();
+                    setTimeout(function() { errorMsg.style.display = 'none'; }, 2000);
+                }
+            }
+
+            overlay.querySelector('#pinCancelBtn').addEventListener('click', cleanup);
+            overlay.querySelector('#pinConfirmBtn').addEventListener('click', checkPin);
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') { checkPin(); }
+            });
         }
     </script>
 </body>

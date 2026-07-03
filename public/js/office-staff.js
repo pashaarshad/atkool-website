@@ -275,7 +275,10 @@ async function viewStaff(id) {
             '<span class="view-detail-label">Last Updated:</span>' +
             '<span class="view-detail-value">' + formatDateTime(staff.updatedAt) + '</span>' +
             '</div>' +
-            idCardHtml;
+            idCardHtml +
+            '<div style="text-align: center; margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px;">' +
+            '<button type="button" onclick="closeViewModal(); editStaff(\'' + staff._id + '\')" style="padding: 10px 24px; font-weight: 700; background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform=\'scale(1.03)\'" onmouseout="this.style.transform=\'\'">Edit Staff Information</button>' +
+            '</div>';
 
         var modal = document.getElementById('viewModal');
         modal.classList.add('show');
@@ -287,21 +290,23 @@ async function viewStaff(id) {
 }
 
 async function editStaff(id) {
-    var token = localStorage.getItem('adminToken');
+    verifyEditPin(async function() {
+        var token = localStorage.getItem('adminToken');
 
-    try {
-        var response = await fetch('/api/office-staff/' + id, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        });
+        try {
+            var response = await fetch('/api/office-staff/' + id, {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
 
-        var staff = await response.json();
-        openModal(staff);
-    } catch (error) {
-        console.error('Edit staff error:', error);
-        showToast('Error loading staff for editing', 'error');
-    }
+            var staff = await response.json();
+            openModal(staff);
+        } catch (error) {
+            console.error('Edit staff error:', error);
+            showToast('Error loading staff for editing', 'error');
+        }
+    });
 }
 
 async function deleteStaff(id) {
@@ -331,4 +336,101 @@ async function deleteStaff(id) {
         console.error('Delete staff error:', error);
         showToast('Error deleting staff', 'error');
     }
+}
+
+function verifyEditPin(onSuccess) {
+    if (!document.getElementById('editPinStyle')) {
+        var style = document.createElement('style');
+        style.id = 'editPinStyle';
+        style.textContent = `
+            .pin-modal-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(15, 23, 42, 0.6);
+                backdrop-filter: blur(8px);
+                z-index: 999999;
+                display: flex; align-items: center; justify-content: center;
+                opacity: 0; transition: opacity 0.3s ease;
+            }
+            .pin-modal-overlay.show { opacity: 1; }
+            .pin-modal {
+                background: rgba(255, 255, 255, 0.95);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 20px;
+                padding: 30px;
+                width: 90%; max-width: 360px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+                text-align: center;
+                transform: scale(0.9); transition: transform 0.3s ease;
+            }
+            .pin-modal-overlay.show .pin-modal { transform: scale(1); }
+            .pin-modal-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
+            .pin-modal-text { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+            .pin-input {
+                width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px;
+                font-size: 20px; font-weight: 700; text-align: center; letter-spacing: 4px;
+                margin-bottom: 20px; outline: none; transition: border-color 0.2s;
+            }
+            .pin-input:focus { border-color: #4338ca; }
+            .pin-modal-actions { display: flex; gap: 10px; }
+            .pin-btn {
+                flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700;
+                cursor: pointer; border: none; transition: all 0.2s;
+            }
+            .pin-btn-cancel { background: #f1f5f9; color: #475569; }
+            .pin-btn-cancel:hover { background: #e2e8f0; }
+            .pin-btn-confirm { background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; }
+            .pin-btn-confirm:hover { transform: translateY(-1px); }
+            .pin-error-msg { color: #ef4444; font-size: 12px; font-weight: 600; margin-top: -12px; margin-bottom: 12px; display: none; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    var overlay = document.createElement('div');
+    overlay.className = 'pin-modal-overlay';
+    overlay.innerHTML = `
+        <div class="pin-modal">
+            <div class="pin-modal-title">🔐 Verification Required</div>
+            <div class="pin-modal-text">Enter the 4-digit PIN code to enable editing.</div>
+            <input type="password" class="pin-input" placeholder="••••" maxlength="5">
+            <div class="pin-error-msg" id="pinErrorMsg">Incorrect PIN code!</div>
+            <div class="pin-modal-actions">
+                <button type="button" class="pin-btn pin-btn-cancel" id="pinCancelBtn">Cancel</button>
+                <button type="button" class="pin-btn pin-btn-confirm" id="pinConfirmBtn">Confirm</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.offsetHeight;
+    overlay.classList.add('show');
+
+    var input = overlay.querySelector('.pin-input');
+    input.focus();
+
+    var errorMsg = overlay.querySelector('#pinErrorMsg');
+
+    function cleanup() {
+        overlay.classList.remove('show');
+        setTimeout(function() { overlay.remove(); }, 300);
+    }
+
+    function checkPin() {
+        var val = input.value.trim();
+        if (val === '2424' || val === '24-24') {
+            cleanup();
+            onSuccess();
+        } else {
+            errorMsg.style.display = 'block';
+            input.value = '';
+            input.focus();
+            setTimeout(function() { errorMsg.style.display = 'none'; }, 2000);
+        }
+    }
+
+    overlay.querySelector('#pinCancelBtn').addEventListener('click', cleanup);
+    overlay.querySelector('#pinConfirmBtn').addEventListener('click', checkPin);
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { checkPin(); }
+    });
 }

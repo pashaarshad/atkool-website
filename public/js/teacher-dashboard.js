@@ -400,7 +400,8 @@ function viewStudentDetails(studentId) {
             </div>
             
             <!-- Modal Footer -->
-            <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 24px; display: flex; justify-content: flex-end;">
+            <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="closeStudentDetailsModal(); editTeacherStudent('${s._id}')" style="background: #10b981; color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; cursor: pointer; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">Edit Student</button>
                 <button onclick="closeStudentDetailsModal()" style="background: #4338CA; color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; cursor: pointer; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#3730a3'" onmouseout="this.style.background='#4338CA'">Close</button>
             </div>
         </div>
@@ -1082,7 +1083,10 @@ function removeTeacherStudentPhoto() {
     document.getElementById('teacherStudentPhotoFile').value = '';
 }
 
-async function loadAddStudent() {
+async function loadAddStudent(isEdit) {
+    if (!isEdit) {
+        editingStudentId = null;
+    }
     const c = document.getElementById('mainContent');
     c.innerHTML = '<div class="loader">Loading...</div>';
 
@@ -1274,10 +1278,13 @@ async function submitStudent(e) {
     }
 
     btn.disabled = true;
-    btn.textContent = 'Adding Student...';
+    btn.textContent = editingStudentId ? 'Saving Student...' : 'Adding Student...';
 
-    const result = await fetchAPI('/api/teacher/students', {
-        method: 'POST',
+    const url = editingStudentId ? `/api/teacher/students/${editingStudentId}` : '/api/teacher/students';
+    const method = editingStudentId ? 'PUT' : 'POST';
+
+    const result = await fetchAPI(url, {
+        method: method,
         body: JSON.stringify({
             name,
             className,
@@ -1294,13 +1301,13 @@ async function submitStudent(e) {
         })
     });
 
-    if (result && result._id) {
-        showToast(`Student ${name} added successfully! Credentials sent to email.`);
+    if (result && (result._id || result.student)) {
+        showToast(editingStudentId ? `Student ${name} updated successfully!` : `Student ${name} added successfully! Credentials sent to email.`);
         loadStudents();
     } else {
-        showToast(result?.message || 'Failed to add student', 'error');
+        showToast(result?.message || (editingStudentId ? 'Failed to update student' : 'Failed to add student'), 'error');
         btn.disabled = false;
-        btn.textContent = 'Add Student';
+        btn.textContent = editingStudentId ? 'Save Student' : 'Add Student';
     }
 }
 
@@ -1736,3 +1743,151 @@ async function saveMarks(examId, maxMarks) {
 
 // Load default view
 loadView('dashboard');
+
+let editingStudentId = null;
+
+async function editTeacherStudent(id) {
+    verifyEditPin(async function() {
+        // Set editing flag
+        editingStudentId = id;
+
+        // Find the specific student in currentClassStudents
+        const s = currentClassStudents.find(student => student._id === id);
+        if (!s) {
+            showToast('Student details not found', 'error');
+            return;
+        }
+
+        // Load the Add Student screen
+        await loadAddStudent(true);
+
+        // Change screen text to Edit mode
+        const header = document.querySelector('.card-header');
+        if (header) {
+            header.innerHTML = `
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:24px;height:24px;stroke:#10b981"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                Edit Student Details
+            `;
+        }
+        const addBtn = document.getElementById('addStudentBtn');
+        if (addBtn) addBtn.textContent = 'Save Student';
+
+        // Populate fields
+        const classSelect = document.getElementById('addStudentClassSelect');
+        if (classSelect) {
+            classSelect.value = `${s.className}|${s.section || 'A'}`;
+        }
+        document.getElementById('addStudentName').value = s.name || '';
+        document.getElementById('addStudentEmail').value = s.email || '';
+        document.getElementById('addStudentId').value = s.studentId || s.rollNo || '';
+        document.getElementById('addMobileNo').value = s.mobileNo || '';
+        document.getElementById('addParentName').value = s.parentName || '';
+        document.getElementById('addParentMobile').value = s.parentMobile || '';
+        document.getElementById('addGuardianMobile').value = s.guardianMobile || '';
+        document.getElementById('addVanSelect').value = s.vanId ? (s.vanId._id || s.vanId) : '';
+        document.getElementById('addPickupPoint').value = s.pickupPoint || '';
+        
+        if (s.photo) {
+            document.getElementById('teacherStudentPhotoBase64').value = s.photo;
+            document.getElementById('teacherStudentPhotoPreview').src = s.photo;
+            document.getElementById('teacherStudentPhotoPreviewContainer').style.display = 'flex';
+        }
+    });
+}
+
+function verifyEditPin(onSuccess) {
+    if (!document.getElementById('editPinStyle')) {
+        var style = document.createElement('style');
+        style.id = 'editPinStyle';
+        style.textContent = `
+            .pin-modal-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(15, 23, 42, 0.6);
+                backdrop-filter: blur(8px);
+                z-index: 999999;
+                display: flex; align-items: center; justify-content: center;
+                opacity: 0; transition: opacity 0.3s ease;
+            }
+            .pin-modal-overlay.show { opacity: 1; }
+            .pin-modal {
+                background: rgba(255, 255, 255, 0.95);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 20px;
+                padding: 30px;
+                width: 90%; max-width: 360px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+                text-align: center;
+                transform: scale(0.9); transition: transform 0.3s ease;
+            }
+            .pin-modal-overlay.show .pin-modal { transform: scale(1); }
+            .pin-modal-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
+            .pin-modal-text { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+            .pin-input {
+                width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px;
+                font-size: 20px; font-weight: 700; text-align: center; letter-spacing: 4px;
+                margin-bottom: 20px; outline: none; transition: border-color 0.2s;
+            }
+            .pin-input:focus { border-color: #4338ca; }
+            .pin-modal-actions { display: flex; gap: 10px; }
+            .pin-btn {
+                flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700;
+                cursor: pointer; border: none; transition: all 0.2s;
+            }
+            .pin-btn-cancel { background: #f1f5f9; color: #475569; }
+            .pin-btn-cancel:hover { background: #e2e8f0; }
+            .pin-btn-confirm { background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; }
+            .pin-btn-confirm:hover { transform: translateY(-1px); }
+            .pin-error-msg { color: #ef4444; font-size: 12px; font-weight: 600; margin-top: -12px; margin-bottom: 12px; display: none; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    var overlay = document.createElement('div');
+    overlay.className = 'pin-modal-overlay';
+    overlay.innerHTML = `
+        <div class="pin-modal">
+            <div class="pin-modal-title">🔐 Verification Required</div>
+            <div class="pin-modal-text">Enter the 4-digit PIN code to enable editing.</div>
+            <input type="password" class="pin-input" placeholder="••••" maxlength="5">
+            <div class="pin-error-msg" id="pinErrorMsg">Incorrect PIN code!</div>
+            <div class="pin-modal-actions">
+                <button type="button" class="pin-btn pin-btn-cancel" id="pinCancelBtn">Cancel</button>
+                <button type="button" class="pin-btn pin-btn-confirm" id="pinConfirmBtn">Confirm</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.offsetHeight;
+    overlay.classList.add('show');
+
+    var input = overlay.querySelector('.pin-input');
+    input.focus();
+
+    var errorMsg = overlay.querySelector('#pinErrorMsg');
+
+    function cleanup() {
+        overlay.classList.remove('show');
+        setTimeout(function() { overlay.remove(); }, 300);
+    }
+
+    function checkPin() {
+        var val = input.value.trim();
+        if (val === '2424' || val === '24-24') {
+            cleanup();
+            onSuccess();
+        } else {
+            errorMsg.style.display = 'block';
+            input.value = '';
+            input.focus();
+            setTimeout(function() { errorMsg.style.display = 'none'; }, 2000);
+        }
+    }
+
+    overlay.querySelector('#pinCancelBtn').addEventListener('click', cleanup);
+    overlay.querySelector('#pinConfirmBtn').addEventListener('click', checkPin);
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { checkPin(); }
+    });
+}

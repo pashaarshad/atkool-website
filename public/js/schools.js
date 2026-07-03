@@ -546,6 +546,9 @@ async function viewSchool(id) {
                 school.schoolImages.map(img => '<div class="doc-item"><img src="' + img + '" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 1px solid #eee;" onclick="window.open(this.src)"></div>').join('') : 
                 '<p style="grid-column: span 3; color: #999; font-size: 14px;">No school images uploaded</p>') +
             '</div>' +
+            '</div>' +
+            '<div style="text-align: center; margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px;">' +
+            '<button type="button" onclick="closeViewModal(); editSchool(\'' + school._id + '\')" style="padding: 10px 24px; font-weight: 700; background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform=\'scale(1.03)\'" onmouseout="this.style.transform=\'\'">Edit School Information</button>' +
             '</div>';
 
 
@@ -578,21 +581,23 @@ function toggleViewPassword() {
 }
 
 async function editSchool(id) {
-    var token = localStorage.getItem('adminToken');
+    verifyEditPin(async function() {
+        var token = localStorage.getItem('adminToken');
 
-    try {
-        var response = await fetch('/api/schools/' + id, {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        });
+        try {
+            var response = await fetch('/api/schools/' + id, {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
 
-        var school = await response.json();
-        openModal(school);
-    } catch (error) {
-        console.error('Edit school error:', error);
-        showToast('Error loading school for editing', 'error');
-    }
+            var school = await response.json();
+            openModal(school);
+        } catch (error) {
+            console.error('Edit school error:', error);
+            showToast('Error loading school for editing', 'error');
+        }
+    });
 }
 
 async function deleteSchool(id) {
@@ -776,5 +781,102 @@ async function loginAsSchool(schoolId, schoolName) {
         console.error('Login as school error:', error);
         showToast('Error logging in as school', 'error');
     }
+}
+
+function verifyEditPin(onSuccess) {
+    if (!document.getElementById('editPinStyle')) {
+        var style = document.createElement('style');
+        style.id = 'editPinStyle';
+        style.textContent = `
+            .pin-modal-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(15, 23, 42, 0.6);
+                backdrop-filter: blur(8px);
+                z-index: 999999;
+                display: flex; align-items: center; justify-content: center;
+                opacity: 0; transition: opacity 0.3s ease;
+            }
+            .pin-modal-overlay.show { opacity: 1; }
+            .pin-modal {
+                background: rgba(255, 255, 255, 0.95);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 20px;
+                padding: 30px;
+                width: 90%; max-width: 360px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+                text-align: center;
+                transform: scale(0.9); transition: transform 0.3s ease;
+            }
+            .pin-modal-overlay.show .pin-modal { transform: scale(1); }
+            .pin-modal-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
+            .pin-modal-text { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+            .pin-input {
+                width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px;
+                font-size: 20px; font-weight: 700; text-align: center; letter-spacing: 4px;
+                margin-bottom: 20px; outline: none; transition: border-color 0.2s;
+            }
+            .pin-input:focus { border-color: #4338ca; }
+            .pin-modal-actions { display: flex; gap: 10px; }
+            .pin-btn {
+                flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700;
+                cursor: pointer; border: none; transition: all 0.2s;
+            }
+            .pin-btn-cancel { background: #f1f5f9; color: #475569; }
+            .pin-btn-cancel:hover { background: #e2e8f0; }
+            .pin-btn-confirm { background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; }
+            .pin-btn-confirm:hover { transform: translateY(-1px); }
+            .pin-error-msg { color: #ef4444; font-size: 12px; font-weight: 600; margin-top: -12px; margin-bottom: 12px; display: none; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    var overlay = document.createElement('div');
+    overlay.className = 'pin-modal-overlay';
+    overlay.innerHTML = `
+        <div class="pin-modal">
+            <div class="pin-modal-title">🔐 Verification Required</div>
+            <div class="pin-modal-text">Enter the 4-digit PIN code to enable editing.</div>
+            <input type="password" class="pin-input" placeholder="••••" maxlength="5">
+            <div class="pin-error-msg" id="pinErrorMsg">Incorrect PIN code!</div>
+            <div class="pin-modal-actions">
+                <button type="button" class="pin-btn pin-btn-cancel" id="pinCancelBtn">Cancel</button>
+                <button type="button" class="pin-btn pin-btn-confirm" id="pinConfirmBtn">Confirm</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.offsetHeight;
+    overlay.classList.add('show');
+
+    var input = overlay.querySelector('.pin-input');
+    input.focus();
+
+    var errorMsg = overlay.querySelector('#pinErrorMsg');
+
+    function cleanup() {
+        overlay.classList.remove('show');
+        setTimeout(function() { overlay.remove(); }, 300);
+    }
+
+    function checkPin() {
+        var val = input.value.trim();
+        if (val === '2424' || val === '24-24') {
+            cleanup();
+            onSuccess();
+        } else {
+            errorMsg.style.display = 'block';
+            input.value = '';
+            input.focus();
+            setTimeout(function() { errorMsg.style.display = 'none'; }, 2000);
+        }
+    }
+
+    overlay.querySelector('#pinCancelBtn').addEventListener('click', cleanup);
+    overlay.querySelector('#pinConfirmBtn').addEventListener('click', checkPin);
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { checkPin(); }
+    });
 }
 
