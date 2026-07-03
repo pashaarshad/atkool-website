@@ -42,6 +42,7 @@ function parentAuth(req, res, next) {
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid token' });
+    }
 }
 
 function schoolAuth(req, res, next) {
