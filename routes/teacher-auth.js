@@ -67,21 +67,7 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Device lock check
-        if (teacher.deviceId && deviceId && teacher.deviceId !== deviceId) {
-            return res.status(403).json({
-                message: 'This account is already logged in on another device. Please contact admin to reset device.',
-                deviceLocked: true
-            });
-        }
-
-        // Save device info if provided
-        if (deviceId) {
-            teacher.deviceId = deviceId;
-            teacher.deviceName = deviceName || 'Unknown Device';
-            teacher.deviceLockedAt = new Date();
-            await teacher.save();
-        }
+        // Device lock removed — allow login from any device
 
         // Check for active subscription
         const today = new Date();
