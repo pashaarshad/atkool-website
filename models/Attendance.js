@@ -31,6 +31,10 @@ const attendanceSchema = new mongoose.Schema({
     section: {
         type: String
     },
+    academicYear: {
+        type: String,
+        default: '2026-2027'
+    },
     createdAt: {
         type: Date,
         default: Date.now

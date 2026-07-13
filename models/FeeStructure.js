@@ -32,6 +32,10 @@ const feeStructureSchema = new mongoose.Schema({
         enum: ['All', 'Class', 'Van Users', 'Specific Students'],
         default: 'Class'
     },
+    academicYear: {
+        type: String,
+        default: '2026-2027'
+    },
     createdAt: {
         type: Date,
         default: Date.now

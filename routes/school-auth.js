@@ -127,6 +127,7 @@ router.get('/me', async (req, res) => {
             // Hide subscription amount details
             amount: null,
             createdAt: school.createdAt,
+            currentAcademicYear: school.currentAcademicYear || '2026-2027',
             hasActivePlan: hasActivePlan,
             subscription: subscriptionInfo,
             role: isPrincipal ? 'Principal' : 'School Admin'

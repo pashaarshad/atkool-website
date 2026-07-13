@@ -41,6 +41,10 @@ const examSchema = new mongoose.Schema({
         enum: ['Scheduled', 'Ongoing', 'Completed', 'Cancelled'],
         default: 'Scheduled'
     },
+    academicYear: {
+        type: String,
+        default: '2026-2027'
+    },
     createdAt: {
         type: Date,
         default: Date.now

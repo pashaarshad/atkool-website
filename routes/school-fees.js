@@ -1,9 +1,10 @@
 const express = require('express');
-const router = express.Router();
+const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const FeeStructure = require('../models/FeeStructure');
 const FeePayment = require('../models/FeePayment');
 const Student = require('../models/Student');
+const School = require('../models/School');
 
 // School Auth Middleware
 function schoolAuth(req, res, next) {
@@ -33,7 +34,9 @@ function schoolAuth(req, res, next) {
 // Get all fee structures configured by school
 router.get('/structures', schoolAuth, async (req, res) => {
     try {
-        const structures = await FeeStructure.find({ schoolId: req.schoolId })
+        const school = await School.findById(req.schoolId);
+        const academicYear = req.query.academicYear || (school ? school.currentAcademicYear : '2026-2027');
+        const structures = await FeeStructure.find({ schoolId: req.schoolId, academicYear })
             .sort({ createdAt: -1 });
         res.json(structures);
     } catch (error) {
@@ -51,6 +54,9 @@ router.post('/structures', schoolAuth, async (req, res) => {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
+        const school = await School.findById(req.schoolId);
+        const academicYear = req.body.academicYear || (school ? school.currentAcademicYear : '2026-2027');
+
         const newStructure = await FeeStructure.create({
             schoolId: req.schoolId,
             feeName,
@@ -58,7 +64,8 @@ router.post('/structures', schoolAuth, async (req, res) => {
             className,
             dueDate: new Date(dueDate),
             feeType: feeType || 'School Fee',
-            allocationType: allocationType || 'Class'
+            allocationType: allocationType || 'Class',
+            academicYear
         });
 
         // Query students that this fee structure applies to
@@ -91,7 +98,8 @@ router.post('/structures', schoolAuth, async (req, res) => {
                 totalAmount: parseFloat(amount),
                 amountPaid: 0,
                 status: 'Unpaid',
-                installments: []
+                installments: [],
+                academicYear
             });
         });
 
@@ -126,9 +134,12 @@ router.delete('/structures/:id', schoolAuth, async (req, res) => {
 // Get all student fee ledgers / payments
 router.get('/payments', schoolAuth, async (req, res) => {
     try {
-        const { status, className, search } = req.query;
+        const { status, className, search, academicYear } = req.query;
 
-        let matchQuery = { schoolId: req.schoolId };
+        const school = await School.findById(req.schoolId);
+        const activeYear = academicYear || (school ? school.currentAcademicYear : '2026-2027');
+
+        let matchQuery = { schoolId: req.schoolId, academicYear: activeYear };
         if (status) {
             matchQuery.status = status;
         }

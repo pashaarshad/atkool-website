@@ -77,6 +77,13 @@ const studentSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    academicYear: {
+        type: String,
+        default: '2026-2027'
+    },
+    previousClassName: {
+        type: String
+    },
     createdAt: {
         type: Date,
         default: Date.now

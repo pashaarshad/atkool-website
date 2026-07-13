@@ -81,6 +81,10 @@ const feePaymentSchema = new mongoose.Schema({
         enum: ['Paid', 'Unpaid', 'Partial'],
         default: 'Unpaid'
     },
+    academicYear: {
+        type: String,
+        default: '2026-2027'
+    },
     createdAt: {
         type: Date,
         default: Date.now

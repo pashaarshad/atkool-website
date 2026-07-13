@@ -84,6 +84,10 @@ const schoolSchema = new mongoose.Schema({
         expiresAt: { type: Date }
     },
 
+    currentAcademicYear: {
+        type: String,
+        default: '2026-2027'
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -37,6 +37,10 @@ const resultSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    academicYear: {
+        type: String,
+        default: '2026-2027'
+    },
     createdAt: {
         type: Date,
         default: Date.now

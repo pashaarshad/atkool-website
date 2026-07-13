@@ -610,8 +610,9 @@
         async function loadStructures() {
             var token = localStorage.getItem('schoolToken');
             var tbody = document.getElementById('structuresTableBody');
+            var activeYear = localStorage.getItem('academicYear') || '2026-2027';
             try {
-                var response = await fetch('/api/school-fees/structures', { headers: { 'Authorization': 'Bearer ' + token } });
+                var response = await fetch('/api/school-fees/structures?academicYear=' + activeYear, { headers: { 'Authorization': 'Bearer ' + token } });
                 var data = await response.json();
                 if (data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">No fee structures configured yet.</td></tr>';
@@ -660,6 +661,7 @@
             var allocationType = document.getElementById('feeAllocationType').value;
             var specificStudentIds = document.getElementById('specificStudentIds').value;
 
+            var activeYear = localStorage.getItem('academicYear') || '2026-2027';
             try {
                 var response = await fetch('/api/school-fees/structures', {
                     method: 'POST',
@@ -671,7 +673,8 @@
                         dueDate: dueDate,
                         feeType: feeType,
                         allocationType: allocationType,
-                        specificStudentIds: specificStudentIds
+                        specificStudentIds: specificStudentIds,
+                        academicYear: activeYear
                     })
                 });
                 var data = await response.json();
@@ -712,10 +715,12 @@
             var search = document.getElementById('searchStudent').value;
             var className = document.getElementById('filterClass').value;
             var status = document.getElementById('filterStatus').value;
+            var activeYear = localStorage.getItem('academicYear') || '2026-2027';
             var params = new URLSearchParams();
             if (search) params.append('search', search);
             if (className) params.append('className', className);
             if (status) params.append('status', status);
+            params.append('academicYear', activeYear);
 
             try {
                 var response = await fetch('/api/school-fees/payments?' + params.toString(), { headers: { 'Authorization': 'Bearer ' + token } });

@@ -101,6 +101,7 @@ app.use('/api/homework', require('./routes/homework'));
 app.use('/api/results', require('./routes/results'));
 app.use('/api/timetable', require('./routes/timetable'));
 app.use('/api/email-verification', require('./routes/email-verification'));
+app.use('/api/academic-year', require('./routes/academic-year'));
 
 app.get('/support', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'support.html'));

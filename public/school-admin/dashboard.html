@@ -86,6 +86,44 @@
         .logo-edit-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(67,56,202,.7); border-radius:12px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .3s; }
         .school-logo:hover .logo-edit-overlay { opacity:1; }
         .logo-edit-overlay svg { width:20px; height:20px; stroke:#fff; }
+        /* Academic Year Selector */
+        .academic-year-wrapper { position:relative; }
+        .academic-year-btn { display:flex; align-items:center; gap:8px; padding:8px 18px; background:linear-gradient(135deg,#4338CA,#6366f1); border:none; border-radius:12px; cursor:pointer; transition:all .3s; box-shadow:0 4px 15px rgba(67,56,202,.3); }
+        .academic-year-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(67,56,202,.4); }
+        .academic-year-btn svg { width:18px; height:18px; stroke:#fff; flex-shrink:0; }
+        .academic-year-btn .ay-label { font-size:10px; color:rgba(255,255,255,.7); font-weight:600; text-transform:uppercase; letter-spacing:.5px; line-height:1; }
+        .academic-year-btn .ay-value { font-size:14px; color:#fff; font-weight:800; line-height:1; }
+        .academic-year-btn .ay-chevron { width:14px; height:14px; stroke:#c7d2fe; transition:transform .2s; }
+        .academic-year-btn.open .ay-chevron { transform:rotate(180deg); }
+        .ay-dropdown { display:none; position:absolute; top:50px; left:0; background:#fff; border:1px solid #e2e8f0; border-radius:14px; min-width:200px; max-height:320px; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,.15); z-index:1000; }
+        .ay-dropdown.show { display:block; }
+        .ay-dropdown-header { padding:12px 16px; background:linear-gradient(135deg,#0F172A,#1e293b); color:#fff; font-weight:700; font-size:13px; border-radius:14px 14px 0 0; }
+        .ay-dropdown-item { padding:10px 16px; cursor:pointer; font-size:13px; font-weight:600; color:#334155; border-bottom:1px solid #f1f5f9; transition:all .2s; display:flex; align-items:center; justify-content:space-between; }
+        .ay-dropdown-item:last-child { border-bottom:none; }
+        .ay-dropdown-item:hover { background:#eef2ff; color:#4338CA; }
+        .ay-dropdown-item.active { background:#eef2ff; color:#4338CA; font-weight:800; }
+        .ay-dropdown-item.active::after { content:'\2713'; color:#4338CA; font-weight:900; }
+        /* Promotion Modal */
+        .promo-modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,.6); backdrop-filter:blur(4px); z-index:3000; align-items:center; justify-content:center; }
+        .promo-modal-overlay.show { display:flex; }
+        .promo-modal { background:#fff; border-radius:18px; padding:32px; max-width:520px; width:90%; box-shadow:0 25px 60px rgba(0,0,0,.2); animation:modalSlideIn .3s ease; }
+        .promo-modal-icon { width:64px; height:64px; margin:0 auto 16px; background:linear-gradient(135deg,#4338CA,#7C3AED); border-radius:50%; display:flex; align-items:center; justify-content:center; }
+        .promo-modal-icon svg { width:32px; height:32px; stroke:#fff; }
+        .promo-modal h2 { text-align:center; font-size:22px; font-weight:800; color:#0F172A; margin-bottom:8px; }
+        .promo-modal p { text-align:center; font-size:14px; color:#64748b; line-height:1.6; margin-bottom:20px; }
+        .promo-changes { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:20px; }
+        .promo-change-item { display:flex; align-items:center; gap:10px; padding:8px 0; font-size:13px; color:#334155; font-weight:600; }
+        .promo-change-item svg { width:18px; height:18px; flex-shrink:0; }
+        .promo-change-item .green { stroke:#059669; }
+        .promo-change-item .orange { stroke:#d97706; }
+        .promo-change-item .red { stroke:#dc2626; }
+        .promo-modal-actions { display:flex; gap:12px; justify-content:flex-end; }
+        .promo-modal-actions button { padding:12px 24px; border-radius:12px; font-weight:700; font-size:14px; border:none; cursor:pointer; transition:all .2s; }
+        .promo-btn-cancel { background:#f1f5f9; color:#334155; }
+        .promo-btn-cancel:hover { background:#e2e8f0; }
+        .promo-btn-confirm { background:linear-gradient(135deg,#4338CA,#7C3AED); color:#fff; box-shadow:0 4px 15px rgba(67,56,202,.3); }
+        .promo-btn-confirm:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(67,56,202,.4); }
+        .promo-btn-confirm:disabled { opacity:.5; cursor:not-allowed; transform:none; }
         .logo-modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,.6); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center; }
         .logo-modal-overlay.show { display:flex; }
         .logo-modal { background:#fff; border-radius:18px; padding:32px; max-width:460px; width:90%; box-shadow:0 25px 60px rgba(0,0,0,.2); animation:modalSlideIn .3s ease; }
@@ -188,6 +226,21 @@
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
                 </div>
+            </div>
+        </div>
+        <!-- Academic Year Selector -->
+        <div class="academic-year-wrapper">
+            <div class="academic-year-btn" id="ayBtn" onclick="toggleAYDropdown(event)">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <div>
+                    <div class="ay-label">Academic Year</div>
+                    <div class="ay-value" id="ayValue">2026-2027</div>
+                </div>
+                <svg class="ay-chevron" viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+            <div class="ay-dropdown" id="ayDropdown">
+                <div class="ay-dropdown-header">&#128197; Select Academic Year</div>
+                <div id="ayList"></div>
             </div>
         </div>
         <div class="school-name" id="schoolName">Loading...</div>
@@ -729,6 +782,198 @@
             if (e.target === this) {
                 closeLogoModal();
             }
+        });
+    </script>
+
+    <!-- Promotion Confirmation Modal -->
+    <div class="promo-modal-overlay" id="promoModalOverlay">
+        <div class="promo-modal">
+            <div class="promo-modal-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <h2 id="promoTitle">Promote Students</h2>
+            <p id="promoDesc">This will promote all students to the next class for the new academic year.</p>
+            <div class="promo-changes">
+                <div class="promo-change-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" class="green"><polyline points="20 6 9 17 4 12"></polyline></svg> Students promoted: Class 1→2, 2→3, etc.</div>
+                <div class="promo-change-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" class="green"><polyline points="20 6 9 17 4 12"></polyline></svg> Teachers & Staff remain unchanged</div>
+                <div class="promo-change-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" class="orange"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Fees reset to zero for the new year</div>
+                <div class="promo-change-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" class="orange"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Attendance starts fresh</div>
+                <div class="promo-change-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" class="red"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Class 12 students will be Graduated</div>
+            </div>
+            <div class="promo-modal-actions">
+                <button class="promo-btn-cancel" onclick="closePromoModal()">Cancel</button>
+                <button class="promo-btn-confirm" id="promoConfirmBtn" onclick="confirmPromotion()">Yes, Promote Students</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Academic Year Logic
+        var currentAcademicYear = '2026-2027';
+        var pendingYear = null;
+
+        function generateAcademicYears() {
+            var years = [];
+            for (var i = 0; i < 50; i++) {
+                var startYear = 2026 + i;
+                years.push(startYear + '-' + (startYear + 1));
+            }
+            return years;
+        }
+
+        function renderAYDropdown() {
+            var years = generateAcademicYears();
+            var html = '';
+            years.forEach(function(year) {
+                var isActive = year === currentAcademicYear ? ' active' : '';
+                html += '<div class="ay-dropdown-item' + isActive + '" onclick="selectAcademicYear(\'' + year + '\')">'
+                    + year + '</div>';
+            });
+            document.getElementById('ayList').innerHTML = html;
+        }
+
+        function toggleAYDropdown(e) {
+            e.stopPropagation();
+            var dropdown = document.getElementById('ayDropdown');
+            var btn = document.getElementById('ayBtn');
+            dropdown.classList.toggle('show');
+            btn.classList.toggle('open');
+            // Close other dropdowns
+            document.getElementById('profileDropdown').classList.remove('show');
+            document.getElementById('notificationDropdown').classList.remove('show');
+        }
+
+        function selectAcademicYear(year) {
+            if (year === currentAcademicYear) {
+                document.getElementById('ayDropdown').classList.remove('show');
+                document.getElementById('ayBtn').classList.remove('open');
+                return;
+            }
+
+            // Check if the new year is AHEAD of current (needs promotion)
+            var currentStart = parseInt(currentAcademicYear.split('-')[0]);
+            var newStart = parseInt(year.split('-')[0]);
+
+            if (newStart > currentStart) {
+                // Forward year change — show promotion modal
+                pendingYear = year;
+                document.getElementById('promoTitle').textContent = 'Promote to ' + year;
+                document.getElementById('promoDesc').textContent = 'Transitioning from ' + currentAcademicYear + ' to ' + year + '. This will promote all students to the next class.';
+                document.getElementById('promoModalOverlay').classList.add('show');
+            } else {
+                // Going back to view old year — just switch view (no promotion)
+                switchAcademicYearView(year);
+            }
+
+            document.getElementById('ayDropdown').classList.remove('show');
+            document.getElementById('ayBtn').classList.remove('open');
+        }
+
+        async function switchAcademicYearView(year) {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/academic-year', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ academicYear: year })
+                });
+                if (response.ok) {
+                    currentAcademicYear = year;
+                    localStorage.setItem('academicYear', year);
+                    document.getElementById('ayValue').textContent = year;
+                    renderAYDropdown();
+                    showToast('Academic Year changed to ' + year, 'success');
+                    // Reload data for the new year
+                    loadSchoolData();
+                }
+            } catch (error) {
+                console.error('Switch year error:', error);
+                showToast('Failed to switch academic year', 'error');
+            }
+        }
+
+        function closePromoModal() {
+            document.getElementById('promoModalOverlay').classList.remove('show');
+            pendingYear = null;
+        }
+
+        async function confirmPromotion() {
+            if (!pendingYear) return;
+            var btn = document.getElementById('promoConfirmBtn');
+            btn.disabled = true;
+            btn.textContent = 'Promoting...';
+
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/academic-year/promote', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fromYear: currentAcademicYear,
+                        toYear: pendingYear
+                    })
+                });
+
+                var data = await response.json();
+                if (response.ok) {
+                    currentAcademicYear = pendingYear;
+                    localStorage.setItem('academicYear', pendingYear);
+                    document.getElementById('ayValue').textContent = pendingYear;
+                    renderAYDropdown();
+                    closePromoModal();
+                    showToast('Promotion complete! ' + data.promoted + ' students promoted, ' + data.graduated + ' graduated.', 'success');
+                    loadSchoolData();
+                } else {
+                    showToast(data.message || 'Promotion failed', 'error');
+                }
+            } catch (error) {
+                console.error('Promotion error:', error);
+                showToast('Server error during promotion', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Yes, Promote Students';
+            }
+        }
+
+        // Load academic year on page load
+        async function loadAcademicYear() {
+            var token = localStorage.getItem('schoolToken');
+            try {
+                var response = await fetch('/api/academic-year', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    var data = await response.json();
+                    currentAcademicYear = data.academicYear || '2026-2027';
+                    localStorage.setItem('academicYear', currentAcademicYear);
+                    document.getElementById('ayValue').textContent = currentAcademicYear;
+                }
+            } catch (error) {
+                console.log('Load academic year error:', error);
+            }
+            renderAYDropdown();
+        }
+
+        // Close AY dropdown on outside click
+        document.addEventListener('click', function() {
+            document.getElementById('ayDropdown').classList.remove('show');
+            document.getElementById('ayBtn').classList.remove('open');
+        });
+
+        // Close promo modal on outside click
+        document.getElementById('promoModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closePromoModal();
+        });
+
+        // Load AY on page ready
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAcademicYear();
         });
     </script>
 </body>

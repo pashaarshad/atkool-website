@@ -37,6 +37,10 @@ const homeworkSchema = new mongoose.Schema({
         required: true
     },
     attachments: [String], // Array of base64 strings or URLs
+    academicYear: {
+        type: String,
+        default: '2026-2027'
+    },
     createdAt: {
         type: Date,
         default: Date.now
