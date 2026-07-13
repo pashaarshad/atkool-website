@@ -81,9 +81,12 @@ const studentSchema = new mongoose.Schema({
         type: String,
         default: '2026-2027'
     },
-    previousClassName: {
-        type: String
-    },
+    classHistory: [{
+        academicYear: { type: String, required: true },
+        className: { type: String, required: true },
+        section: { type: String, default: 'A' },
+        status: { type: String, default: 'Active' }
+    }],
     createdAt: {
         type: Date,
         default: Date.now

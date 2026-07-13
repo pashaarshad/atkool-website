@@ -82,6 +82,20 @@ router.post('/promote', schoolAuth, async (req, res) => {
             const lowerClass = currentClass.toLowerCase().trim();
             let newClass = currentClass;
 
+            // Pre-promotion details to push into history
+            const historyEntry = {
+                academicYear: student.academicYear || fromYear,
+                className: student.className,
+                section: student.section || 'A',
+                status: student.status || 'Active'
+            };
+
+            // Initialize classHistory if undefined
+            if (!student.classHistory) {
+                student.classHistory = [];
+            }
+            student.classHistory.push(historyEntry);
+
             // Check if it's a named class (Nursery, LKG, UKG, etc.)
             if (promotionMap[lowerClass]) {
                 newClass = promotionMap[lowerClass];
@@ -91,7 +105,6 @@ router.post('/promote', schoolAuth, async (req, res) => {
                 if (!isNaN(classNum)) {
                     if (classNum >= 12) {
                         // Highest class - graduate the student
-                        student.previousClassName = currentClass;
                         student.status = 'Graduated';
                         student.academicYear = toYear;
                         await student.save();
@@ -103,7 +116,6 @@ router.post('/promote', schoolAuth, async (req, res) => {
                 }
             }
 
-            student.previousClassName = currentClass;
             student.className = newClass;
             student.academicYear = toYear;
             await student.save();

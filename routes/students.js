@@ -32,55 +32,82 @@ function schoolAuth(req, res, next) {
 
 router.get('/classes', schoolAuth, async (req, res) => {
     try {
-        const { teacherName, className } = req.query;
+        const { teacherName, className, academicYear } = req.query;
 
-        const schoolObjectId = new mongoose.Types.ObjectId(req.schoolId);
-        let matchQuery = { schoolId: schoolObjectId };
+        const school = await School.findById(req.schoolId);
+        const activeYear = academicYear || (school ? school.currentAcademicYear : '2026-2027');
 
-        const classes = await Student.aggregate([
-            { $match: matchQuery },
-            {
-                $group: {
-                    _id: { className: '$className', section: '$section', teacherId: '$teacherId' },
-                    studentCount: { $sum: 1 }
+        // Fetch all students for this school
+        const students = await Student.find({ schoolId: req.schoolId })
+            .populate('teacherId', 'name');
+
+        // Group in memory
+        const groups = {};
+
+        students.forEach(student => {
+            let sClass = student.className;
+            let sSection = student.section || 'A';
+            let sStatus = student.status || 'Active';
+            let sTeacherId = student.teacherId ? student.teacherId._id : null;
+            let sTeacherName = student.teacherId ? student.teacherId.name : 'Not Assigned';
+            
+            // Check if they have history for this year
+            const history = student.classHistory.find(h => h.academicYear === activeYear);
+            let existsInYear = false;
+
+            if (history) {
+                sClass = history.className;
+                sSection = history.section;
+                sStatus = history.status;
+                existsInYear = true;
+            } else if (student.academicYear === activeYear) {
+                existsInYear = true;
+            }
+
+            // Only count active classes
+            if (existsInYear && sStatus === 'Active') {
+                const key = `${sClass}-${sSection}-${sTeacherId || 'unassigned'}`;
+                if (!groups[key]) {
+                    groups[key] = {
+                        className: sClass,
+                        section: sSection,
+                        teacherId: sTeacherId,
+                        teacherName: sTeacherName,
+                        studentCount: 0
+                    };
                 }
-            },
-            {
-                $lookup: {
-                    from: 'teachers',
-                    localField: '_id.teacherId',
-                    foreignField: '_id',
-                    as: 'teacher'
-                }
-            },
-            { $unwind: { path: '$teacher', preserveNullAndEmptyArrays: true } },
-            {
-                $project: {
-                    className: '$_id.className',
-                    section: '$_id.section',
-                    teacherId: '$_id.teacherId',
-                    teacherName: { $ifNull: ['$teacher.name', 'Not Assigned'] },
-                    studentCount: 1
-                }
-            },
-            { $sort: { className: 1, section: 1 } }
-        ]);
+                groups[key].studentCount++;
+            }
+        });
 
-        let filteredClasses = classes;
+        let result = Object.values(groups);
 
+        // Filter
         if (teacherName) {
-            filteredClasses = filteredClasses.filter(c =>
+            result = result.filter(c =>
                 c.teacherName.toLowerCase().includes(teacherName.toLowerCase())
             );
         }
 
         if (className) {
-            filteredClasses = filteredClasses.filter(c =>
+            result = result.filter(c =>
                 c.className.toLowerCase().includes(className.toLowerCase())
             );
         }
 
-        res.json(filteredClasses);
+        // Sort: numeric classes first, then alphabetical sections
+        result.sort((a, b) => {
+            const classA = parseInt(a.className);
+            const classB = parseInt(b.className);
+            if (!isNaN(classA) && !isNaN(classB)) {
+                if (classA !== classB) return classA - classB;
+            } else {
+                if (a.className !== b.className) return a.className.localeCompare(b.className);
+            }
+            return a.section.localeCompare(b.section);
+        });
+
+        res.json(result);
     } catch (error) {
         console.error('Get classes error:', error);
         res.status(500).json({ message: 'Server error' });
@@ -89,17 +116,60 @@ router.get('/classes', schoolAuth, async (req, res) => {
 
 router.get('/', schoolAuth, async (req, res) => {
     try {
-        const { className, section, name } = req.query;
+        const { className, section, name, academicYear } = req.query;
+
+        const school = await School.findById(req.schoolId);
+        const activeYear = academicYear || (school ? school.currentAcademicYear : '2026-2027');
+
         let query = { schoolId: req.schoolId };
 
-        if (className) query.className = className;
-        if (section) query.section = section;
+        if (className || section) {
+            let matches = [];
+
+            // Case 1: Student has history matching the filters
+            let historyQuery = { academicYear: activeYear };
+            if (className) historyQuery.className = className;
+            if (section) historyQuery.section = section;
+            matches.push({ classHistory: { $elemMatch: historyQuery } });
+
+            // Case 2: Student has no history, but current matches filters
+            let currentQuery = { 
+                academicYear: activeYear,
+                classHistory: { $not: { $elemMatch: { academicYear: activeYear } } }
+            };
+            if (className) currentQuery.className = className;
+            if (section) currentQuery.section = section;
+            matches.push(currentQuery);
+
+            query.$or = matches;
+        } else {
+            // No filters: find all students who belong to this academic year
+            query.$or = [
+                { academicYear: activeYear },
+                { 'classHistory.academicYear': activeYear }
+            ];
+        }
+
         if (name) query.name = { $regex: name, $options: 'i' };
 
         const students = await Student.find(query)
             .populate('teacherId', 'name')
             .sort({ rollNo: 1, name: 1 });
-        res.json(students);
+
+        // Override with historical class/section/status if necessary
+        const result = students.map(student => {
+            const history = student.classHistory.find(h => h.academicYear === activeYear);
+            if (history) {
+                const obj = student.toObject();
+                obj.className = history.className;
+                obj.section = history.section;
+                obj.status = history.status;
+                return obj;
+            }
+            return student;
+        });
+
+        res.json(result);
     } catch (error) {
         console.error('Get students error:', error);
         res.status(500).json({ message: 'Server error' });

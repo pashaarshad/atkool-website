@@ -106,7 +106,14 @@ router.get('/me', async (req, res) => {
         }
 
         // Get real counts from DB
-        const studentCount = await Student.countDocuments({ schoolId: school._id, status: 'Active' });
+        const activeYear = school.currentAcademicYear || '2026-2027';
+        const studentCount = await Student.countDocuments({
+            schoolId: school._id,
+            $or: [
+                { academicYear: activeYear, status: 'Active' },
+                { classHistory: { $elemMatch: { academicYear: activeYear, status: 'Active' } } }
+            ]
+        });
         const teacherCount = await Teacher.countDocuments({ schoolId: school._id, status: 'Active' });
 
         res.json({
