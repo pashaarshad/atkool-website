@@ -942,6 +942,7 @@
             select.innerHTML = '<option value="">Loading teachers...</option>';
             document.getElementById('addClassSelect').innerHTML = '<option value="">-- Select Class --</option>';
             document.getElementById('addSectionSelect').innerHTML = '<option value="">-- Select Section --</option>';
+            onTeacherChange();
             document.getElementById('addStudentName').value = '';
             document.getElementById('addStudentEmail').value = '';
             document.getElementById('addStudentId').value = '';
@@ -986,24 +987,22 @@
         }
 
         function onTeacherChange() {
-            var teacherId = document.getElementById('addTeacherSelect').value;
             var classSelect = document.getElementById('addClassSelect');
             var sectionSelect = document.getElementById('addSectionSelect');
             classSelect.innerHTML = '<option value="">-- Select Class --</option>';
             sectionSelect.innerHTML = '<option value="">-- Select Section --</option>';
-            if (!teacherId) return;
-            var teacher = allTeachers.find(function(t) { return t._id === teacherId; });
-            if (!teacher) return;
-            var assignments = teacher.classAssignments || [];
-            if (assignments.length > 0) {
-                var classes = [...new Set(assignments.map(function(a) { return a.className; }))];
-                classSelect.innerHTML = '<option value="">-- Select Class --</option>' +
-                    classes.map(function(c) { return '<option value="' + c + '">' + c + '</option>'; }).join('');
-            } else {
-                classSelect.innerHTML = '<option value="">-- Select Class --</option>' +
-                    Array.from({length:12}, function(_,i){ return i+1; })
-                        .map(function(n){ return '<option value="'+n+'">Class '+n+'</option>'; }).join('');
+            
+            // Always allow selection of all classes (Nursery, LKG, UKG, and 1 to 12)
+            var allClasses = ['Nursery', 'LKG', 'UKG'];
+            for (var i = 1; i <= 12; i++) {
+                allClasses.push(String(i));
             }
+            
+            classSelect.innerHTML = '<option value="">-- Select Class --</option>' +
+                allClasses.map(function(c) {
+                    var display = isNaN(c) ? c : 'Class ' + c;
+                    return '<option value="' + c + '">' + display + '</option>';
+                }).join('');
         }
 
         function onClassChange() {
@@ -1014,9 +1013,11 @@
             if (!className) return;
             var teacher = allTeachers.find(function(t) { return t._id === teacherId; });
             var assignments = teacher ? (teacher.classAssignments || []) : [];
-            var sections = assignments.length > 0
-                ? assignments.filter(function(a){ return a.className === className; }).map(function(a){ return a.section; })
-                : ['A','B','C','D'];
+            
+            // If the teacher has assignments for this class, show them. Otherwise, default to A, B, C, D.
+            var teacherSections = assignments.filter(function(a){ return a.className === className; }).map(function(a){ return a.section; });
+            var sections = teacherSections.length > 0 ? teacherSections : ['A','B','C','D'];
+            
             sectionSelect.innerHTML = '<option value="">-- Select Section --</option>' +
                 sections.map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join('');
         }
