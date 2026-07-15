@@ -21,7 +21,12 @@ router.post('/login', async (req, res) => {
 
         let query = {};
         if (email) {
-            query.email = { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') };
+            query = {
+                $or: [
+                    { email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') } },
+                    { mobileNo: email }
+                ]
+            };
         } else if (mobileNo) {
             query.mobileNo = mobileNo;
         }
@@ -29,7 +34,7 @@ router.post('/login', async (req, res) => {
         const teacher = await Teacher.findOne(query);
 
         if (!teacher) {
-            return res.status(401).json({ message: email ? 'No teacher found with this email' : 'No teacher found with this phone number' });
+            return res.status(401).json({ message: 'No teacher found with this email or phone number' });
         }
 
         if (!teacher.password || teacher.password === '') {
