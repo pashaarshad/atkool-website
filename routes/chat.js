@@ -431,4 +431,222 @@ router.post('/system/send', schoolAuth, async (req, res) => {
     }
 });
 
+// ============ UNIVERSAL CHAT ENDPOINTS ============
+
+function universalAuth(req, res, next) {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_admin_secret_key_2024');
+        req.userId = decoded.type === 'teacher' ? decoded.teacherId : decoded.studentId;
+        req.userType = decoded.type; // 'teacher' or 'parent'
+        req.schoolId = decoded.schoolId;
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+}
+
+// Get all possible contacts in the school
+router.get('/universal/contacts', universalAuth, async (req, res) => {
+    try {
+        let teachers = await Teacher.find({
+            schoolId: req.schoolId,
+            status: { $ne: 'Inactive' }
+        }).select('name email mobileNo subject photo className');
+
+        let students = await Student.find({
+            schoolId: req.schoolId,
+            approvalStatus: 'Approved'
+        }).select('name className section parentName parentMobile photo');
+
+        // Exclude current user from their respective list
+        if (req.userType === 'teacher') {
+            teachers = teachers.filter(t => t._id.toString() !== req.userId.toString());
+        } else {
+            students = students.filter(s => s._id.toString() !== req.userId.toString());
+        }
+
+        const teacherContacts = teachers.map(t => ({
+            id: t._id,
+            name: t.name,
+            type: 'teacher',
+            details: t.subject ? `${t.subject} Teacher` : 'Teacher',
+            photo: t.photo
+        }));
+
+        const studentContacts = students.map(s => ({
+            id: s._id,
+            name: s.name,
+            type: 'student',
+            details: `Parent: ${s.parentName || 'N/A'} • Class ${s.className}-${s.section}`,
+            photo: s.photo
+        }));
+
+        res.json({ success: true, data: [...teacherContacts, ...studentContacts] });
+    } catch (error) {
+        console.error('Get universal contacts error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get all universal conversations for the user
+router.get('/universal/conversations', universalAuth, async (req, res) => {
+    try {
+        const messages = await ChatMessage.find({
+            schoolId: req.schoolId,
+            $or: [
+                { senderId: req.userId },
+                { receiverId: req.userId }
+            ]
+        }).sort({ createdAt: -1 });
+
+        const partners = {};
+        messages.forEach(msg => {
+            if (!msg.senderId || !msg.receiverId) return;
+            const partnerId = msg.senderId.toString() === req.userId.toString()
+                ? msg.receiverId.toString()
+                : msg.senderId.toString();
+            if (!partners[partnerId]) {
+                partners[partnerId] = {
+                    lastMessage: msg,
+                    unreadCount: 0
+                };
+            }
+            if (msg.receiverId.toString() === req.userId.toString() && !msg.isRead) {
+                partners[partnerId].unreadCount += 1;
+            }
+        });
+
+        const conversations = await Promise.all(Object.keys(partners).map(async (partnerId) => {
+            const details = partners[partnerId];
+            let partner = await Teacher.findById(partnerId).select('name subject photo');
+            let partnerType = 'teacher';
+            if (!partner) {
+                partner = await Student.findById(partnerId).select('name className section parentName photo');
+                partnerType = 'student';
+            }
+
+            if (!partner) return null;
+
+            return {
+                partner: {
+                    id: partner._id,
+                    name: partner.name,
+                    type: partnerType,
+                    details: partnerType === 'teacher'
+                        ? (partner.subject ? `${partner.subject} Teacher` : 'Teacher')
+                        : `Parent: ${partner.parentName || 'N/A'} • Class ${partner.className}-${partner.section}`,
+                    photo: partner.photo
+                },
+                lastMessage: {
+                    message: details.lastMessage.message,
+                    messageType: details.lastMessage.messageType || 'text',
+                    senderId: details.lastMessage.senderId,
+                    createdAt: details.lastMessage.createdAt
+                },
+                unreadCount: details.unreadCount
+            };
+        }));
+
+        const filteredConversations = conversations.filter(c => c !== null);
+        filteredConversations.sort((a, b) => {
+            if (a.unreadCount > 0 && b.unreadCount === 0) return -1;
+            if (a.unreadCount === 0 && b.unreadCount > 0) return 1;
+            return new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt);
+        });
+
+        res.json({ success: true, data: filteredConversations });
+    } catch (error) {
+        console.error('Get universal conversations error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get messages between user and partnerId
+router.get('/universal/messages/:partnerId', universalAuth, async (req, res) => {
+    try {
+        const { partnerId } = req.params;
+        const messages = await ChatMessage.find({
+            schoolId: req.schoolId,
+            $or: [
+                { senderId: req.userId, receiverId: partnerId },
+                { senderId: partnerId, receiverId: req.userId }
+            ]
+        }).sort({ createdAt: 1 });
+
+        // Mark received messages as read
+        await ChatMessage.updateMany(
+            {
+                schoolId: req.schoolId,
+                senderId: partnerId,
+                receiverId: req.userId,
+                isRead: false
+            },
+            { isRead: true, readAt: new Date() }
+        );
+
+        res.json({ success: true, data: messages });
+    } catch (error) {
+        console.error('Get universal messages error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Send a universal message
+router.post('/universal/send', universalAuth, async (req, res) => {
+    try {
+        const { receiverId, message, messageType } = req.body;
+        if (!receiverId || !message) {
+            return res.status(400).json({ message: 'Receiver ID and message are required' });
+        }
+
+        let receiverType = 'parent';
+        let receiver = await Teacher.findById(receiverId);
+        if (receiver) {
+            receiverType = 'teacher';
+        } else {
+            receiver = await Student.findById(receiverId);
+            if (!receiver) {
+                return res.status(404).json({ message: 'Receiver not found' });
+            }
+        }
+
+        // Setup legacy fields for old app/web compat
+        let teacherId = null;
+        let studentId = null;
+        if (req.userType === 'teacher') {
+            teacherId = req.userId;
+            if (receiverType === 'parent') {
+                studentId = receiverId;
+            }
+        } else {
+            studentId = req.userId;
+            if (receiverType === 'teacher') {
+                teacherId = receiverId;
+            }
+        }
+
+        const chatMessage = await ChatMessage.create({
+            schoolId: req.schoolId,
+            senderId: req.userId,
+            senderType: req.userType,
+            receiverId,
+            receiverType,
+            teacherId,
+            studentId,
+            message: message.trim(),
+            messageType: messageType || 'text'
+        });
+
+        res.status(201).json({ success: true, data: chatMessage });
+    } catch (error) {
+        console.error('Universal send message error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router;
