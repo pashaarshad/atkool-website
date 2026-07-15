@@ -458,10 +458,19 @@ router.get('/universal/contacts', universalAuth, async (req, res) => {
             status: { $ne: 'Inactive' }
         }).select('name email mobileNo subject photo className');
 
-        let students = await Student.find({
+        let studentsQuery = {
             schoolId: req.schoolId,
             approvalStatus: 'Approved'
-        }).select('name className section parentName parentMobile photo');
+        };
+
+        if (req.userType === 'parent') {
+            const currentStudent = await Student.findById(req.userId);
+            if (currentStudent && currentStudent.className) {
+                studentsQuery.className = currentStudent.className;
+            }
+        }
+
+        let students = await Student.find(studentsQuery).select('name className section parentName parentMobile photo');
 
         // Exclude current user from their respective list
         if (req.userType === 'teacher') {
