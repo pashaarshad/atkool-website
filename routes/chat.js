@@ -605,6 +605,21 @@ router.get('/universal/messages/:partnerId', universalAuth, async (req, res) => 
     }
 });
 
+// Get universal unread count
+router.get('/universal/unread-count', universalAuth, async (req, res) => {
+    try {
+        const count = await ChatMessage.countDocuments({
+            schoolId: req.schoolId,
+            receiverId: req.userId,
+            isRead: false
+        });
+        res.json({ success: true, count });
+    } catch (error) {
+        console.error('Get universal unread count error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Send a universal message
 router.post('/universal/send', universalAuth, async (req, res) => {
     try {

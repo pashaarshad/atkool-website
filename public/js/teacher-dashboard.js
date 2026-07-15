@@ -691,28 +691,28 @@ async function loadChat() {
     const c = document.getElementById('mainContent');
     c.innerHTML = '<div class="loader">Loading conversations...</div>';
 
-    const conversations = await fetchAPI('/api/chat/teacher/conversations');
-    if (!conversations) return;
-
-    if (conversations.length === 0) {
+    const response = await fetchAPI('/api/chat/universal/conversations');
+    if (!response || !response.success) {
         c.innerHTML = `
             <div class="card">
                 <div class="card-header" style="gap:12px">
                     <svg fill="none" stroke="#4338CA" viewBox="0 0 24 24" style="width:24px;height:24px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                     ATKOOL Connect — Chat
                 </div>
-                <div class="empty-state"><p>No students assigned yet. Students in your classes will appear here for chat.</p></div>
+                <div class="empty-state"><p>Unable to load conversations. Please try again.</p></div>
             </div>`;
         return;
     }
 
+    const conversations = response.data || [];
+
     const convListHtml = conversations.map(conv => {
-        const s = conv.student;
+        const partner = conv.partner;
         const lastMsg = conv.lastMessage;
         
         let lastMsgText = 'No messages yet';
         if (lastMsg) {
-            const prefix = lastMsg.senderType === 'teacher' ? 'You: ' : '';
+            const prefix = lastMsg.senderId === partner.id ? '' : 'You: ';
             if (lastMsg.messageType === 'image') {
                 lastMsgText = prefix + '📷 Sent an image';
             } else if (lastMsg.messageType === 'file') {
@@ -724,54 +724,63 @@ async function loadChat() {
         const lastTime = lastMsg ? formatChatTime(new Date(lastMsg.createdAt)) : '';
         const unreadBadge = conv.unreadCount > 0 ? `<span style="background:#ef4444;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:10px;min-width:20px;text-align:center">${conv.unreadCount}</span>` : '';
 
+        const photoHtml = partner.photo 
+            ? `<img src="${partner.photo}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+            : `<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:800;font-size:18px">${partner.name.charAt(0).toUpperCase()}</div>`;
+
         return `
-            <div class="conv-item" onclick="loadChatConversation('${s._id}','${s.name}','${s.parentName || 'Parent'}')" style="
+            <div class="conv-item" onclick="loadChatConversation('${partner.id}','${partner.name.replace(/'/g, "\\'")}','${partner.details.replace(/'/g, "\\'")}')" style="
                 display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:all .2s;
                 ${conv.unreadCount > 0 ? 'background:#f8fafc;' : ''}
             " onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='${conv.unreadCount > 0 ? '#f8fafc' : '#fff'}'">
-                <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:800;font-size:18px">
-                    ${s.name.charAt(0).toUpperCase()}
-                </div>
+                ${photoHtml}
                 <div style="flex:1;min-width:0">
                     <div style="display:flex;justify-content:space-between;align-items:center">
-                        <div style="font-weight:700;color:#0F172A;font-size:14px">${s.name}</div>
+                        <div style="font-weight:700;color:#0F172A;font-size:14px">${partner.name}</div>
                         <div style="font-size:11px;color:#94a3b8;font-weight:500">${lastTime}</div>
                     </div>
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px">
                         <div style="font-size:12px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;${conv.unreadCount > 0 ? 'font-weight:700;color:#334155' : ''}">${lastMsgText}</div>
                         ${unreadBadge}
                     </div>
-                    <div style="font-size:11px;color:#94a3b8;margin-top:2px">Class ${s.className}-${s.section} • Parent: ${s.parentName || 'N/A'}</div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:2px">${partner.details}</div>
                 </div>
             </div>`;
     }).join('');
 
     c.innerHTML = `
         <div class="card" style="padding:0;overflow:hidden">
-            <div style="padding:20px 24px;border-bottom:2px solid #f1f5f9;display:flex;align-items:center;gap:12px">
-                <svg fill="none" stroke="#4338CA" viewBox="0 0 24 24" style="width:26px;height:26px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                <div>
-                    <div style="font-size:18px;font-weight:800;color:#0F172A">ATKOOL Connect</div>
-                    <div style="font-size:12px;color:#64748b;font-weight:600">${conversations.length} conversation${conversations.length > 1 ? 's' : ''}</div>
+            <div style="padding:20px 24px;border-bottom:2px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <svg fill="none" stroke="#4338CA" viewBox="0 0 24 24" style="width:26px;height:26px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    <div>
+                        <div style="font-size:18px;font-weight:800;color:#0F172A">ATKOOL Connect</div>
+                        <div style="font-size:12px;color:#64748b;font-weight:600">${conversations.length} active conversation${conversations.length !== 1 ? 's' : ''}</div>
+                    </div>
                 </div>
+                <button onclick="openAllContactsModal()" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px; display: flex; align-items: center; gap: 6px; background:#4338CA; border:none; color:white; border-radius:8px; cursor:pointer; font-weight:700;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;stroke-width:2;"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    Show All Contacts
+                </button>
             </div>
             <div style="max-height:calc(100vh - 250px);overflow-y:auto">
-                ${convListHtml}
+                ${conversations.length === 0 ? '<div style="text-align:center;padding:40px;color:#64748b;font-weight:600;">No active conversations yet.<br><span style="font-size:12px;font-weight:normal;color:#94a3b8;">Click "Show All Contacts" to start chatting.</span></div>' : convListHtml}
             </div>
         </div>`;
 
     updateChatBadge();
 }
-//test
-async function loadChatConversation(studentId, studentName, parentName) {
+
+async function loadChatConversation(partnerId, partnerName, partnerDetails) {
     if (chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
 
     const c = document.getElementById('mainContent');
     c.innerHTML = '<div class="loader">Loading chat...</div>';
 
-    const messages = await fetchAPI(`/api/chat/teacher/messages/${studentId}`);
-    if (!messages) return;
+    const response = await fetchAPI(`/api/chat/universal/messages/${partnerId}`);
+    if (!response || !response.success) return;
 
+    const messages = response.data;
     const messagesHtml = messages.map(msg => renderTeacherChatMessage(msg)).join('');
 
     c.innerHTML = `
@@ -779,30 +788,27 @@ async function loadChatConversation(studentId, studentName, parentName) {
             <!-- Chat Header -->
             <div style="background:#fff;border-radius:16px 16px 0 0;padding:16px 24px;display:flex;align-items:center;gap:14px;border:1px solid #e2e8f0;border-bottom:2px solid #f1f5f9">
                 <button onclick="loadChat()" style="background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;transition:.2s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-                    <svg fill="none" stroke="#64748b" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    <svg fill="none" stroke="#64748b" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
-                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;flex-shrink:0">
-                    ${studentName.charAt(0).toUpperCase()}
-                </div>
                 <div>
-                    <div style="font-weight:700;color:#0F172A;font-size:15px">${studentName}</div>
-                    <div style="font-size:12px;color:#64748b;font-weight:500">Parent: ${parentName}</div>
+                    <div style="font-weight:800;color:#0F172A;font-size:16px">${partnerName}</div>
+                    <div style="font-size:12px;color:#64748b;font-weight:600">${partnerDetails}</div>
                 </div>
             </div>
             
             <!-- Messages Area -->
             <div id="chatMessages" style="flex:1;overflow-y:auto;padding:20px 24px;background:#fafbfc;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0">
-                ${messages.length === 0 ? '<div style="text-align:center;color:#94a3b8;padding:40px;font-weight:500">Start a conversation with ' + parentName + '</div>' : messagesHtml}
+                ${messages.length === 0 ? '<div style="text-align:center;color:#94a3b8;padding:40px;font-weight:500">Start a conversation with ' + partnerName + '</div>' : messagesHtml}
             </div>
             
             <!-- Input Area -->
-            <div style="background:#fff;border-radius:0 0 16px 16px;padding:16px 24px;display:flex;gap:12px;align-items:center;border:1px solid #e2e8f0;border-top:2px solid #f1f5f9">
-                <input type="file" id="chatAttachmentInput" style="display:none;" onchange="handleTeacherChatFileSelected(event, '${studentId}')">
+            <div style="background:#fff;border-radius:0 0 16px 16px;padding:16px 24px;display:flex;gap:12px;align-items:center;border:1px solid #e2e8f0;border-top:2px solid #f1f5f9;position:relative;">
+                <input type="file" id="chatAttachmentInput" style="display:none;" onchange="handleTeacherChatFileSelected(event, '${partnerId}')">
                 <button onclick="document.getElementById('chatAttachmentInput').click()" style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'" title="Send Document or Image">
                     <svg fill="none" stroke="#475569" viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
                 </button>
-                <input type="text" id="chatInput" placeholder="Type a message..." style="flex:1;padding:12px 18px;border:2px solid #e2e8f0;border-radius:24px;font-size:14px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor='#4338CA'" onblur="this.style.borderColor='#e2e8f0'" onkeypress="if(event.key==='Enter')sendTeacherMessage('${studentId}')">
-                <button onclick="sendTeacherMessage('${studentId}')" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;box-shadow:0 4px 12px rgba(67,56,202,.3)" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
+                <input type="text" id="chatInput" placeholder="Type a message..." style="flex:1;padding:12px 18px;border:2px solid #e2e8f0;border-radius:24px;font-size:14px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor='#4338CA'" onblur="this.style.borderColor='#e2e8f0'" onkeypress="if(event.key==='Enter')sendTeacherMessage('${partnerId}')">
+                <button onclick="sendTeacherMessage('${partnerId}')" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;box-shadow:0 4px 12px rgba(67,56,202,.3)" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
                     <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                 </button>
             </div>
@@ -814,15 +820,15 @@ async function loadChatConversation(studentId, studentName, parentName) {
 
     // Poll for new messages every 5 seconds
     chatPollInterval = setInterval(async () => {
-        const newMessages = await fetchAPI(`/api/chat/teacher/messages/${studentId}`);
-        if (!newMessages) return;
+        const response = await fetchAPI(`/api/chat/universal/messages/${partnerId}`);
+        if (!response || !response.success) return;
         const container = document.getElementById('chatMessages');
         if (!container) { clearInterval(chatPollInterval); return; }
 
         const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
 
-        if (newMessages.length > 0) {
-            container.innerHTML = newMessages.map(msg => renderTeacherChatMessage(msg)).join('');
+        if (response.data.length > 0) {
+            container.innerHTML = response.data.map(msg => renderTeacherChatMessage(msg)).join('');
         }
 
         if (wasAtBottom) container.scrollTop = container.scrollHeight;
@@ -840,7 +846,9 @@ function downloadBase64File(base64Data, filename) {
 }
 
 function renderTeacherChatMessage(msg) {
-    const isMe = msg.senderType === 'teacher';
+    const teacherData = JSON.parse(localStorage.getItem('teacherData') || '{}');
+    const currentUserId = teacherData._id || teacherData.id;
+    const isMe = msg.senderId ? msg.senderId.toString() === currentUserId.toString() : (msg.senderType === 'teacher');
     const time = new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
     let contentHtml = '';
@@ -881,7 +889,7 @@ function renderTeacherChatMessage(msg) {
         </div>`;
 }
 
-async function handleTeacherChatFileSelected(event, studentId) {
+async function handleTeacherChatFileSelected(event, receiverId) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -908,22 +916,22 @@ async function handleTeacherChatFileSelected(event, studentId) {
         const base64Data = e.target.result;
         const messageType = file.type.startsWith('image/') ? 'image' : 'file';
 
-        const result = await fetchAPI('/api/chat/teacher/send', {
+        const result = await fetchAPI('/api/chat/universal/send', {
             method: 'POST',
             body: JSON.stringify({
-                studentId,
+                receiverId,
                 message: base64Data,
                 messageType
             })
         });
 
-        if (result && result._id) {
+        if (result && result.success && result.data) {
             showToast('Attachment sent successfully!');
             const container = document.getElementById('chatMessages');
             if (container) {
                 const emptyMsg = container.querySelector('[style*="text-align:center"]');
                 if (emptyMsg) emptyMsg.remove();
-                container.innerHTML += renderTeacherChatMessage(result);
+                container.innerHTML += renderTeacherChatMessage(result.data);
                 container.scrollTop = container.scrollHeight;
             }
         } else {
@@ -934,89 +942,22 @@ async function handleTeacherChatFileSelected(event, studentId) {
     event.target.value = '';
 }
 
-async function loadChatConversation(studentId, studentName, parentName) {
-    if (chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
-
-    const c = document.getElementById('mainContent');
-    c.innerHTML = '<div class="loader">Loading chat...</div>';
-
-    const messages = await fetchAPI(`/api/chat/teacher/messages/${studentId}`);
-    if (!messages) return;
-
-    const messagesHtml = messages.map(msg => renderTeacherChatMessage(msg)).join('');
-
-    c.innerHTML = `
-        <div style="display:flex;flex-direction:column;height:calc(100vh - 140px);">
-            <!-- Chat Header -->
-            <div style="background:#fff;border-radius:16px 16px 0 0;padding:16px 24px;display:flex;align-items:center;gap:14px;border:1px solid #e2e8f0;border-bottom:2px solid #f1f5f9">
-                <button onclick="loadChat()" style="background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;transition:.2s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
-                    <svg fill="none" stroke="#64748b" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                </button>
-                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#7C3AED);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;flex-shrink:0">
-                    ${studentName.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                    <div style="font-weight:700;color:#0F172A;font-size:15px">${studentName}</div>
-                    <div style="font-size:12px;color:#64748b;font-weight:500">Parent: ${parentName}</div>
-                </div>
-            </div>
-            
-            <!-- Messages Area -->
-            <div id="chatMessages" style="flex:1;overflow-y:auto;padding:20px 24px;background:#fafbfc;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0">
-                ${messages.length === 0 ? '<div style="text-align:center;color:#94a3b8;padding:40px;font-weight:500">Start a conversation with ' + parentName + '</div>' : messagesHtml}
-            </div>
-            
-            <!-- Input Area -->
-            <div style="background:#fff;border-radius:0 0 16px 16px;padding:16px 24px;display:flex;gap:12px;align-items:center;border:1px solid #e2e8f0;border-top:2px solid #f1f5f9;position:relative;">
-                <input type="file" id="teacherChatFileInput" style="display:none" onchange="handleTeacherChatFileSelected(event, '${studentId}')">
-                <button onclick="document.getElementById('teacherChatFileInput').click()" style="width:40px;height:40px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
-                    <svg fill="none" stroke="#475569" viewBox="0 0 24 24" style="width:20px;height:20px;stroke-width:2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
-                </button>
-                <input type="text" id="chatInput" placeholder="Type a message..." style="flex:1;padding:12px 18px;border:2px solid #e2e8f0;border-radius:24px;font-size:14px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor='#4338CA'" onblur="this.style.borderColor='#e2e8f0'" onkeypress="if(event.key==='Enter')sendTeacherMessage('${studentId}')">
-                <button onclick="sendTeacherMessage('${studentId}')" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4338CA,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;box-shadow:0 4px 12px rgba(67,56,202,.3)" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
-                    <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                </button>
-            </div>
-        </div>`;
-
-    // Scroll to bottom
-    const chatDiv = document.getElementById('chatMessages');
-    chatDiv.scrollTop = chatDiv.scrollHeight;
-
-    // Poll for new messages every 5 seconds
-    chatPollInterval = setInterval(async () => {
-        const newMessages = await fetchAPI(`/api/chat/teacher/messages/${studentId}`);
-        if (!newMessages) return;
-        const container = document.getElementById('chatMessages');
-        if (!container) { clearInterval(chatPollInterval); return; }
-
-        const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
-
-        if (newMessages.length > 0) {
-            container.innerHTML = newMessages.map(msg => renderTeacherChatMessage(msg)).join('');
-        }
-        if (wasAtBottom) container.scrollTop = container.scrollHeight;
-        updateChatBadge();
-    }, 5000);
-}
-
-async function sendTeacherMessage(studentId) {
+async function sendTeacherMessage(receiverId) {
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
     if (!message) return;
-
     input.value = '';
-    const result = await fetchAPI('/api/chat/teacher/send', {
+
+    const result = await fetchAPI('/api/chat/universal/send', {
         method: 'POST',
-        body: JSON.stringify({ studentId, message })
+        body: JSON.stringify({ receiverId, message })
     });
 
-    if (result && result._id) {
-        // Add message to UI immediately
+    if (result && result.success && result.data) {
         const chatDiv = document.getElementById('chatMessages');
         const emptyMsg = chatDiv.querySelector('[style*="text-align:center"]');
         if (emptyMsg) emptyMsg.remove();
-        chatDiv.innerHTML += renderTeacherChatMessage(result);
+        chatDiv.innerHTML += renderTeacherChatMessage(result.data);
         chatDiv.scrollTop = chatDiv.scrollHeight;
     } else {
         showToast('Failed to send message', 'error');
@@ -1031,6 +972,78 @@ function formatChatTime(date) {
     if (diff < 86400000) return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     if (diff < 604800000) return date.toLocaleDateString('en-US', { weekday: 'short' });
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// ============ UNIVERSAL CONTACTS MODAL LOGIC ============
+let allContactsList = [];
+
+async function openAllContactsModal() {
+    const modal = document.getElementById('teacherContactsModal');
+    const list = document.getElementById('contactsModalList');
+    document.getElementById('contactSearchInput').value = '';
+    list.innerHTML = '<div class="loader">Loading contacts...</div>';
+    modal.classList.add('show');
+
+    try {
+        const response = await fetchAPI('/api/chat/universal/contacts');
+        if (response && response.success) {
+            allContactsList = response.data || [];
+            renderContacts(allContactsList);
+        } else {
+            list.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;">Failed to load contacts.</div>';
+        }
+    } catch (err) {
+        console.error(err);
+        list.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;">Error loading contacts.</div>';
+    }
+}
+
+function closeAllContactsModal() {
+    document.getElementById('teacherContactsModal').classList.remove('show');
+}
+
+function renderContacts(contacts) {
+    const list = document.getElementById('contactsModalList');
+    if (contacts.length === 0) {
+        list.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;">No contacts found.</div>';
+        return;
+    }
+    list.innerHTML = contacts.map(c => {
+        const photoHtml = c.photo 
+            ? `<img src="${c.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+            : `<div style="width:40px;height:40px;border-radius:50%;background:#eef2ff;color:#4338CA;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">${c.name.charAt(0).toUpperCase()}</div>`;
+        
+        const roleBadgeColor = c.type === 'teacher' ? 'background:#e0e7ff;color:#4338CA;' : 'background:#ecfdf5;color:#059669;';
+        const roleBadgeText = c.type === 'teacher' ? 'Teacher' : 'Student';
+
+        return `
+            <div onclick="startChatFromContacts('${c.id}', '${c.name.replace(/'/g, "\\'")}', '${c.details.replace(/'/g, "\\'")}')" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#f8fafc';this.style.borderColor='#cbd5e1';" onmouseout="this.style.background='none';this.style.borderColor='#e2e8f0';">
+                ${photoHtml}
+                <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="font-weight:700;color:#0F172A;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.name}</div>
+                        <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;${roleBadgeColor}">${roleBadgeText}</span>
+                    </div>
+                    <div style="font-size:11px;color:#64748b;margin-top:2px;">${c.details}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function filterContacts() {
+    const query = document.getElementById('contactSearchInput').value.toLowerCase().trim();
+    const filtered = allContactsList.filter(c => 
+        c.name.toLowerCase().includes(query) || 
+        c.details.toLowerCase().includes(query) ||
+        c.type.toLowerCase().includes(query)
+    );
+    renderContacts(filtered);
+}
+
+function startChatFromContacts(partnerId, name, details) {
+    closeAllContactsModal();
+    loadChatConversation(partnerId, name, details);
 }
 
 // ============ ADD STUDENT ============

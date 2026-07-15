@@ -153,6 +153,21 @@
         </div>
     </div>
     <div class="toast" id="toast"></div>
+
+    <!-- All Contacts Modal -->
+    <div class="modal-overlay" id="teacherContactsModal" style="z-index: 2000;">
+        <div class="modal" style="max-width: 500px; display:flex; flex-direction:column; max-height:80vh;">
+            <button type="button" class="modal-close" onclick="closeAllContactsModal()">&times;</button>
+            <h2 style="margin-bottom:15px; font-size:20px; font-weight:800;">All Contacts</h2>
+            <div style="margin-bottom: 15px;">
+                <input type="text" id="contactSearchInput" oninput="filterContacts()" placeholder="Search contacts by name or class..." style="width:100%; padding:10px 14px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; outline:none;" />
+            </div>
+            <div id="contactsModalList" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px;">
+                <!-- Contacts load here -->
+            </div>
+        </div>
+    </div>
+
 <script src="js/teacher-dashboard.js"></script>
 <script src="/js/pwa.js"></script>
 </body>
