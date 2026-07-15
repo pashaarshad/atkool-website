@@ -383,6 +383,7 @@
 
     <div class="modal-overlay" id="teacherModal">
         <div class="modal">
+            <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
             <h2 id="modalTitle">Add Teacher</h2>
             <form id="teacherForm">
                 <input type="hidden" id="teacherId">
@@ -542,6 +543,7 @@
 
     <div class="modal-overlay" id="viewTeacherModal">
         <div class="modal">
+            <button type="button" class="modal-close" onclick="closeViewModal()">&times;</button>
             <h2>Teacher Details</h2>
             <div id="viewTeacherContent" class="view-details">
             </div>
@@ -554,6 +556,7 @@
     <!-- Leave Confirmation Modal -->
     <div class="modal-overlay" id="leaveConfirmModal">
         <div class="modal" style="width: 400px; text-align: center;">
+            <button type="button" class="modal-close" onclick="closeLeaveModal()">&times;</button>
             <div style="margin-bottom: 20px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" style="width: 60px; height: 60px;">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -574,6 +577,7 @@
     <!-- Custom Reset Confirmation Modal -->
     <div class="modal-overlay" id="resetConfirmModal">
         <div class="modal" style="width: 400px; text-align: center;">
+            <button type="button" class="modal-close" onclick="closeResetModal()">&times;</button>
             <div style="margin-bottom: 20px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"
                     style="width: 60px; height: 60px;">

@@ -134,7 +134,9 @@ body {
 /* ===== MODALS ===== */
 .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,.6); backdrop-filter:blur(4px); display:none; justify-content:center; align-items:center; z-index:1000; }
 .modal-overlay.show { display:flex; }
-.modal { background:#fff; border-radius:18px; padding:32px; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; border:none; box-shadow:0 25px 60px rgba(0,0,0,.2); }
+.modal { position:relative; background:#fff; border-radius:18px; padding:32px; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; border:none; box-shadow:0 25px 60px rgba(0,0,0,.2); }
+.modal-close { position:absolute; top:20px; right:20px; background:none; border:none; font-size:28px; font-weight:700; color:#64748b; cursor:pointer; line-height:1; padding:4px; transition:color .2s; }
+.modal-close:hover { color:#0F172A; }
 .modal h2 { margin-bottom:22px; color:#0F172A; font-weight:700; }
 .modal .form-group { margin-bottom:16px; }
 .modal .form-group label { color:#334155; font-weight:700; font-size:13px; }
@@ -273,7 +275,7 @@ body {
 .subscription-form-input:focus { outline:none; border-color:#4338CA; box-shadow:0 0 0 4px rgba(67,56,202,.08); }
 
 /* ===== CONFIRM MODAL ===== */
-.confirm-modal { background:#fff; border-radius:20px; padding:36px; width:100%; max-width:440px; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,.2); border:none; }
+.confirm-modal { position:relative; background:#fff; border-radius:20px; padding:36px; width:100%; max-width:440px; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,.2); border:none; }
 .confirm-modal-icon { width:72px; height:72px; margin:0 auto 22px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#d1fae5,#a7f3d0); border-radius:50%; }
 .confirm-modal-icon svg { width:40px; height:40px; stroke:#059669; }
 .confirm-modal h2 { font-size:22px; font-weight:700; color:#0F172A; margin-bottom:12px; }

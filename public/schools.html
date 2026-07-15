@@ -106,6 +106,7 @@
 
     <div class="modal-overlay" id="schoolModal">
         <div class="modal">
+            <button type="button" class="modal-close" onclick="document.getElementById('cancelBtn').click()">&times;</button>
             <h2 id="modalTitle">Edit School</h2>
             <form id="schoolForm">
                 <input type="hidden" id="schoolId">
@@ -213,6 +214,7 @@
     <!-- Renew Confirmation Modal -->
     <div class="modal-overlay" id="renewModal">
         <div class="confirm-modal">
+            <button type="button" class="modal-close" onclick="closeRenewModal()">&times;</button>
             <div class="confirm-modal-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
                     <path d="M23 4v6h-6"></path>
@@ -241,6 +243,7 @@
     <!-- Secure Delete OTP Modal -->
     <div class="modal-overlay" id="deleteOtpModal">
         <div class="confirm-modal" style="max-width: 400px;">
+            <button type="button" class="modal-close" onclick="closeDeleteOtpModal()">&times;</button>
             <div class="confirm-modal-icon" style="background: #fee2e2; color: #ef4444; border-color: #fca5a5;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="stroke: #ef4444; width:36px; height:36px;">
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
